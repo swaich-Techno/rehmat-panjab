@@ -1,0 +1,35 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# builds
+/.next/
+/.vinext/
+/dist/
+/out/
+/.wrangler/
+/outputs/
+/work/
+
+# local environment files
+.env*
+!.env.example
+
+# Vercel
+.vercel
+
+# logs and generated files
+*.log
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+*.pem
