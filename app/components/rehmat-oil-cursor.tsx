@@ -10,14 +10,27 @@ function createOilSplit(x: number, y: number, onControl: boolean) {
   effect.style.setProperty("--oil-x", x + "px");
   effect.style.setProperty("--oil-y", y + "px");
 
-  for (const className of ["oil-click-main", "oil-click-lobe oil-click-lobe-a", "oil-click-lobe oil-click-lobe-b", "oil-satellite oil-satellite-a", "oil-satellite oil-satellite-b", "oil-satellite oil-satellite-c", "oil-click-ripple"]) {
+  for (const className of [
+    "oil-click-main",
+    "oil-click-lobe oil-click-lobe-a",
+    "oil-click-lobe oil-click-lobe-b",
+    "oil-click-lobe oil-click-lobe-c",
+    "oil-click-lobe oil-click-lobe-d",
+    "oil-satellite oil-satellite-a",
+    "oil-satellite oil-satellite-b",
+    "oil-satellite oil-satellite-c",
+    "oil-satellite oil-satellite-d",
+    "oil-satellite oil-satellite-e",
+    "oil-click-ripple",
+    "oil-click-ripple oil-click-ripple-delayed",
+  ]) {
     const part = document.createElement("i");
     part.className = className;
     effect.appendChild(part);
   }
 
   document.body.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 460);
+  window.setTimeout(() => effect.remove(), 720);
 }
 
 export function RehmatOilCursor() {
@@ -48,7 +61,7 @@ export function RehmatOilCursor() {
       const targetAngle = distance > 0.35 ? Math.atan2(dy, dx) * (180 / Math.PI) + 90 : 0;
       cursorPoint.angle += (targetAngle - cursorPoint.angle) * 0.24;
 
-      el.style.transform = "translate3d(" + (cursorPoint.px - 11) + "px," + (cursorPoint.py - 15) + "px,0)";
+      el.style.transform = "translate3d(" + (cursorPoint.px - 15) + "px," + (cursorPoint.py - 21) + "px,0)";
       el.style.setProperty("--oil-rotate", cursorPoint.angle + "deg");
       el.style.setProperty("--oil-stretch", String(stretch));
       el.style.setProperty("--oil-width", String(2 - stretch));
