@@ -13,16 +13,19 @@ export function NotifyForm({ productSlug }: { productSlug?: string }) {
     setStatus("loading");
     setMessage("");
     try {
-      const response = await fetch("/api/notifications", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          email: data.get("email"),
-          consent: data.get("consent") === "on",
-          category: productSlug ? "restock" : "product_launch",
-          productSlug,
+      const [response] = await Promise.all([
+        fetch("/api/notifications", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email: data.get("email"),
+            consent: data.get("consent") === "on",
+            category: productSlug ? "restock" : "product_launch",
+            productSlug,
+          }),
         }),
-      });
+        new Promise((resolve) => window.setTimeout(resolve, 900)),
+      ]);
       const result = await response.json() as { message?: string };
       if (!response.ok) throw new Error(result.message);
       setStatus("success");
@@ -39,8 +42,10 @@ export function NotifyForm({ productSlug }: { productSlug?: string }) {
       <label htmlFor={`notify-${productSlug ?? "house"}`}>Email address</label>
       <div className="input-row">
         <input id={`notify-${productSlug ?? "house"}`} name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
-        <button className="button button-dark" type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Joining…" : "Notify me"}
+        <button className={`button button-dark transit-button state-${status}`} type="submit" disabled={status === "loading" || status === "success"}>
+          <span className="transit-label">{status === "success" ? "You’re on the list" : status === "loading" ? "Sending" : "Notify me"}</span>
+          <span className="transit-route" aria-hidden="true"><i /><b /><em /></span>
+          <span className="transit-success" aria-hidden="true">Joined <i>✓</i></span>
         </button>
       </div>
       <label className="consent-row">

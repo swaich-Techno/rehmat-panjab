@@ -82,7 +82,22 @@ export function ScentQuiz() {
     <section className="quiz-stage" style={{ "--preview": preview?.tint ?? "#e8e8dc" } as React.CSSProperties}>
       <header className="quiz-progress">
         <span>{String(step + 1).padStart(2, "0")} / {String(quizQuestions.length).padStart(2, "0")}</span>
-        <div><i style={{ transform: `scaleX(${(step + 1) / quizQuestions.length})` }} /></div>
+        <div
+          className="quiz-code-progress"
+          role="progressbar"
+          aria-label="Scent profile progress"
+          aria-valuemin={1}
+          aria-valuemax={quizQuestions.length}
+          aria-valuenow={step + 1}
+        >
+          {quizQuestions.map((item, index) => (
+            <i
+              className={index < step ? "is-complete" : index === step ? "is-current" : ""}
+              key={item.prompt}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
         <button type="button" onClick={() => { setAnswers((current) => current.slice(0, -1)); setStep((current) => Math.max(0, current - 1)); }} disabled={step === 0}>Back</button>
       </header>
       <div className="quiz-question">

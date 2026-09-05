@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 export function ArchiveLogin({ configured, returnTo }: { configured: boolean; returnTo: string }) {
   const [state, setState] = useState<"locked" | "verifying" | "open" | "error">("locked");
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +37,19 @@ export function ArchiveLogin({ configured, returnTo }: { configured: boolean; re
           <label htmlFor="archive-email">Email</label>
           <input id="archive-email" name="email" type="email" autoComplete="email" required disabled={!configured || state === "verifying"} />
           <label htmlFor="archive-password">Password</label>
-          <input id="archive-password" name="password" type="password" autoComplete="current-password" required disabled={!configured || state === "verifying"} />
+          <div className={showPassword ? "password-vault-field is-visible" : "password-vault-field"}>
+            <input id="archive-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required disabled={!configured || state === "verifying"} />
+            <button
+              type="button"
+              className="password-vault-toggle"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((current) => !current)}
+              disabled={!configured || state === "verifying"}
+            >
+              <span aria-hidden="true"><i /><i /><i /></span>
+            </button>
+          </div>
           <button className="button button-dark" type="submit" disabled={!configured || state === "verifying"}>{state === "verifying" ? "Unlocking…" : "Unlock archive"}</button>
           {!configured && <p className="archive-closed">The private archive is opening soon. Public discovery remains available.</p>}
           <p className="form-message error" role="alert">{message}</p>

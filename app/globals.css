@@ -249,6 +249,25 @@ a:hover .product-media img { transform: scale(1.36) translateY(-12%); }
 .form-message { min-height: 24px; margin-top: 12px; font-size: .74rem; }
 .form-message.success, .success-note { color: var(--forest); }
 .form-message.error { color: #8c2f2f; }
+.transit-button { min-width: 164px; }
+.transit-button:disabled { opacity: 1; }
+.transit-label, .transit-success, .transit-route { transition: opacity 180ms ease, transform 300ms var(--ease-liquid); }
+.transit-label { opacity: 1; }
+.transit-route, .transit-success { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
+.transit-route { right: 18px; left: 18px; }
+.transit-route > i { position: absolute; right: 8px; left: 8px; height: 1px; border-top: 1px dashed rgba(255,255,255,.54); }
+.transit-route > b { position: absolute; left: 2px; width: 30px; height: 17px; border: 1px solid rgba(255,255,255,.72); border-radius: 3px 7px 4px 3px; background: linear-gradient(90deg,#f3ead7 0 61%,#c7822f 62% 100%); box-shadow: 0 2px 7px rgba(0,0,0,.22); }
+.transit-route > b::before, .transit-route > b::after { position: absolute; bottom: -4px; width: 6px; height: 6px; border: 1px solid rgba(255,255,255,.72); border-radius: 50%; background: var(--forest-deep); content: ""; }
+.transit-route > b::before { left: 4px; }.transit-route > b::after { right: 3px; }
+.transit-route > em { position: absolute; right: 1px; width: 9px; height: 13px; border-radius: 62% 38% 58% 42%; background: var(--brass); box-shadow: inset 2px 1px 3px rgba(255,255,255,.5); transform: rotate(8deg); }
+.transit-success { gap: 8px; color: #fff9e9; font-style: normal; }
+.transit-success > i { color: #f0c773; font-style: normal; font-size: 1rem; }
+.transit-button.state-loading .transit-label, .transit-button.state-success .transit-label { opacity: 0; transform: translateY(-5px); }
+.transit-button.state-loading .transit-route { opacity: 1; }
+.transit-button.state-loading .transit-route > b { animation: transit-drive 1.55s cubic-bezier(.55,.08,.25,1) infinite; }
+.transit-button.state-success .transit-success { opacity: 1; transform: scale(1); }
+.transit-button.state-success { border-color: rgba(240,199,115,.62); box-shadow: inset 0 1px 0 rgba(255,255,255,.32),0 0 0 3px rgba(183,121,49,.1),0 10px 26px rgba(17,35,28,.16); }
+@keyframes transit-drive { 0% { transform: translateX(0) scale(.88); } 18% { transform: translateX(0) scale(1); } 76% { transform: translateX(96px) scale(1); } 100% { transform: translateX(108px) scale(.82); opacity: .25; } }
 
 /* Immersive intros and scent quiz */
 .immersive-intro { display: grid; min-height: calc(100dvh - 76px); grid-template-columns: 1fr 1fr; align-items: center; gap: 50px; padding: clamp(70px,8vw,130px) clamp(24px,7vw,110px); background: radial-gradient(circle at 78% 38%,#d4e0d4,transparent 32%),var(--ivory); }
@@ -260,8 +279,11 @@ a:hover .product-media img { transform: scale(1.36) translateY(-12%); }
 .sensory-orb span { font-size: .64rem; font-weight: 600; letter-spacing: .17em; line-height: 1.6; text-align: center; text-transform: uppercase; }
 .quiz-stage { position: relative; min-height: calc(100dvh - 76px); padding: 36px clamp(20px,5vw,72px) 54px; background: radial-gradient(circle at 70% 60%,var(--preview),transparent 42%),var(--ivory); transition: background 500ms var(--ease-liquid); overflow: hidden; }
 .quiz-progress { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; color: var(--muted-ink); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; }
-.quiz-progress > div { height: 1px; background: var(--line); }
-.quiz-progress i { display: block; width: 100%; height: 2px; background: var(--forest); transform-origin: left; transition: transform 500ms var(--ease-liquid); }
+.quiz-code-progress { display: grid; grid-template-columns: repeat(6,minmax(28px,52px)); justify-content: center; gap: 9px; }
+.quiz-code-progress i { display: block; height: 22px; border: 1px solid rgba(23,61,50,.18); border-radius: 8px; background: rgba(255,255,255,.26); box-shadow: inset 0 1px 0 rgba(255,255,255,.58); transition: border-color 260ms ease, background 340ms var(--ease-liquid), box-shadow 340ms ease, transform 260ms var(--ease-liquid); }
+.quiz-code-progress i.is-complete { border-color: rgba(183,121,49,.44); background: linear-gradient(135deg,rgba(221,174,94,.88),rgba(23,61,50,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.48); }
+.quiz-code-progress i.is-current { border-color: var(--amber); background: radial-gradient(circle at 34% 26%,rgba(255,255,255,.88),rgba(212,156,69,.56)); box-shadow: 0 0 0 3px rgba(183,121,49,.11),0 0 18px rgba(183,121,49,.42),inset 0 0 8px rgba(255,255,255,.72); animation: quiz-code-glow 1.45s ease-in-out infinite; transform: translateY(-2px); }
+@keyframes quiz-code-glow { 50% { box-shadow: 0 0 0 5px rgba(183,121,49,.08),0 0 27px rgba(183,121,49,.58),inset 0 0 12px rgba(255,255,255,.82); transform: translateY(-2px) scale(1.045); } }
 .quiz-progress button { min-width: 52px; min-height: 44px; border: 0; background: transparent; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
 .quiz-progress button:disabled { opacity: .3; }
 .quiz-question { max-width: 980px; margin: clamp(80px,11vh,130px) auto 54px; text-align: center; }
@@ -418,7 +440,21 @@ a:hover .product-media img { transform: scale(1.36) translateY(-12%); }
 .login-copy > p:not(.eyebrow) { max-width: 470px; color: var(--muted-ink); }
 .login-copy form { max-width: 480px; margin-top: 26px; }
 .login-copy input { width: 100%; margin-bottom: 18px; }
+.password-vault-field { position: relative; margin-bottom: 18px; }
+.password-vault-field input { margin-bottom: 0; padding-right: 64px; }
+.password-vault-toggle { position: absolute; top: 3px; right: 3px; display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-left: 1px solid var(--line); background: rgba(244,240,228,.66); color: var(--forest); cursor: pointer; }
+.password-vault-toggle > span { position: relative; display: block; width: 25px; height: 25px; border: 1px solid currentColor; border-radius: 50%; transition: color 240ms ease, transform 600ms var(--ease-liquid); }
+.password-vault-toggle i { position: absolute; top: 3px; left: calc(50% - .5px); width: 1px; height: 7px; background: currentColor; transform-origin: .5px 9px; }
+.password-vault-toggle i:nth-child(2) { transform: rotate(120deg); }
+.password-vault-toggle i:nth-child(3) { transform: rotate(240deg); }
+.password-vault-field.is-visible .password-vault-toggle > span { color: var(--amber); transform: rotate(210deg); }
+.password-vault-toggle:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .login-copy .button { width: 100%; }
+.state-verifying .vault-door { animation: vault-pressure 1.1s ease-in-out infinite; }
+.state-verifying .vault-dial { animation: vault-crack 1.1s var(--ease-liquid) infinite; }
+.state-open .vault-door { box-shadow: inset 0 0 0 22px rgba(0,0,0,.06),inset 0 0 0 23px rgba(218,176,92,.42),0 0 52px rgba(218,176,92,.18),0 45px 90px rgba(0,0,0,.3); }
+@keyframes vault-pressure { 50% { transform: scale(.992); } }
+@keyframes vault-crack { 0% { transform: rotate(0); } 52% { transform: rotate(205deg); } 72% { transform: rotate(180deg); } 100% { transform: rotate(360deg); } }
 .archive-closed { color: var(--muted-ink); font-size: .75rem; }
 .archive-locked-page, .error-page { display: flex; min-height: calc(100dvh - 76px); flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; text-align: center; background: radial-gradient(circle at 50% 40%,#d4dfd5,var(--ivory) 48%); }
 .archive-locked-page h1, .error-page h1 { margin-bottom: 24px; font-size: clamp(4.5rem,9vw,10rem); }
@@ -651,4 +687,7 @@ a:hover .product-media img { transform: scale(1.36) translateY(-12%); }
   .campaign-refraction, .campaign-water-ripple, .signature-drop, .hero-drop-transition > i, .oil-click-effect { animation: none !important; }
   .campaign-refraction, .campaign-water-ripple { transform: none !important; }
   .oil-click-effect { display: none; }
+  .quiz-code-progress i.is-current, .state-verifying .vault-door, .state-verifying .vault-dial { animation: none !important; }
+  .transit-button.state-loading .transit-route { display: none; }
+  .transit-button.state-loading .transit-label { opacity: 1; transform: none; }
 }
