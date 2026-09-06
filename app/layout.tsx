@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { CartProvider } from "./components/cart-provider";
 import { RehmatOilCursor } from "./components/rehmat-oil-cursor";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
@@ -29,10 +30,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <a className="skip-link" href="#main-content">Skip to content</a>
-        <RehmatOilCursor />
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <CartProvider>
+          <RehmatOilCursor />
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </CartProvider>
       </body>
     </html>
   );

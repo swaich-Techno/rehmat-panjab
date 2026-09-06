@@ -14,15 +14,7 @@ function createOilSplit(x: number, y: number, onControl: boolean) {
     "oil-click-main",
     "oil-click-lobe oil-click-lobe-a",
     "oil-click-lobe oil-click-lobe-b",
-    "oil-click-lobe oil-click-lobe-c",
-    "oil-click-lobe oil-click-lobe-d",
-    "oil-satellite oil-satellite-a",
-    "oil-satellite oil-satellite-b",
-    "oil-satellite oil-satellite-c",
-    "oil-satellite oil-satellite-d",
-    "oil-satellite oil-satellite-e",
     "oil-click-ripple",
-    "oil-click-ripple oil-click-ripple-delayed",
   ]) {
     const part = document.createElement("i");
     part.className = className;
@@ -30,12 +22,11 @@ function createOilSplit(x: number, y: number, onControl: boolean) {
   }
 
   document.body.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 720);
+  window.setTimeout(() => effect.remove(), 560);
 }
 
 export function RehmatOilCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
   const point = useRef({ x: -40, y: -40, px: -40, py: -40, angle: 0, raf: 0, active: false, settled: 0 });
 
   useEffect(() => {
@@ -95,15 +86,11 @@ export function RehmatOilCursor() {
       cursorPoint.active = true;
       cursorPoint.settled = 0;
 
-      const stateTarget = targetElement.closest<HTMLElement>("[data-cursor]");
       const interactive = targetElement.closest("a, button");
-      const rawState = stateTarget?.dataset.cursor ?? (interactive ? "LINK" : "DEFAULT");
-      const state = ["VIEW", "ADD", "DROP", "MIX", "VOTE"].includes(rawState) ? rawState : rawState === "LINK" ? "LINK" : "DEFAULT";
       const hidden = Boolean(targetElement.closest(IGNORED_TARGETS) || window.getSelection()?.type === "Range");
-      el.dataset.state = state;
+      el.dataset.state = interactive ? "INTERACTIVE" : "DEFAULT";
       el.classList.toggle("is-hidden", hidden);
       el.classList.add("is-active");
-      if (labelRef.current) labelRef.current.textContent = state === "VIEW" ? "VIEW" : state === "ADD" ? "ADD" : "";
       start();
     };
 
@@ -173,12 +160,10 @@ export function RehmatOilCursor() {
             </linearGradient>
           </defs>
           <path className="oil-cursor-drop" d="M11.7 1C10.8 5.7 7.1 9.2 4.7 13.5C1.8 18.8 4.2 26.5 11 28.2C17.4 29.8 21.1 24.8 20.6 19.4C20.1 13.9 14.3 9.7 11.7 1Z" />
-          <path className="oil-cursor-bottle" d="M8 3H14V7C17.3 8.4 19 11 19 15V25C19 27.1 17.4 28.5 15.4 28.5H6.6C4.6 28.5 3 27.1 3 25V15C3 11 4.7 8.4 8 7V3Z" />
           <ellipse className="oil-cursor-highlight" cx="8.2" cy="16" rx="1.4" ry="4.2" />
         </svg>
       </span>
-      <span ref={labelRef} className="oil-cursor-label" />
-      <span className="oil-cursor-underline" />
+      <span className="oil-cursor-twin" />
     </div>
   );
 }

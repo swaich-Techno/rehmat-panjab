@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { HomepageCampaign } from "./components/homepage-campaign";
 import { ProductMedia } from "./components/product-media";
-import { products } from "../lib/products";
+import { getStorefrontProducts } from "../lib/storefront";
 
-export default function Home() {
+export default async function Home() {
+  const products = await getStorefrontProducts();
   return (
     <main id="main-content" className="home-v41">
       <HomepageCampaign />
