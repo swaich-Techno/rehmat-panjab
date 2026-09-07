@@ -8,7 +8,11 @@ create table if not exists public.experience_settings (
     'What can I layer with Musk Rizali?',
     'Create a warm and elegant combination.',
     'Create a three-fragrance combination for a wedding.',
-    'Suggest something soft for everyday use.'
+    'Suggest something soft for everyday use.',
+    'Can I combine Vanilla Musk, Oud Rose and White Oud?',
+    'Which fragrance should I apply first?',
+    'Make this combination lighter.',
+    'Suggest an evening combination using available products.'
   ],
   suggested_moods text[] not null default array['Soft','Warm','Elegant','Confident','Calm','Romantic'],
   suggested_occasions text[] not null default array['Everyday','Work','Evening','Wedding','Celebration','Reflection'],
