@@ -15,6 +15,7 @@ type CartContextValue = {
   add: (line: CartLineInput) => void;
   update: (variantId: string, quantity: number) => void;
   remove: (variantId: string) => void;
+  clear: () => void;
   show: () => void;
   close: () => void;
 };
@@ -57,6 +58,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLines((current) => current.filter((line) => line.variantId !== variantId));
     setAnnouncement("Item removed from cart.");
   }, []);
+  const clear = useCallback(() => {
+    setLines([]);
+    setAnnouncement("Payment verified. Cart cleared.");
+  }, []);
   const show = useCallback(() => setOpen(true), []);
   const close = useCallback(() => setOpen(false), []);
   const value = useMemo(() => ({
@@ -67,9 +72,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     add,
     update,
     remove,
+    clear,
     show,
     close,
-  }), [add, close, lines, open, remove, show, update]);
+  }), [add, clear, close, lines, open, remove, show, update]);
 
   return (
     <CartContext.Provider value={value}>

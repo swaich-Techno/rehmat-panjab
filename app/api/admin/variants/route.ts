@@ -10,6 +10,7 @@ const variantSchema = z.object({
   sku: z.string().trim().min(2).max(80).regex(/^[A-Za-z0-9._-]+$/),
   priceRupees: optionalPrice,
   quantity: z.coerce.number().int().min(0).max(1_000_000),
+  lowStockThreshold: z.coerce.number().int().min(0).max(1_000_000),
   enabled: z.boolean(),
 }).refine((value) => !value.enabled || value.priceRupees !== null, { message: "An enabled variant needs a price.", path: ["priceRupees"] });
 
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     variantId = data.id;
   }
 
-  const { error: inventoryError } = await supabase.from("inventory").upsert({ variant_id: variantId, quantity: value.quantity, reserved, updated_at: new Date().toISOString() });
+  const { error: inventoryError } = await supabase.from("inventory").upsert({ variant_id: variantId, quantity: value.quantity, reserved, low_stock_threshold: value.lowStockThreshold, updated_at: new Date().toISOString() });
   if (inventoryError) return NextResponse.json({ message: "The variant saved, but its inventory could not be updated." }, { status: 500 });
   await supabase.from("audit_logs").insert({ actor_id: user.id, action: value.id ? "variant.updated" : "variant.created", entity_type: "product_variant", entity_id: variantId, metadata: { product_id: value.productId, sku: payload.sku } });
   return NextResponse.json({ message: value.id ? "Variant updated." : "Variant created.", id: variantId });

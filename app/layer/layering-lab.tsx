@@ -6,11 +6,19 @@ import { products } from "../../lib/products";
 
 export function LayeringLab() {
   const [selected, setSelected] = useState<string[]>([]);
+  const [shareMessage, setShareMessage] = useState("");
   const first = products.find((product) => product.id === selected[0]);
   const second = products.find((product) => product.id === selected[1]);
 
   function toggle(id: string) {
     setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : current.length < 2 ? [...current, id] : [current[1], id]);
+  }
+
+  async function sharePair() {
+    if (!first || !second) return;
+    const text = `${first.name} + ${second.name} — a Rehmat Panjab Layering Lab pairing awaiting house approval.`;
+    if (navigator.share) await navigator.share({ title: "Rehmat Panjab Layering Lab", text, url: window.location.href });
+    else { await navigator.clipboard.writeText(`${text} ${window.location.href}`); setShareMessage("Pairing link copied."); }
   }
 
   return (
@@ -26,7 +34,7 @@ export function LayeringLab() {
           <div className="shared-glass"><i style={{ "--oil-a": first?.color ?? "transparent", "--oil-b": second?.color ?? "transparent", height: selected.length ? "55%" : "10%" } as React.CSSProperties} /><span>R</span></div>
         </div>
       </div>
-      {first && second && <div className="layer-result"><p className="eyebrow">Layering character</p><h2>{first.character[0]} {second.character[1]} {second.id.includes("oud") || second.id === "saffron" ? "Woods" : "Musk"}</h2><p><strong>{first.name}</strong> first. <strong>{second.name}</strong> lightly above.</p><div className="button-row"><Link className="button button-outline" href="/auth/login?returnTo=/my-rehmat">Sign in to save</Link><Link className="text-link" href={`/product/${first.slug}`}>Explore {first.name} ↗</Link></div><small>Both fragrances are launching soon, so purchase is not yet active.</small></div>}
+      {first && second && <div className="layer-result"><p className="eyebrow">Selected pairing</p><h2>{first.name}<br />+ {second.name}</h2><p>The application order, ratio and combined character are awaiting approval from the house. We will not invent guidance before it is confirmed.</p><div className="button-row"><button className="button button-outline" type="button" onClick={sharePair}>Share pairing</button><Link className="text-link" href={`/product/${first.slug}`}>Explore {first.name} ↗</Link><Link className="text-link" href={`/product/${second.slug}`}>Explore {second.name} ↗</Link></div><small aria-live="polite">{shareMessage || "Both selected formats can be reviewed individually. Checkout remains closed."}</small></div>}
     </section>
   );
 }

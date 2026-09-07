@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../components/cart-provider";
 import { formatMoney } from "../../lib/cart";
+import { RazorpayCheckout } from "../components/razorpay-checkout";
 
 export function CartPageContent() {
   const { lines, subtotal, update, remove } = useCart();
@@ -21,7 +22,7 @@ export function CartPageContent() {
               <div className="cart-page-line-controls"><div className="quantity-stepper" aria-label={`Quantity for ${line.productName}`}><button type="button" onClick={() => update(line.variantId, line.quantity - 1)} aria-label="Decrease quantity">−</button><span>{line.quantity}</span><button type="button" onClick={() => update(line.variantId, line.quantity + 1)} disabled={line.quantity >= line.maxQuantity} aria-label="Increase quantity">+</button></div><button className="remove-line" type="button" onClick={() => remove(line.variantId)}>Remove</button></div>
             </article>)}
           </section>
-          <aside className="cart-summary"><p className="eyebrow">Order summary</p><div><span>Subtotal</span><strong>{formatMoney(subtotal)}</strong></div><p>Taxes, delivery, and verified discounts will be calculated by the payment provider.</p><button className="button button-dark" type="button" disabled>Secure checkout coming next</button><small>No payment credentials are configured, so checkout is intentionally unavailable.</small></aside>
+          <aside className="cart-summary"><p className="eyebrow">Order summary</p><div><span>Subtotal</span><strong>{formatMoney(subtotal)}</strong></div><p>Prices and stock are rechecked securely before payment. Any delivery charge will be shown before you confirm.</p><RazorpayCheckout lines={lines.map(({ variantId, quantity }) => ({ variantId, quantity }))} /><small>Payments open in Razorpay’s encrypted checkout. Your card or UPI details never pass through Rehmat Panjab.</small></aside>
         </div>
       )}
     </main>

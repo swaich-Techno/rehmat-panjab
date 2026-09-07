@@ -14,15 +14,6 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
   const selected = product.variants.find((variant) => variant.id === selectedId) ?? initial;
   const canAdd = Boolean(selected && isPurchasable(product, selected));
 
-  if (!COMMERCE_ENABLED) {
-    return product.enabledSizes.length ? (
-      <div className="product-formats" aria-label="Planned bottle formats">
-        <div>{product.enabledSizes.map((size) => <span key={size}>{size} ml</span>)}</div>
-        <p>Formats are shown for information only. Purchasing is not open.</p>
-      </div>
-    ) : <p className="purchase-unavailable">Formats are being prepared. Join the private notice for release details.</p>;
-  }
-
   if (!product.variants.length) return <p className="purchase-unavailable">Formats are being prepared. Join the private notice for release details.</p>;
 
   return (
@@ -46,9 +37,9 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
       </fieldset>
       {selected && <div className="purchase-status" aria-live="polite">
         <div key={selected.id} className="purchase-price"><span>{selected.sizeMl} ml</span><strong>{selected.pricePaise === null ? "Price pending" : formatMoney(selected.pricePaise, selected.currency)}</strong></div>
-        <p>{product.status === "coming_soon" ? "Launching soon — purchase is not open." : product.status === "sold_out" || selected.availableQuantity < 1 ? "Currently unavailable." : selected.availableQuantity <= 5 ? `Only ${selected.availableQuantity} left.` : "In stock and ready to order."}</p>
+        <p>{product.status === "sold_out" || selected.availableQuantity < 1 ? "Currently unavailable." : selected.availableQuantity <= selected.lowStockThreshold ? "Only a few left." : "Available."}</p>
       </div>}
-      {product.status === "active" && selected?.pricePaise !== null && <div className="purchase-actions">
+      {COMMERCE_ENABLED && product.status === "active" && selected?.pricePaise !== null && <div className="purchase-actions">
         <div className="quantity-stepper" aria-label="Quantity">
           <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity">−</button>
           <span aria-live="polite">{quantity}</span>
@@ -73,6 +64,7 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
           })}
         >{canAdd ? "Add to cart" : "Unavailable"}</button>
       </div>}
+      {!COMMERCE_ENABLED && <p className="purchase-unavailable">Online purchasing is not open yet. Prices and formats are shown for catalogue information.</p>}
     </div>
   );
 }

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
-const IGNORED_TARGETS = "input, textarea, select, option, [contenteditable='true']";
+const IGNORED_TARGETS = "input, textarea, select, option, form, [contenteditable='true'], .razorpay-checkout, [data-native-cursor]";
+const INTERACTIVE_TARGETS = "a, button, [role='button'], .v41-product-card, .product-card";
 
-function createOilSplit(x: number, y: number, onControl: boolean) {
+function createOilSplit(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
   const effect = document.createElement("span");
   effect.className = onControl ? "oil-click-effect is-control" : "oil-click-effect";
   effect.style.setProperty("--oil-x", x + "px");
@@ -22,7 +23,8 @@ function createOilSplit(x: number, y: number, onControl: boolean) {
   }
 
   document.body.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 560);
+  const timer = window.setTimeout(() => onDone(effect, timer), 560);
+  return { effect, timer };
 }
 
 export function RehmatOilCursor() {
@@ -35,6 +37,8 @@ export function RehmatOilCursor() {
     const narrowViewport = window.matchMedia("(max-width: 700px)");
     let cursorEnabled = finePointer.matches && !reduced.matches && !narrowViewport.matches;
     const cursorPoint = point.current;
+    const effects = new Set<HTMLElement>();
+    const timers = new Set<number>();
 
     const draw = () => {
       const el = cursorRef.current;
@@ -45,10 +49,10 @@ export function RehmatOilCursor() {
 
       const dx = cursorPoint.x - cursorPoint.px;
       const dy = cursorPoint.y - cursorPoint.py;
-      cursorPoint.px += dx * 0.62;
-      cursorPoint.py += dy * 0.62;
+      cursorPoint.px += dx * 0.34;
+      cursorPoint.py += dy * 0.34;
       const distance = Math.hypot(dx, dy);
-      const stretch = 1 + Math.min(distance / 110, 0.14);
+      const stretch = 1 + Math.min(distance / 95, 0.18);
       const targetAngle = distance > 0.35 ? Math.atan2(dy, dx) * (180 / Math.PI) + 90 : 0;
       cursorPoint.angle += (targetAngle - cursorPoint.angle) * 0.24;
 
@@ -56,6 +60,8 @@ export function RehmatOilCursor() {
       el.style.setProperty("--oil-rotate", cursorPoint.angle + "deg");
       el.style.setProperty("--oil-stretch", String(stretch));
       el.style.setProperty("--oil-width", String(2 - stretch));
+      el.style.setProperty("--oil-highlight-x", Math.max(-1.4, Math.min(1.4, dx * 0.035)) + "px");
+      el.style.setProperty("--oil-highlight-y", Math.max(-1, Math.min(1, dy * 0.025)) + "px");
 
       if (distance < 0.08 && Math.abs(cursorPoint.angle) < 0.2) cursorPoint.settled += 1;
       else cursorPoint.settled = 0;
@@ -86,19 +92,26 @@ export function RehmatOilCursor() {
       cursorPoint.active = true;
       cursorPoint.settled = 0;
 
-      const interactive = targetElement.closest("a, button");
+      const interactive = targetElement.closest(INTERACTIVE_TARGETS);
       const hidden = Boolean(targetElement.closest(IGNORED_TARGETS) || window.getSelection()?.type === "Range");
       el.dataset.state = interactive ? "INTERACTIVE" : "DEFAULT";
       el.classList.toggle("is-hidden", hidden);
+      document.documentElement.classList.toggle("rehmat-native-cursor", hidden);
       el.classList.add("is-active");
       start();
     };
 
     const down = (event: PointerEvent) => {
       const target = event.target as HTMLElement;
-      if (reduced.matches || target.closest(IGNORED_TARGETS)) return;
+      if (!cursorEnabled || target.closest(IGNORED_TARGETS)) return;
       cursorRef.current?.classList.add("is-pressed");
-      createOilSplit(event.clientX, event.clientY, Boolean(target.closest("a, button")));
+      const created = createOilSplit(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
+        effect.remove();
+        effects.delete(effect);
+        timers.delete(timer);
+      });
+      effects.add(created.effect);
+      timers.add(created.timer);
     };
     const up = () => {
       const el = cursorRef.current;
@@ -109,6 +122,7 @@ export function RehmatOilCursor() {
     const leave = () => {
       cursorPoint.active = false;
       cursorRef.current?.classList.remove("is-active");
+      document.documentElement.classList.remove("rehmat-native-cursor");
     };
     const visibility = () => {
       if (document.hidden && cursorPoint.raf) {
@@ -122,20 +136,28 @@ export function RehmatOilCursor() {
       if (!cursorEnabled) leave();
     };
 
-    syncCursorMode();
-    window.addEventListener("pointermove", move, { passive: true });
-    window.addEventListener("pointerdown", down, { passive: true });
-    window.addEventListener("pointerup", up, { passive: true });
-    window.addEventListener("pointercancel", up, { passive: true });
-    document.documentElement.addEventListener("mouseleave", leave);
-    document.addEventListener("visibilitychange", visibility);
-    finePointer.addEventListener("change", syncCursorMode);
-    reduced.addEventListener("change", syncCursorMode);
-    narrowViewport.addEventListener("change", syncCursorMode);
+    try {
+      syncCursorMode();
+      window.addEventListener("pointermove", move, { passive: true });
+      window.addEventListener("pointerdown", down, { passive: true });
+      window.addEventListener("pointerup", up, { passive: true });
+      window.addEventListener("pointercancel", up, { passive: true });
+      document.documentElement.addEventListener("mouseleave", leave);
+      document.addEventListener("visibilitychange", visibility);
+      finePointer.addEventListener("change", syncCursorMode);
+      reduced.addEventListener("change", syncCursorMode);
+      narrowViewport.addEventListener("change", syncCursorMode);
+    } catch {
+      document.documentElement.classList.remove("has-rehmat-cursor", "rehmat-native-cursor");
+      return;
+    }
 
     return () => {
       if (cursorPoint.raf) cancelAnimationFrame(cursorPoint.raf);
       document.documentElement.classList.remove("has-rehmat-cursor");
+      document.documentElement.classList.remove("rehmat-native-cursor");
+      timers.forEach((timer) => window.clearTimeout(timer));
+      effects.forEach((effect) => effect.remove());
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerdown", down);
       window.removeEventListener("pointerup", up);
@@ -163,7 +185,8 @@ export function RehmatOilCursor() {
           <ellipse className="oil-cursor-highlight" cx="8.2" cy="16" rx="1.4" ry="4.2" />
         </svg>
       </span>
-      <span className="oil-cursor-twin" />
+      <span className="oil-cursor-split oil-cursor-split-a" />
+      <span className="oil-cursor-split oil-cursor-split-b" />
     </div>
   );
 }

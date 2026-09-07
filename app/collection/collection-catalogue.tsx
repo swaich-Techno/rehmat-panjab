@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { formatMoney } from "../../lib/cart";
 import { firstPrice, statusLabel, type StorefrontProduct } from "../../lib/catalog";
-import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { ProductMedia } from "../components/product-media";
 
 export function CollectionCatalogue({ products }: { products: StorefrontProduct[] }) {
@@ -20,7 +19,7 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
   const sizes = [...new Set(products.flatMap((product) => product.enabledSizes))].sort((a, b) => a - b);
 
   const normalized = query.trim().toLowerCase();
-  const maximum = COMMERCE_ENABLED && maxPrice ? Number(maxPrice) * 100 : null;
+  const maximum = maxPrice ? Number(maxPrice) * 100 : null;
   const filtered = products.filter((product) => {
       const price = firstPrice(product);
       if (normalized && ![product.name, product.subtitle, product.scentFamily, ...product.character].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
@@ -35,8 +34,8 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
   }).sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       if (sort === "newest") return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
-      if (COMMERCE_ENABLED && sort === "price-low") return (firstPrice(a) ?? Number.MAX_SAFE_INTEGER) - (firstPrice(b) ?? Number.MAX_SAFE_INTEGER);
-      if (COMMERCE_ENABLED && sort === "price-high") return (firstPrice(b) ?? -1) - (firstPrice(a) ?? -1);
+      if (sort === "price-low") return (firstPrice(a) ?? Number.MAX_SAFE_INTEGER) - (firstPrice(b) ?? Number.MAX_SAFE_INTEGER);
+      if (sort === "price-high") return (firstPrice(b) ?? -1) - (firstPrice(a) ?? -1);
       return Number(b.featured) - Number(a.featured) || a.number.localeCompare(b.number);
   });
 
@@ -48,8 +47,8 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
         <div><label htmlFor="catalogue-character">Character</label><select id="catalogue-character" value={character} onChange={(event) => setCharacter(event.target.value)}><option value="all">All characters</option>{characters.map((value) => <option value={value} key={value}>{value}</option>)}</select></div>
         <div><label htmlFor="catalogue-size">Size</label><select id="catalogue-size" value={size} onChange={(event) => setSize(event.target.value)}><option value="all">All sizes</option>{sizes.map((value) => <option value={value} key={value}>{value} ml</option>)}</select></div>
         <div><label htmlFor="catalogue-availability">Availability</label><select id="catalogue-availability" value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">All statuses</option><option value="available">Available</option><option value="coming_soon">Launching soon</option><option value="sold_out">Sold out</option></select></div>
-        {COMMERCE_ENABLED && <div><label htmlFor="catalogue-price">Maximum price</label><input id="catalogue-price" type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="₹" /></div>}
-        <div><label htmlFor="catalogue-sort">Sort</label><select id="catalogue-sort" value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured</option><option value="newest">Newest</option>{COMMERCE_ENABLED && <><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}<option value="name">Name</option></select></div>
+        <div><label htmlFor="catalogue-price">Maximum price</label><input id="catalogue-price" type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="₹" /></div>
+        <div><label htmlFor="catalogue-sort">Sort</label><select id="catalogue-sort" value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured</option><option value="newest">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></div>
         <p aria-live="polite">{filtered.length} {filtered.length === 1 ? "oil" : "oils"}</p>
       </section>
       <section className="collection-list" aria-label="Rehmat fragrances">
@@ -62,7 +61,7 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
               <h2><Link href={`/product/${product.slug}`}>{product.name}</Link></h2>
               <p className="product-subtitle">{product.subtitle}</p><p>{product.atmosphere}</p>
               <ul aria-label="Scent character">{product.character.map((word) => <li key={word}>{word}</li>)}</ul>
-              <div className="collection-price"><span>{statusLabel(product.status)}</span>{COMMERCE_ENABLED && <strong>{price === null ? "Price pending" : `From ${formatMoney(price)}`}</strong>}</div>
+              <div className="collection-price"><span>{statusLabel(product.status)}</span><strong>{price === null ? "Price pending" : `From ${formatMoney(price)}`}</strong></div>
               <div className="collection-actions"><span className={`status-dot status-${product.status}`}>{statusLabel(product.status)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
             </div>
           </article>;

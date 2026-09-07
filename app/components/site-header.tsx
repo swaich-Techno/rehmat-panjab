@@ -7,8 +7,9 @@ import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { useCart } from "./cart-provider";
 
 const nav = [
-  ["Collection", "/collection"],
-  ["Find your scent", "/find-your-scent"],
+  ["Fragrances", "/collection"],
+  ["Layering Lab", "/layer"],
+  ["Scent Discovery", "/find-your-scent"],
   ["Create yours", "/create-your-fragrance"],
   ["Next drop", "/next-drop"],
 ];

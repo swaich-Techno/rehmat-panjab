@@ -2,7 +2,6 @@ import { getSupabaseConfig } from "./supabase/config";
 import { createSupabaseServerClient } from "./supabase/server";
 import { products as editorialProducts } from "./products";
 import type { CatalogStatus, StorefrontProduct } from "./catalog";
-import { COMMERCE_ENABLED } from "./commerce";
 
 type CatalogRow = {
   id: string;
@@ -18,6 +17,8 @@ type CatalogRow = {
   image_path: string | null;
   campaign_image_path: string | null;
   featured: boolean;
+  occasions: string[] | null;
+  reviews_enabled: boolean;
   created_at: string;
   product_variants?: Array<{
     id: string;
@@ -25,7 +26,7 @@ type CatalogRow = {
     sku: string;
     price_paise: number | null;
     enabled: boolean;
-    inventory?: { quantity: number; reserved: number } | Array<{ quantity: number; reserved: number }> | null;
+    inventory?: { quantity: number; reserved: number; low_stock_threshold: number } | Array<{ quantity: number; reserved: number; low_stock_threshold: number }> | null;
   }>;
 };
 
@@ -33,7 +34,9 @@ function fallbackCatalogue(): StorefrontProduct[] {
   return editorialProducts.map((product) => ({
     ...product,
     databaseId: null,
-    description: product.atmosphere,
+    description: product.description,
+    suitableFor: product.suitableFor,
+    reviewsEnabled: true,
     scentFamily: null,
     imageAlt: `${product.name} perfume oil bottle in its campaign setting`,
     featured: false,
@@ -42,10 +45,11 @@ function fallbackCatalogue(): StorefrontProduct[] {
       id: `preview-${product.slug}-${size}`,
       sizeMl: size,
       sku: `${product.slug}-${size}`.toUpperCase(),
-      pricePaise: null,
+      pricePaise: product.prices[size] ?? null,
       currency: "INR" as const,
       enabled: false,
       availableQuantity: 0,
+      lowStockThreshold: 2,
     })),
   }));
 }
@@ -68,11 +72,12 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     return {
       id: variant.id,
       sizeMl: Number(variant.size_ml),
-      sku: COMMERCE_ENABLED ? variant.sku : "",
-      pricePaise: COMMERCE_ENABLED ? variant.price_paise : null,
+      sku: variant.sku,
+      pricePaise: variant.price_paise,
       currency: "INR" as const,
       enabled: variant.enabled,
       availableQuantity: Math.max(0, (inventory?.quantity ?? 0) - (inventory?.reserved ?? 0)),
+      lowStockThreshold: inventory?.low_stock_threshold ?? 2,
     };
   }).filter((variant) => variant.enabled).sort((a, b) => a.sizeMl - b.sizeMl);
 
@@ -85,6 +90,8 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     subtitle: row.subtitle,
     atmosphere: row.short_description || row.description || editorial?.atmosphere || "",
     description: row.description || row.short_description || editorial?.atmosphere || "",
+    suitableFor: Array.isArray(row.occasions) ? row.occasions : editorial?.suitableFor ?? [],
+    reviewsEnabled: row.reviews_enabled,
     scentFamily: row.scent_family,
     character,
     color: editorial?.color ?? "#c7b58f",
@@ -103,7 +110,7 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,scent_family,status,scent_profile,image_path,campaign_image_path,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,scent_family,status,scent_profile,occasions,reviews_enabled,image_path,campaign_image_path,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");

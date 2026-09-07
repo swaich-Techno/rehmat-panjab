@@ -2,8 +2,8 @@ export type Database = {
   public: {
     Tables: {
       products: {
-        Row: { id: string; product_number: string; name: string; slug: string; subtitle: string; description: string; short_description: string; scent_family: string | null; status: "draft" | "coming_soon" | "active" | "sold_out" | "archived"; notes: Record<string, unknown>; notes_verified: boolean; scent_profile: Record<string, unknown>; occasions: string[]; seasons: string[]; image_path: string | null; campaign_image_path: string | null; featured: boolean; launch_date: string | null; seo_title: string | null; seo_description: string | null; og_image_path: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; product_number: string; name: string; slug: string; subtitle?: string; description?: string; short_description?: string; scent_family?: string | null; status?: "draft" | "coming_soon" | "active" | "sold_out" | "archived"; scent_profile?: Record<string, unknown>; image_path?: string | null; campaign_image_path?: string | null; featured?: boolean; seo_title?: string | null; seo_description?: string | null; og_image_path?: string | null; notes_verified?: boolean; updated_at?: string };
+        Row: { id: string; product_number: string; name: string; slug: string; subtitle: string; description: string; short_description: string; scent_family: string | null; status: "draft" | "coming_soon" | "active" | "sold_out" | "archived"; notes: Record<string, unknown>; notes_verified: boolean; scent_profile: Record<string, unknown>; occasions: string[]; seasons: string[]; reviews_enabled: boolean; image_path: string | null; campaign_image_path: string | null; featured: boolean; launch_date: string | null; seo_title: string | null; seo_description: string | null; og_image_path: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; product_number: string; name: string; slug: string; subtitle?: string; description?: string; short_description?: string; scent_family?: string | null; status?: "draft" | "coming_soon" | "active" | "sold_out" | "archived"; scent_profile?: Record<string, unknown>; occasions?: string[]; reviews_enabled?: boolean; image_path?: string | null; campaign_image_path?: string | null; featured?: boolean; seo_title?: string | null; seo_description?: string | null; og_image_path?: string | null; notes_verified?: boolean; updated_at?: string };
         Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>;
         Relationships: [];
       };
@@ -14,9 +14,9 @@ export type Database = {
         Relationships: [];
       };
       inventory: {
-        Row: { variant_id: string; quantity: number; reserved: number; updated_at: string };
-        Insert: { variant_id: string; quantity?: number; reserved?: number; updated_at?: string };
-        Update: { quantity?: number; reserved?: number; updated_at?: string };
+        Row: { variant_id: string; quantity: number; reserved: number; low_stock_threshold: number; updated_at: string };
+        Insert: { variant_id: string; quantity?: number; reserved?: number; low_stock_threshold?: number; updated_at?: string };
+        Update: { quantity?: number; reserved?: number; low_stock_threshold?: number; updated_at?: string };
         Relationships: [];
       };
       profiles: { Row: { id: string; display_name: string | null; role: "customer" | "admin" | "super_admin"; created_at: string; updated_at: string }; Insert: { id: string; display_name?: string | null; role?: "customer" }; Update: { display_name?: string | null }; Relationships: [] };

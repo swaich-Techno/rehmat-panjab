@@ -8,6 +8,7 @@ export type CatalogVariant = {
   currency: "INR";
   enabled: boolean;
   availableQuantity: number;
+  lowStockThreshold: number;
 };
 
 export type StorefrontProduct = {
@@ -19,6 +20,8 @@ export type StorefrontProduct = {
   subtitle: string;
   atmosphere: string;
   description: string;
+  suitableFor: string[];
+  reviewsEnabled: boolean;
   scentFamily: string | null;
   character: string[];
   color: string;
