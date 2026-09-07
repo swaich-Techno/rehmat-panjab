@@ -102,8 +102,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel related-panel"><p className="eyebrow">Continue exploring</p><h2>Related<br />fragrances.</h2><div className="related-fragrances">{related.map((item) => <Link key={item.slug} href={`/product/${item.slug}`}><span>{item.number}</span><strong>{item.name}</strong><small>{item.atmosphere}</small></Link>)}</div><Link className="button button-outline" href="/layer">Explore this fragrance in Layering Lab</Link></section>
         {!purchasable && <section className="story-panel notify-panel">
           <p className="eyebrow">Private notice</p>
-          <h2>{product.status === "sold_out" ? <>Return when<br />it is replenished.</> : <>Be there when<br />the first drop lands.</>}</h2>
-          <p>{product.status === "sold_out" ? "Leave your email for one considered back-in-stock note." : "No false countdown. No invented scarcity. Leave your email for one considered launch note."}</p>
+          <h2>{product.status === "sold_out" ? <>Return when<br />it is replenished.</> : product.status === "active" ? <>Know when online<br />purchasing opens.</> : <>Be there when<br />the first drop lands.</>}</h2>
+          <p>{product.status === "sold_out" ? "Leave your email for one considered back-in-stock note." : product.status === "active" ? "The catalogue is active while online checkout remains closed. Leave your email for one considered opening note." : "No false countdown. No invented scarcity. Leave your email for one considered launch note."}</p>
           <NotifyForm productSlug={product.slug} />
         </section>}
       </div>

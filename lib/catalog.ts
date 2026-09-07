@@ -47,6 +47,6 @@ export function isPurchasable(product: StorefrontProduct, variant: CatalogVarian
 export function statusLabel(status: CatalogStatus) {
   if (status === "coming_soon") return "Launching soon";
   if (status === "sold_out") return "Sold out";
-  return COMMERCE_ENABLED ? "Available" : "Launching soon";
+  return "Available";
 }
 import { COMMERCE_ENABLED } from "./commerce";
