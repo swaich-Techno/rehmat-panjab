@@ -8,8 +8,8 @@ test("product data stays honest and size-safe", async () => {
   const products = await read("lib/products.ts");
   assert.doesNotMatch(products, /enabledSizes:\s*\[[^\]]*24/);
   assert.match(products, /enabledSizes:\s*\[6, 12\]/);
-  assert.doesNotMatch(products, /price|rating|reviews/i);
-  assert.match(products, /coming_soon/);
+  for (const price of [49900,79900,59900,85000,119900,69900,109900]) assert.match(products, new RegExp(String(price)));
+  assert.doesNotMatch(products, /rating|reviewCount/i);
 });
 
 test("private routes are noindex and admin access is server-side", async () => {
@@ -32,10 +32,11 @@ test("persistence schema enables RLS and unique vote protection", async () => {
 });
 
 test("motion and interaction accessibility are explicit", async () => {
-  const [css, quiz] = await Promise.all([read("app/globals.css"), read("app/find-your-scent/scent-quiz.tsx")]);
+  const [css, quiz, cursor] = await Promise.all([read("app/globals.css"), read("app/find-your-scent/scent-quiz.tsx"), read("app/components/rehmat-oil-cursor.tsx")]);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /:focus-visible/);
-  assert.match(quiz, /Hold to feel/);
-  assert.match(quiz, /500/);
+  assert.match(quiz, /aria-pressed/);
+  assert.match(quiz, /role="progressbar"/);
+  assert.match(cursor, /requestAnimationFrame/);
   await assert.rejects(access(new URL("../app/_sites-preview/SkeletonPreview.tsx", import.meta.url)));
 });

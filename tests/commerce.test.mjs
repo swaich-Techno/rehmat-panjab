@@ -121,8 +121,32 @@ test("reviews are pending, private by default, rate limited, and moderated serve
   assert.match(productPage, /aggregateRating/);
   assert.match(productPage, /isPurchasable\(product, variant\)/);
   assert.match(header, /\["Layering Lab", "\/layer"\]/);
-  assert.match(layer, /awaiting approval from the house/);
+  assert.match(layer, /Guide Me/);
+  assert.match(layer, /Build My Own/);
   assert.doesNotMatch(layer, /lightly above/);
+});
+
+test("guided experiences stay grounded, private and non-transactional", async () => {
+  const [quiz,quizUi,layerApi,layerUi,whatsapp,cursor,adminApi,migration,envExample] = await Promise.all([
+    readFile(new URL("../lib/quiz.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/find-your-scent/scent-quiz.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/layering/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/layer/layering-lab.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/whatsapp-order.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/rehmat-oil-cursor.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/experiences/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/202609070001_guided_experiences.sql", import.meta.url), "utf8"),
+    readFile(new URL("../.env.example", import.meta.url), "utf8"),
+  ]);
+  assert.equal((quiz.match(/kicker:"\d{2} ·/g) ?? []).length, 12);
+  assert.match(quiz, /multiple:true,limit:4/); assert.match(quiz, /multiple:true,limit:3/);
+  assert.match(quizUi, /Save to My Rehmat/); assert.match(quizUi, /Open in Layering Lab/);
+  assert.match(layerApi, /register_experience_attempt/); assert.match(layerApi, /gpt-6-astra/); assert.match(layerApi, /createFallbackRecommendation/);
+  assert.match(layerUi, /settings\.layeringMaxFragrances/); assert.match(layerUi, /Make this combination lighter/);
+  assert.match(whatsapp, /wa\.me/); assert.doesNotMatch(whatsapp, /create-order|verify-payment|inventory/);
+  assert.doesNotMatch(cursor, /oil-cursor-split|oil-click-lobe/); assert.match(cursor, /oil-click-ripple/);
+  assert.match(adminApi, /role!=="super_admin"/); assert.match(migration, /system_guidance/); assert.match(migration, /saved layers own/);
+  assert.match(envExample, /NEXT_PUBLIC_COMMERCE_ENABLED=false/); assert.match(envExample, /OPENAI_API_KEY=/);
 });
 
 test("product pages omit the scent impression panel without leaving its styles", async () => {

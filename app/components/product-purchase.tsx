@@ -5,8 +5,9 @@ import { formatMoney } from "../../lib/cart";
 import { isPurchasable, type StorefrontProduct } from "../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { useCart } from "./cart-provider";
+import { WhatsAppOrder, type WhatsAppOrderSettings } from "./whatsapp-order";
 
-export function ProductPurchase({ product }: { product: StorefrontProduct }) {
+export function ProductPurchase({ product, whatsappSettings }: { product: StorefrontProduct; whatsappSettings: WhatsAppOrderSettings }) {
   const cart = useCart();
   const initial = useMemo(() => product.variants.find((variant) => isPurchasable(product, variant)) ?? product.variants[0], [product]);
   const [selectedId, setSelectedId] = useState(initial?.id ?? "");
@@ -65,6 +66,7 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
         >{canAdd ? "Add to cart" : "Unavailable"}</button>
       </div>}
       {!COMMERCE_ENABLED && <p className="purchase-unavailable">Online purchasing is not open yet. Prices and formats are shown for catalogue information.</p>}
+      {!COMMERCE_ENABLED && <WhatsAppOrder compact products={[{name:product.name,slug:product.slug,variants:product.variants.map(({sizeMl,pricePaise,currency})=>({sizeMl,pricePaise,currency}))}]} settings={whatsappSettings} />}
     </div>
   );
 }

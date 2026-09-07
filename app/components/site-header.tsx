@@ -9,9 +9,8 @@ import { useCart } from "./cart-provider";
 const nav = [
   ["Fragrances", "/collection"],
   ["Layering Lab", "/layer"],
-  ["Scent Discovery", "/find-your-scent"],
-  ["Create yours", "/create-your-fragrance"],
-  ["Next drop", "/next-drop"],
+  ["Name Your Rehmat", "/find-your-scent"],
+  ["Our Story", "/discover"],
 ];
 
 export function SiteHeader() {

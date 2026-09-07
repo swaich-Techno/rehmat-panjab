@@ -5,22 +5,15 @@ import { useEffect, useRef } from "react";
 const IGNORED_TARGETS = "input, textarea, select, option, form, [contenteditable='true'], .razorpay-checkout, [data-native-cursor]";
 const INTERACTIVE_TARGETS = "a, button, [role='button'], .v41-product-card, .product-card";
 
-function createOilSplit(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
+function createOilRipple(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
   const effect = document.createElement("span");
   effect.className = onControl ? "oil-click-effect is-control" : "oil-click-effect";
   effect.style.setProperty("--oil-x", x + "px");
   effect.style.setProperty("--oil-y", y + "px");
 
-  for (const className of [
-    "oil-click-main",
-    "oil-click-lobe oil-click-lobe-a",
-    "oil-click-lobe oil-click-lobe-b",
-    "oil-click-ripple",
-  ]) {
-    const part = document.createElement("i");
-    part.className = className;
-    effect.appendChild(part);
-  }
+  const ripple = document.createElement("i");
+  ripple.className = "oil-click-ripple";
+  effect.appendChild(ripple);
 
   document.body.appendChild(effect);
   const timer = window.setTimeout(() => onDone(effect, timer), 560);
@@ -105,7 +98,7 @@ export function RehmatOilCursor() {
       const target = event.target as HTMLElement;
       if (!cursorEnabled || target.closest(IGNORED_TARGETS)) return;
       cursorRef.current?.classList.add("is-pressed");
-      const created = createOilSplit(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
+      const created = createOilRipple(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
         effect.remove();
         effects.delete(effect);
         timers.delete(timer);
@@ -185,8 +178,6 @@ export function RehmatOilCursor() {
           <ellipse className="oil-cursor-highlight" cx="8.2" cy="16" rx="1.4" ry="4.2" />
         </svg>
       </span>
-      <span className="oil-cursor-split oil-cursor-split-a" />
-      <span className="oil-cursor-split oil-cursor-split-b" />
     </div>
   );
 }
