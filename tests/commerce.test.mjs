@@ -124,3 +124,14 @@ test("reviews are pending, private by default, rate limited, and moderated serve
   assert.match(layer, /awaiting approval from the house/);
   assert.doesNotMatch(layer, /lightly above/);
 });
+
+test("product pages omit the scent impression panel without leaving its styles", async () => {
+  const [productPage, styles] = await Promise.all([
+    readFile(new URL("../app/product/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(productPage, /Scent impression|editorial portrait|Fragrance details are still being verified|impression-panel/i);
+  assert.doesNotMatch(styles, /impression-panel/);
+  assert.match(productPage, /03 · The ritual/);
+  assert.match(productPage, /04 · Available formats/);
+});

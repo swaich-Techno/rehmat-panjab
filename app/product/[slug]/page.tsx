@@ -81,19 +81,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="long-description">{product.description.split(/\n\s*\n/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
           <div className="suitable-for"><h3>Suitable for</h3><ul>{product.suitableFor.map((use) => <li key={use}>{use}</li>)}</ul></div>
         </section>
-        <section className="story-panel impression-panel">
-          <p className="eyebrow">03 · Scent impression</p>
-          <h2>An editorial portrait,<br />not a note pyramid.</h2>
-          <p>Fragrance details are still being verified. Until the final oil is approved, we share only its intended atmosphere and character.</p>
-        </section>
         <section className="story-panel ritual-panel">
-          <p className="eyebrow">04 · The ritual</p>
+          <p className="eyebrow">03 · The ritual</p>
           <h2>A few drops.<br />A quieter radius.</h2>
           <p>Concentrated perfume oil, worn close to skin. Apply sparingly to pulse points and let it settle.</p>
           <div className="ritual-drop" aria-hidden="true" />
         </section>
         <section className="story-panel format-panel">
-          <p className="eyebrow">05 · Available formats</p>
+          <p className="eyebrow">04 · Available formats</p>
           <h2>Choose your<br />quiet ritual.</h2>
           <ProductPurchase product={product} />
         </section>

@@ -23,7 +23,7 @@ export function ProductReviews({ productId, productName, summary }: { productId:
   }
 
   return <section className="product-reviews" aria-labelledby="reviews-title">
-    <div className="reviews-heading"><div><p className="eyebrow">06 · Community notes</p><h2 id="reviews-title">Reviews of<br />{productName}.</h2></div><div className="rating-summary" aria-label={`${summary.average.toFixed(1)} out of 5 from ${summary.total} approved reviews`}><strong>{summary.total ? summary.average.toFixed(1) : "—"}</strong><span>{summary.total} approved {summary.total === 1 ? "review" : "reviews"}</span></div></div>
+    <div className="reviews-heading"><div><p className="eyebrow">05 · Community notes</p><h2 id="reviews-title">Reviews of<br />{productName}.</h2></div><div className="rating-summary" aria-label={`${summary.average.toFixed(1)} out of 5 from ${summary.total} approved reviews`}><strong>{summary.total ? summary.average.toFixed(1) : "—"}</strong><span>{summary.total} approved {summary.total === 1 ? "review" : "reviews"}</span></div></div>
     <div className="rating-breakdown">{[5,4,3,2,1].map((rating) => <div key={rating}><span>{rating} star</span><i><b style={{ transform: `scaleX(${summary.total ? summary.breakdown[rating] / summary.total : 0})` }} /></i><small>{summary.breakdown[rating]}</small></div>)}</div>
     <div className="reviews-list">
       {!summary.reviews.length && <p className="reviews-empty">No reviews yet. Be the first to share your experience with this fragrance.</p>}
