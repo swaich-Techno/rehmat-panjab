@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { NotifyForm } from "../../components/notify-form";
@@ -84,6 +85,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p>{product.summary || product.atmosphere}</p>
           <div className="light-beam" aria-hidden="true" />
         </section>
+        {product.campaignImage && <section className="story-panel editorial-campaign-panel">
+          <p className="eyebrow">Editorial campaign artwork</p>
+          <h2>Mood, not product photography.</h2>
+          <figure>
+            <div className="editorial-campaign-image"><Image src={product.campaignImage} alt={product.campaignImageAlt ?? `Editorial campaign artwork for ${product.name}; not a product photograph`} fill sizes="(max-width: 700px) 88vw, 42vw" /></div>
+            <figcaption>Editorial campaign artwork · This is not a genuine product photograph.</figcaption>
+          </figure>
+        </section>}
         <section className="story-panel product-description-panel">
           <p className="eyebrow">02 · The fragrance</p>
           <h2>A complete<br />portrait.</h2>

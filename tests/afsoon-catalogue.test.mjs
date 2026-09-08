@@ -5,10 +5,13 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("Afsoon is fully represented without fabricated stock or photography", async () => {
-  const [products, migration, media] = await Promise.all([
+  const [products, migration, editorialMigration, media, storefront, productPage] = await Promise.all([
     read("lib/products.ts"),
     read("supabase/migrations/202609080001_afsoon_suitability_images.sql"),
+    read("supabase/migrations/202609080002_afsoon_editorial_campaign.sql"),
     read("app/components/product-media.tsx"),
+    read("lib/storefront.ts"),
+    read("app/product/[slug]/page.tsx"),
   ]);
   for (const value of ["AFSOON","Inspired by Vampire Blood","49900","89900","Dark Cherry","Velvet Musk","Slightly sensual-sweet leaning"]) assert.match(products, new RegExp(value));
   assert.match(migration, /where p\.slug='afsoon'[\s\S]*on conflict\(variant_id\) do nothing/);
@@ -16,6 +19,9 @@ test("Afsoon is fully represented without fabricated stock or photography", asyn
   assert.doesNotMatch(migration, /on conflict\(variant_id\).*do update/s);
   assert.match(media, /Genuine product image pending/);
   assert.match(products, /Afsoon product photograph awaiting owner upload/);
+  assert.match(editorialMigration, /afsoon-editorial-campaign\.webp/);
+  assert.match(storefront, /image: publicImage\(row\.image_path/);
+  assert.match(productPage, /Editorial campaign artwork · This is not a genuine product photograph\./);
 });
 
 test("suitability is backend-managed, searchable, filterable and visible", async () => {

@@ -244,6 +244,12 @@ a:hover .product-media img { transform: scale(1.018); }
 .scent-journey { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-top: 34px; }
 .light-panel { background: linear-gradient(125deg,var(--ivory),#dde5da); }
 .light-beam { position: absolute; top: -30%; right: -25%; width: 70%; height: 150%; background: linear-gradient(100deg,transparent,rgba(255,255,255,.72),transparent); filter: blur(10px); transform: rotate(15deg); }
+.editorial-campaign-panel { color: var(--ivory); background: linear-gradient(145deg,#4f1724,#161d19); }
+.editorial-campaign-panel h2 { max-width: 640px; }
+.editorial-campaign-panel figure { width: min(100%,560px); margin: 12px 0 0; }
+.editorial-campaign-image { position: relative; width: 100%; overflow: hidden; aspect-ratio: 4 / 5; border: 1px solid rgba(244,240,228,.24); background: #271714; }
+.editorial-campaign-image img { object-fit: cover; }
+.editorial-campaign-panel figcaption { margin-top: 12px; color: rgba(244,240,228,.72); font-size: .62rem; letter-spacing: .12em; line-height: 1.6; text-transform: uppercase; }
 .ritual-panel { background: var(--paper); }
 .ritual-drop { width: 90px; height: 118px; margin-top: 50px; border: 1px solid rgba(23,61,50,.3); border-radius: 65% 35% 62% 38% / 72% 38% 62% 28%; background: radial-gradient(circle at 33% 25%,rgba(255,255,255,.85),rgba(183,121,49,.3)); box-shadow: inset 12px 10px 20px rgba(255,255,255,.45), 0 25px 50px rgba(23,61,50,.14); }
 .size-row { display: flex; gap: 12px; margin: 20px 0 32px; }
@@ -255,6 +261,7 @@ a:hover .product-media img { transform: scale(1.018); }
 .notify-form > label:first-child, .admin-form label, .login-copy label { display: block; margin-bottom: 7px; font-size: .65rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .input-row { display: flex; }
 .input-row input, .login-copy input, .admin-form input, .admin-form textarea, .admin-form select { min-height: 50px; flex: 1; border: 1px solid var(--line); border-radius: 0; padding: 12px 14px; background: rgba(255,255,255,.45); color: var(--ink); }
+.field-hint { margin: 7px 0 0; color: var(--muted-ink); font-size: .7rem; line-height: 1.45; }
 .consent-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; color: var(--muted-ink); font-size: .72rem; }
 .consent-row input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--forest); }
 .form-message { min-height: 24px; margin-top: 12px; font-size: .74rem; }

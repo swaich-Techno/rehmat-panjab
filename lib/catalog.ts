@@ -39,6 +39,8 @@ export type StorefrontProduct = {
   image: string;
   imageAlt: string;
   imagePending: boolean;
+  campaignImage: string | null;
+  campaignImageAlt: string | null;
   status: CatalogStatus;
   featured: boolean;
   createdAt: string | null;
