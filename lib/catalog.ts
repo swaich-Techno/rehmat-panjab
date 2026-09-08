@@ -5,6 +5,8 @@ export type CatalogVariant = {
   sizeMl: number;
   sku: string;
   pricePaise: number | null;
+  normalPricePaise?: number | null;
+  promotionalLabel?: string | null;
   currency: "INR";
   enabled: boolean;
   availableQuantity: number;
@@ -20,6 +22,8 @@ export type StorefrontProduct = {
   subtitle: string;
   atmosphere: string;
   description: string;
+  inspirationLine?: string;
+  searchAliases: string[];
   suitableFor: string[];
   reviewsEnabled: boolean;
   scentFamily: string | null;

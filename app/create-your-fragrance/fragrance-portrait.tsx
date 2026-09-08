@@ -6,7 +6,7 @@ import { useState } from "react";
 const stages = [
   { title: "Choose your opening", role: "Opening", options: [
     { id: "citrus", label: "Pale citrus", mood: "Bright", color: "#d9c95d", closest: "white-oud" },
-    { id: "saffron", label: "Golden spice", mood: "Radiant", color: "#c77c22", closest: "saffron-amber-oud" },
+    { id: "saffron", label: "Golden spice", mood: "Radiant", color: "#c77c22", closest: "junoon" },
     { id: "air", label: "Clean air", mood: "Quiet", color: "#dfe6db", closest: "musk-rizali" },
   ]},
   { title: "Choose its heart", role: "Heart", options: [
@@ -16,7 +16,7 @@ const stages = [
   ]},
   { title: "Choose its base", role: "Base", options: [
     { id: "musk", label: "Soft musk", mood: "Intimate", color: "#e1dfd2", closest: "musk-rizali" },
-    { id: "oud", label: "Dark wood", mood: "Grounded", color: "#6c412e", closest: "saffron-amber-oud" },
+    { id: "oud", label: "Dark wood", mood: "Grounded", color: "#6c412e", closest: "junoon" },
     { id: "amber", label: "Amber warmth", mood: "Evening", color: "#aa612c", closest: "oud-rose" },
   ]},
   { title: "Set the radius", role: "Mood", options: [

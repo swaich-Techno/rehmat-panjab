@@ -90,6 +90,7 @@ export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
             clear();
             setState("success");
             setMessage("Payment verified. Thank you—your order is confirmed.");
+            window.location.assign("/payment/success");
           } catch (error) {
             setState("error");
             setMessage(error instanceof Error ? error.message : "Payment could not be verified. Please contact support before retrying.");
@@ -100,6 +101,7 @@ export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
             if (paymentStarted || paymentFailed) return;
             setState("cancelled");
             setMessage("Payment was cancelled. Your cart has been kept so you can try again.");
+            window.location.assign("/payment/cancelled");
           },
         },
       });
@@ -107,6 +109,7 @@ export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
         paymentFailed = true;
         setState("error");
         setMessage(response.error?.description || "Payment failed. Check the details in the payment window and try again.");
+        window.location.assign("/payment/failed");
       });
       setState("idle");
       setMessage("Complete payment in the secure Razorpay window.");

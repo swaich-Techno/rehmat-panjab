@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { requireAdmin } from "../../lib/supabase/auth";
-
-export const dynamic = "force-dynamic";
-
-export default async function AdminPage() {
-  const { role } = await requireAdmin();
-  return <main id="main-content" className="admin-page"><p className="eyebrow">House administration · {role.replace("_", " ")}</p><h1>Rehmat house<br />operations.</h1><div className="admin-grid"><Link href="/admin/products"><span>01</span><h2>Products</h2><p>Names, status, storytelling, formats, and launch details.</p></Link><Link href="/admin/reviews"><span>02</span><h2>Reviews</h2><p>Moderate submissions, reports, verification and public responses.</p></Link>{role==="super_admin"?<Link href="/admin/experiences"><span>03</span><h2>Experiences</h2><p>Layering, scent portrait and WhatsApp request settings.</p></Link>:<article><span>03</span><h2>Next drop</h2><p>Campaign milestones appear after configuration.</p></article>}</div></main>;
-}
+export const dynamic="force-dynamic";
+const cards=[
+  ["01","Products","/admin/products","Catalogue, variants and inventory."],
+  ["02","Reviews","/admin/reviews","Moderation, reports and public responses."],
+  ["03","Experiences","/admin/experiences","Layering, quiz and WhatsApp settings."],
+  ["04","Discounts","/admin/discounts","Scheduled automatic pricing rules."],
+  ["05","Coupons","/admin/coupons","Codes, eligibility and usage limits."],
+  ["06","Orders","/admin/orders","Manual WhatsApp confirmations."],
+  ["07","Store readiness","/admin/readiness","Contact, policies and Razorpay checklist."],
+];
+export default async function AdminPage(){const {role}=await requireAdmin();return <main id="main-content" className="admin-page"><p className="eyebrow">House administration · {role.replace("_"," ")}</p><h1>Rehmat house<br/>operations.</h1><div className="admin-grid">{cards.filter((_,i)=>role==="super_admin"||i<3).map(([n,title,href,copy])=><Link href={href} key={href}><span>{n}</span><h2>{title}</h2><p>{copy}</p></Link>)}</div></main>}

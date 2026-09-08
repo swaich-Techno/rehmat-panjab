@@ -18,3 +18,7 @@ export function verifyRazorpayPaymentSignature(orderId: string, paymentId: strin
   const expected = createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex");
   return safeEqual(expected, signature);
 }
+
+export function verifyRazorpayWebhookSignature(body:string,signature:string,secret:string){
+  return safeEqual(createHmac("sha256",secret).update(body).digest("hex"),signature);
+}

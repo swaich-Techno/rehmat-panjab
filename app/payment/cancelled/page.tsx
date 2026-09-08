@@ -1,0 +1,1 @@
+import Link from "next/link"; export default function Page(){return <main id="main-content" className="policy-page"><p className="eyebrow">Payment cancelled</p><h1>Your cart is saved.</h1><p>No payment was recorded. You can return whenever you are ready.</p><Link className="button button-dark" href="/cart">Return to cart</Link></main>}

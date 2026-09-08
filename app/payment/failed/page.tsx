@@ -1,0 +1,1 @@
+import Link from "next/link"; export default function Page(){return <main id="main-content" className="policy-page"><p className="eyebrow">Payment not completed</p><h1>Please try again.</h1><p>No order is marked paid unless its signature is verified.</p><Link className="button button-dark" href="/cart">Return to cart</Link></main>}

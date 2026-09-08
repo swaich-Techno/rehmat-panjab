@@ -2,6 +2,7 @@ import { getSupabaseConfig } from "./supabase/config";
 import { createSupabaseServerClient } from "./supabase/server";
 import { products as editorialProducts } from "./products";
 import type { CatalogStatus, StorefrontProduct } from "./catalog";
+import { createSupabaseAdminClient } from "./supabase/admin";
 
 type CatalogRow = {
   id: string;
@@ -11,6 +12,8 @@ type CatalogRow = {
   subtitle: string;
   description: string;
   short_description: string;
+  inspiration_line?: string | null;
+  search_aliases?: string[] | null;
   scent_family: string | null;
   status: CatalogStatus;
   scent_profile: Record<string, unknown> | null;
@@ -35,6 +38,8 @@ function fallbackCatalogue(): StorefrontProduct[] {
     ...product,
     databaseId: null,
     description: product.description,
+    inspirationLine: product.inspirationLine,
+    searchAliases: product.searchAliases ?? [],
     suitableFor: product.suitableFor,
     reviewsEnabled: true,
     scentFamily: null,
@@ -90,6 +95,8 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     subtitle: row.subtitle,
     atmosphere: row.short_description || row.description || editorial?.atmosphere || "",
     description: row.description || row.short_description || editorial?.atmosphere || "",
+    inspirationLine: row.inspiration_line || editorial?.inspirationLine,
+    searchAliases: Array.isArray(row.search_aliases) ? row.search_aliases : editorial?.searchAliases ?? [],
     suitableFor: Array.isArray(row.occasions) ? row.occasions : editorial?.suitableFor ?? [],
     reviewsEnabled: row.reviews_enabled,
     scentFamily: row.scent_family,
@@ -110,11 +117,19 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,scent_family,status,scent_profile,occasions,reviews_enabled,image_path,campaign_image_path,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,inspiration_line,search_aliases,scent_family,status,scent_profile,occasions,reviews_enabled,image_path,campaign_image_path,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");
-  return ((data ?? []) as unknown as CatalogRow[]).map(mapRow);
+  const catalogue=((data ?? []) as unknown as CatalogRow[]).map(mapRow);
+  const admin=createSupabaseAdminClient(); if(!admin)return catalogue;
+  const now=new Date().toISOString(); const {data:discounts}=await admin.from("automatic_discounts").select("*,discount_products(product_id),discount_variants(variant_id)").eq("active",true).is("archived_at",null).or(`starts_at.is.null,starts_at.lte.${now}`).or(`ends_at.is.null,ends_at.gt.${now}`).order("priority",{ascending:false});
+  return catalogue.map(product=>({...product,variants:product.variants.map(variant=>{
+    if(variant.pricePaise===null)return variant; const price=variant.pricePaise;
+    const discount=(discounts??[]).find(item=>{const ps=(item.discount_products??[]).map((x:{product_id:string})=>x.product_id);const vs=(item.discount_variants??[]).map((x:{variant_id:string})=>x.variant_id);return item.minimum_quantity<=1&&item.minimum_subtotal_paise<=price&&(!ps.length||product.databaseId&&ps.includes(product.databaseId))&&(!vs.length||vs.includes(variant.id));});
+    if(!discount)return variant; const raw=discount.discount_type==="percentage"?Math.floor(price*Math.min(100,discount.value)/100):discount.value; const saving=Math.min(price,discount.max_discount_paise===null?raw:Math.min(raw,discount.max_discount_paise));
+    return {...variant,normalPricePaise:price,pricePaise:price-saving,promotionalLabel:discount.public_label};
+  })}));
 }
 
 export async function getStorefrontProduct(slug: string) {

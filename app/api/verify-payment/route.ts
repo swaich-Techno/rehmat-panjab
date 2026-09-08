@@ -35,5 +35,8 @@ export async function POST(request: Request) {
   });
   if (error) return NextResponse.json({ success: false, message: "Payment is valid, but the order could not be completed. Please contact support." }, { status: 409 });
 
+  const {data:paid}=await supabaseAdmin.from("orders").select("id,coupon_id,subtotal_paise,discount_paise,user_id").eq("razorpay_order_id",orderId).single();
+  if(paid?.coupon_id&&paid.discount_paise){await supabaseAdmin.from("coupon_redemptions").upsert({coupon_id:paid.coupon_id,order_id:paid.id,customer_identifier:paid.user_id,eligible_subtotal_paise:paid.subtotal_paise??0,discount_paise:paid.discount_paise,confirmation_status:"confirmed",payment_status:"paid",idempotency_reference:`razorpay:${paymentId}`},{onConflict:"idempotency_reference"});}
+
   return NextResponse.json({ success: true, payment_id: paymentId, remaining_quantity: remaining });
 }

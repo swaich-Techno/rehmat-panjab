@@ -1,0 +1,1 @@
+import Link from "next/link"; export default function Page(){return <main id="main-content" className="policy-page"><p className="eyebrow">Payment confirmed</p><h1>Thank you.</h1><p>Your verified order has been recorded.</p><Link className="button button-dark" href="/collection">Return to the collection</Link></main>}

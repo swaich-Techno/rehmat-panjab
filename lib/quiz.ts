@@ -33,17 +33,22 @@ export const quizQuestions: QuizQuestion[] = [
 
 export type QuizAnswers = Record<string, string[]>;
 export function scoreQuiz(answers: QuizAnswers) {
-  const totals: Record<ScentId, number> = { musk:0, vanilla:0, saffron:0, "white-oud":0, "oud-rose":0 };
+  const totals: Record<ScentId, number> = { musk:0, vanilla:0, saffron:0, "white-oud":0, "oud-rose":0, junoon:0, "red-musk":0, nazakat:0, "zara-candy":0, "deer-musk":0 };
   for (const question of quizQuestions) for (const option of question.options) if (answers[question.id]?.includes(option.id)) {
     for (const [id, score] of Object.entries(option.scores)) totals[id as ScentId] += score ?? 0;
   }
-  return (Object.entries(totals) as [ScentId,number][]).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+  totals.junoon += totals.saffron;
+  totals["red-musk"] += Math.round(totals.junoon * .45);
+  totals.nazakat += Math.round(totals["oud-rose"] * .7);
+  totals["zara-candy"] += Math.round(totals.vanilla * .65);
+  totals["deer-musk"] += Math.round(totals.musk * .65);
+  return (Object.entries(totals) as [ScentId,number][]).filter(([id]) => id !== "saffron").sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
 }
 
 export function buildPortraitName(answers: QuizAnswers, primary: ScentId, words: string[]) {
   const chosen = quizQuestions.flatMap((question) => question.options.filter((option) => answers[question.id]?.includes(option.id))).flatMap((option) => option.feeling);
   const safe = words.filter((word) => /^[A-Za-z][A-Za-z -]{1,30}$/.test(word));
-  const lead = safe.find((word) => chosen.some((feeling) => feeling.toLowerCase().includes(word.toLowerCase()))) ?? ({ musk:"Quiet",vanilla:"Velvet",saffron:"Golden","white-oud":"White","oud-rose":"Rose" } as Record<ScentId,string>)[primary];
+  const lead = safe.find((word) => chosen.some((feeling) => feeling.toLowerCase().includes(word.toLowerCase()))) ?? ({ musk:"Quiet",vanilla:"Velvet",saffron:"Golden","white-oud":"White","oud-rose":"Rose",junoon:"Junoon","red-musk":"Ember",nazakat:"Radiant","zara-candy":"Sweet","deer-musk":"Wild" } as Record<ScentId,string>)[primary];
   const tail = safe.find((word) => word !== lead && ["Strength","Devotion","Evening","Radiance","Stillness","Horizon","Warmth"].includes(word)) ?? "Radiance";
   return `${lead} ${tail}`.slice(0,60);
 }

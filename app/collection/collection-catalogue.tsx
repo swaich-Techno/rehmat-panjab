@@ -22,7 +22,7 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
   const maximum = maxPrice ? Number(maxPrice) * 100 : null;
   const filtered = products.filter((product) => {
       const price = firstPrice(product);
-      if (normalized && ![product.name, product.subtitle, product.scentFamily, ...product.character].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
+      if (normalized && ![product.name, product.subtitle, product.scentFamily, ...product.character, ...product.searchAliases].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
       if (family !== "all" && product.scentFamily !== family) return false;
       if (character !== "all" && !product.character.includes(character)) return false;
       if (size !== "all" && !product.enabledSizes.includes(Number(size))) return false;
@@ -54,14 +54,16 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
       <section className="collection-list" aria-label="Rehmat fragrances">
         {filtered.length ? filtered.map((product, index) => {
           const price = firstPrice(product);
+          const pricedVariant=product.variants.filter(item=>item.pricePaise!==null).sort((a,b)=>(a.pricePaise??0)-(b.pricePaise??0))[0];
           return <article className={`collection-product layout-${index % 2 ? "right" : "left"}`} key={product.databaseId ?? product.id}>
             <Link className="collection-media-link" href={`/product/${product.slug}`} data-cursor="VIEW"><ProductMedia product={product} priority={index === 0} /></Link>
             <div className="collection-copy">
               <div className="number-rule"><span>{product.number}</span><i /></div>
               <h2><Link href={`/product/${product.slug}`}>{product.name}</Link></h2>
+              {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
               <p className="product-subtitle">{product.subtitle}</p><p>{product.atmosphere}</p>
               <ul aria-label="Scent character">{product.character.map((word) => <li key={word}>{word}</li>)}</ul>
-              <div className="collection-price"><span>{statusLabel(product.status)}</span><strong>{price === null ? "Price pending" : `From ${formatMoney(price)}`}</strong></div>
+              <div className="collection-price"><span>{pricedVariant?.promotionalLabel??statusLabel(product.status)}</span><strong>{price === null ? "Contact for price" : <>{pricedVariant?.normalPricePaise&&<del>{formatMoney(pricedVariant.normalPricePaise)}</del>} From {formatMoney(price)} {pricedVariant?.normalPricePaise&&<small>Save {formatMoney(pricedVariant.normalPricePaise-price)}</small>}</>}</strong></div>
               <div className="collection-actions"><span className={`status-dot status-${product.status}`}>{statusLabel(product.status)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
             </div>
           </article>;

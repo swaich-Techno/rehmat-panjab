@@ -6,12 +6,14 @@ import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { createRazorpayOrderToken } from "../../../lib/razorpay";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import { calculateOrderQuote } from "../../../lib/quote";
 
 const requestSchema = z.object({
   lines: z.array(z.object({
     variantId: z.string().uuid(),
     quantity: z.number().int().min(1).max(10),
   }).strict()).min(1).max(20),
+  couponCode: z.string().trim().max(40).optional(),
 }).strict();
 
 function errorStatus(error: unknown) {
@@ -70,6 +72,9 @@ export async function POST(request: Request) {
     amount += variant.price_paise * quantity;
   }
 
+  const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode).catch(()=>null);
+  if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
+  const subtotal=amount; amount=quote.totalPaise;
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return NextResponse.json({ message: "The payment total must be at least ₹1." }, { status: 400 });
   }
@@ -83,11 +88,13 @@ export async function POST(request: Request) {
       user_id: authData.user?.id ?? null,
       status: "pending",
       currency: "INR",
-      subtotal_paise: amount,
+      subtotal_paise: subtotal,
       shipping_paise: 0,
-      discount_paise: 0,
+      discount_paise: quote.discountPaise,
       total_paise: amount,
       razorpay_order_id: order.id,
+      coupon_id: quote.couponId,
+      coupon_code: quote.couponCode,
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 

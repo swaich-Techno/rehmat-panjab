@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { NotifyForm } from "../../components/notify-form";
 import { ProductMedia } from "../../components/product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
-import { products as editorialProducts } from "../../../lib/products";
+import { productRedirects, products as editorialProducts } from "../../../lib/products";
 import { isPurchasable, statusLabel } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { getProductReviewSummary } from "../../../lib/reviews";
 import { getStorefrontProduct, getStorefrontProducts } from "../../../lib/storefront";
 import { getExperienceSettings } from "../../../lib/experience-settings";
+import { getSiteUrl } from "../../../lib/site-url";
 
 export function generateStaticParams() {
   return editorialProducts.map((product) => ({ slug: product.slug }));
@@ -18,6 +19,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) return {};
   return {
@@ -39,7 +41,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   ]);
   const related = catalogue.filter((item) => item.slug !== product.slug).slice(0, 3);
   const purchasable = COMMERCE_ENABLED && product.variants.some((variant) => isPurchasable(product, variant));
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rehmat-panjab.vercel.app";
+  const origin = getSiteUrl();
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -68,6 +70,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel story-opening">
           <p className="eyebrow">Rehmat {product.number} · {statusLabel(product.status)}</p>
           <h1>{product.name}</h1>
+          {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
           <p className="product-lede">{product.atmosphere}</p>
           <div className="character-chips">{product.character.map((word) => <span key={word}>{word}</span>)}</div>
         </section>
@@ -97,12 +100,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel service-panel"><p className="eyebrow">Shipping & returns</p><h2>Handled with<br />consideration.</h2><p>Delivery timing and any applicable charge are confirmed before an order is accepted. Unopened items may be eligible for return under the published returns policy.</p></section>
         <ProductReviews productId={product.databaseId ?? "00000000-0000-0000-0000-000000000000"} productName={product.name} summary={reviews} />
         <section className="story-panel related-panel"><p className="eyebrow">Continue exploring</p><h2>Related<br />fragrances.</h2><div className="related-fragrances">{related.map((item) => <Link key={item.slug} href={`/product/${item.slug}`}><span>{item.number}</span><strong>{item.name}</strong><small>{item.atmosphere}</small></Link>)}</div><Link className="button button-outline" href="/layer">Explore this fragrance in Layering Lab</Link></section>
-        {!purchasable && <section className="story-panel notify-panel">
-          <p className="eyebrow">Private notice</p>
-          <h2>{product.status === "sold_out" ? <>Return when<br />it is replenished.</> : product.status === "active" ? <>Know when online<br />purchasing opens.</> : <>Be there when<br />the first drop lands.</>}</h2>
-          <p>{product.status === "sold_out" ? "Leave your email for one considered back-in-stock note." : product.status === "active" ? "The catalogue is active while online checkout remains closed. Leave your email for one considered opening note." : "No false countdown. No invented scarcity. Leave your email for one considered launch note."}</p>
-          <NotifyForm productSlug={product.slug} />
-        </section>}
+        {!purchasable && product.status === "sold_out" && <section className="story-panel notify-panel"><p className="eyebrow">Availability notice</p><h2>Return when<br />it is replenished.</h2><p>Leave your email for one considered back-in-stock note.</p><NotifyForm productSlug={product.slug} /></section>}
       </div>
     </main>
   );

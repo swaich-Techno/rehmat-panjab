@@ -7,7 +7,7 @@ import { products, type ScentId } from "../../lib/products";
 import { buildPortraitName, quizQuestions, scoreQuiz, type QuizAnswers } from "../../lib/quiz";
 import { WhatsAppOrder } from "../components/whatsapp-order";
 
-const refinements: Array<[string, ScentId]> = [["Softer","musk"],["Warmer","vanilla"],["Less sweet","white-oud"],["More floral","oud-rose"],["More woody","white-oud"],["Daytime","musk"],["Evening","saffron"],["Bolder","saffron"],["Simpler","musk"]];
+const refinements: Array<[string, ScentId]> = [["Softer","musk"],["Warmer","vanilla"],["Less sweet","white-oud"],["More floral","nazakat"],["More woody","white-oud"],["Daytime","musk"],["Evening","junoon"],["Bolder","red-musk"],["Simpler","musk"]];
 
 export function ScentQuiz({ settings }: { settings: ExperienceSettings }) {
   const [step, setStep] = useState(-1);

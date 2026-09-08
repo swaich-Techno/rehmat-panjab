@@ -18,7 +18,7 @@ export function LayeringLab({ catalogue, settings, initialSelected }: { catalogu
   const [message, setMessage] = useState("");
 
   const recommendedProducts = useMemo(() => recommendation?.productIds.map((id) => catalogue.find((product) => product.id === id)).filter((product): product is Product => Boolean(product)) ?? [], [catalogue, recommendation]);
-  const whatsappProducts = recommendedProducts.map((product) => ({ name: product.name, slug: product.slug, variants: product.enabledSizes.map((size) => ({ sizeMl: size, pricePaise: product.prices[size] ?? null, currency: "INR" as const })) }));
+  const whatsappProducts = recommendedProducts.map((product) => ({ name: product.name, slug: product.slug, variants: product.enabledSizes.map((size) => ({ id:`preview-${product.slug}-${size}`, sizeMl: size, pricePaise: product.prices[size] ?? null, currency: "INR" as const })) }));
 
   function toggle(id: ScentId) {
     setRecommendation(null); setMessage("");
