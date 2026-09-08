@@ -6,7 +6,7 @@ import { ProductMedia } from "../../components/product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
 import { productRedirects, products as editorialProducts } from "../../../lib/products";
-import { isPurchasable, statusLabel } from "../../../lib/catalog";
+import { isPurchasable, statusLabel, suitabilityLabels } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { getProductReviewSummary } from "../../../lib/reviews";
 import { getStorefrontProduct, getStorefrontProducts } from "../../../lib/storefront";
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) return {};
   return {
     title: product.name,
-    description: `${product.subtitle}. A concentrated perfume oil from Rehmat Panjab.`,
+    description: product.microDescription || `${product.subtitle}. A concentrated perfume oil from Rehmat Panjab.`,
     alternates: { canonical: `/product/${product.slug}` },
     openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.image }] },
   };
@@ -48,6 +48,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     "@type": "Product",
     name: product.name,
     description: product.description,
+    audience: { "@type": "PeopleAudience", suggestedGender: suitabilityLabels[product.suitability] },
     image: [product.image.startsWith("http") ? product.image : `${origin}${product.image}`],
     ...(COMMERCE_ENABLED ? { sku: product.variants[0]?.sku, offers: product.variants.filter((variant) => isPurchasable(product, variant)).map((variant) => ({
       "@type": "Offer",
@@ -73,18 +74,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <h1>{product.name}</h1>
           {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
           <p className="product-lede">{product.atmosphere}</p>
+          {product.microDescription && <p className="product-micro-description">{product.microDescription}</p>}
+          <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
           <div className="character-chips">{product.character.map((word) => <span key={word}>{word}</span>)}</div>
         </section>
         <section className="story-panel light-panel">
           <p className="eyebrow">01 · Light</p>
           <h2>See it before<br />you smell it.</h2>
-          <p>{product.atmosphere}</p>
+          <p>{product.summary || product.atmosphere}</p>
           <div className="light-beam" aria-hidden="true" />
         </section>
         <section className="story-panel product-description-panel">
           <p className="eyebrow">02 · The fragrance</p>
           <h2>A complete<br />portrait.</h2>
           <div className="long-description">{product.description.split(/\n\s*\n/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
+          {product.positioning && <p className="product-positioning"><strong>Positioning</strong> {product.positioning}</p>}
+          {product.notes && <div className="note-groups" aria-label="Fragrance notes"><div><h3>Top</h3><p>{product.notes.top.join(" · ")}</p></div><div><h3>Heart</h3><p>{product.notes.heart.join(" · ")}</p></div><div><h3>Base</h3><p>{product.notes.base.join(" · ")}</p></div></div>}
+          {product.journey && <div className="scent-journey" aria-label="Scent journey"><p><strong>Opening</strong>{product.journey.opening}</p><p><strong>Heart</strong>{product.journey.heart}</p><p><strong>Drydown</strong>{product.journey.drydown}</p></div>}
           <div className="suitable-for"><h3>Suitable for</h3><ul>{product.suitableFor.map((use) => <li key={use}>{use}</li>)}</ul></div>
         </section>
         <section className="story-panel ritual-panel">

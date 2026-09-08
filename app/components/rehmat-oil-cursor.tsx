@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 const IGNORED_TARGETS = "input, textarea, select, option, form, [contenteditable='true'], .razorpay-checkout, [data-native-cursor]";
 const INTERACTIVE_TARGETS = "a, button, [role='button'], .v41-product-card, .product-card";
 
-function createOilRipple(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
+function createOilSpill(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
   const effect = document.createElement("span");
   effect.className = onControl ? "oil-click-effect is-control" : "oil-click-effect";
   effect.style.setProperty("--oil-x", x + "px");
@@ -14,9 +14,17 @@ function createOilRipple(x: number, y: number, onControl: boolean, onDone: (effe
   const ripple = document.createElement("i");
   ripple.className = "oil-click-ripple";
   effect.appendChild(ripple);
+  const spill = document.createElement("i");
+  spill.className = "oil-click-spill";
+  effect.appendChild(spill);
+  for (let index = 0; index < 3; index += 1) {
+    const speck = document.createElement("i");
+    speck.className = `oil-spill-speck oil-spill-speck-${index + 1}`;
+    effect.appendChild(speck);
+  }
 
   document.body.appendChild(effect);
-  const timer = window.setTimeout(() => onDone(effect, timer), 560);
+  const timer = window.setTimeout(() => onDone(effect, timer), 640);
   return { effect, timer };
 }
 
@@ -98,7 +106,7 @@ export function RehmatOilCursor() {
       const target = event.target as HTMLElement;
       if (!cursorEnabled || target.closest(IGNORED_TARGETS)) return;
       cursorRef.current?.classList.add("is-pressed");
-      const created = createOilRipple(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
+      const created = createOilSpill(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
         effect.remove();
         effects.delete(effect);
         timers.delete(timer);
@@ -110,7 +118,8 @@ export function RehmatOilCursor() {
       const el = cursorRef.current;
       el?.classList.remove("is-pressed");
       el?.classList.add("is-rebounding");
-      window.setTimeout(() => el?.classList.remove("is-rebounding"), 180);
+      const timer = window.setTimeout(() => { el?.classList.remove("is-rebounding"); timers.delete(timer); }, 180);
+      timers.add(timer);
     };
     const leave = () => {
       cursorPoint.active = false;

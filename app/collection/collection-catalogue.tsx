@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import { formatMoney } from "../../lib/cart";
-import { firstPrice, statusLabel, type StorefrontProduct } from "../../lib/catalog";
+import { firstPrice, statusLabel, suitabilityLabels, type StorefrontProduct } from "../../lib/catalog";
 import { ProductMedia } from "../components/product-media";
 
 export function CollectionCatalogue({ products }: { products: StorefrontProduct[] }) {
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState("all");
   const [character, setCharacter] = useState("all");
+  const [suitability, setSuitability] = useState("all");
   const [size, setSize] = useState("all");
   const [availability, setAvailability] = useState("all");
   const [maxPrice, setMaxPrice] = useState("");
@@ -22,9 +23,10 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
   const maximum = maxPrice ? Number(maxPrice) * 100 : null;
   const filtered = products.filter((product) => {
       const price = firstPrice(product);
-      if (normalized && ![product.name, product.subtitle, product.scentFamily, ...product.character, ...product.searchAliases].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
+      if (normalized && ![product.name, product.subtitle, product.scentFamily, suitabilityLabels[product.suitability], product.suitabilityNote, ...product.character, ...product.searchAliases].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
       if (family !== "all" && product.scentFamily !== family) return false;
       if (character !== "all" && !product.character.includes(character)) return false;
+      if (suitability !== "all" && product.suitability !== suitability) return false;
       if (size !== "all" && !product.enabledSizes.includes(Number(size))) return false;
       if (availability === "available" && product.status !== "active") return false;
       if (availability === "coming_soon" && product.status !== "coming_soon") return false;
@@ -45,6 +47,7 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
         <div className="catalogue-search"><label htmlFor="catalogue-search">Search</label><input id="catalogue-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, family, or character" /></div>
         <div><label htmlFor="catalogue-family">Family</label><select id="catalogue-family" value={family} onChange={(event) => setFamily(event.target.value)}><option value="all">All families</option>{families.map((value) => <option value={value} key={value}>{value}</option>)}</select></div>
         <div><label htmlFor="catalogue-character">Character</label><select id="catalogue-character" value={character} onChange={(event) => setCharacter(event.target.value)}><option value="all">All characters</option>{characters.map((value) => <option value={value} key={value}>{value}</option>)}</select></div>
+        <div><label htmlFor="catalogue-suitability">Suitability</label><select id="catalogue-suitability" value={suitability} onChange={(event) => setSuitability(event.target.value)}><option value="all">All</option><option value="unisex">Unisex</option><option value="men">Men</option><option value="women">Women</option></select></div>
         <div><label htmlFor="catalogue-size">Size</label><select id="catalogue-size" value={size} onChange={(event) => setSize(event.target.value)}><option value="all">All sizes</option>{sizes.map((value) => <option value={value} key={value}>{value} ml</option>)}</select></div>
         <div><label htmlFor="catalogue-availability">Availability</label><select id="catalogue-availability" value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">All statuses</option><option value="available">Available</option><option value="coming_soon">Launching soon</option><option value="sold_out">Sold out</option></select></div>
         <div><label htmlFor="catalogue-price">Maximum price</label><input id="catalogue-price" type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="₹" /></div>
@@ -62,12 +65,13 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
               <h2><Link href={`/product/${product.slug}`}>{product.name}</Link></h2>
               {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
               <p className="product-subtitle">{product.subtitle}</p><p>{product.atmosphere}</p>
+              <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
               <ul aria-label="Scent character">{product.character.map((word) => <li key={word}>{word}</li>)}</ul>
               <div className="collection-price"><span>{pricedVariant?.promotionalLabel??statusLabel(product.status)}</span><strong>{price === null ? "Contact for price" : <>{pricedVariant?.normalPricePaise&&<del>{formatMoney(pricedVariant.normalPricePaise)}</del>} From {formatMoney(price)} {pricedVariant?.normalPricePaise&&<small>Save {formatMoney(pricedVariant.normalPricePaise-price)}</small>}</>}</strong></div>
               <div className="collection-actions"><span className={`status-dot status-${product.status}`}>{statusLabel(product.status)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
             </div>
           </article>;
-        }) : <div className="catalogue-empty"><div className="empty-drop" aria-hidden="true" /><h2>No oils match.</h2><p>Clear or widen the filters to return to the full collection.</p><button className="button button-outline" type="button" onClick={() => { setQuery(""); setFamily("all"); setCharacter("all"); setSize("all"); setAvailability("all"); setMaxPrice(""); }}>Clear filters</button></div>}
+        }) : <div className="catalogue-empty"><div className="empty-drop" aria-hidden="true" /><h2>No oils match.</h2><p>Clear or widen the filters to return to the full collection.</p><button className="button button-outline" type="button" onClick={() => { setQuery(""); setFamily("all"); setCharacter("all"); setSuitability("all"); setSize("all"); setAvailability("all"); setMaxPrice(""); }}>Clear filters</button></div>}
       </section>
     </>
   );

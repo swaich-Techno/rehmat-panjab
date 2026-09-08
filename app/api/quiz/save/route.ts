@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
-const scentId = z.enum(["musk","vanilla","white-oud","oud-rose","junoon","red-musk","nazakat","zara-candy","deer-musk"]);
+const scentId = z.enum(["musk","vanilla","white-oud","oud-rose","junoon","red-musk","nazakat","zara-candy","deer-musk","afsoon"]);
 const schema = z.object({ answers:z.record(z.string(),z.array(z.string().max(40)).max(4)).refine((value)=>Object.keys(value).length<=12), portrait:z.string().trim().min(2).max(60).regex(/^[A-Za-z][A-Za-z -]+$/), primaryId:scentId, secondaryId:scentId, feelings:z.array(z.string().max(40)).max(4) }).strict();
 const slug=(id:z.infer<typeof scentId>)=>id==="musk"?"musk-rizali":id==="vanilla"?"vanilla-musk":id;
 

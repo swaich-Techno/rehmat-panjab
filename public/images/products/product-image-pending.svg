@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-labelledby="title description">
+  <title id="title">Afsoon product image pending</title>
+  <desc id="description">A neutral dark amber field used until the owner supplies a genuine Afsoon product photograph.</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#8a5635"/>
+      <stop offset="0.52" stop-color="#4f2925"/>
+      <stop offset="1" stop-color="#18221d"/>
+    </radialGradient>
+    <linearGradient id="oil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2cf86" stop-opacity=".74"/>
+      <stop offset=".48" stop-color="#b66b28" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#522516" stop-opacity=".76"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#glow)"/>
+  <ellipse cx="400" cy="790" rx="220" ry="36" fill="#0a1511" opacity=".28"/>
+  <path d="M400 210C376 330 278 426 278 574c0 111 54 205 122 205s122-94 122-205c0-148-98-244-122-364Z" fill="url(#oil)" stroke="#e7c27e" stroke-opacity=".38" stroke-width="2"/>
+  <path d="M359 444c-24 52-32 109-18 166" fill="none" stroke="#fff4d4" stroke-opacity=".34" stroke-linecap="round" stroke-width="14"/>
+  <circle cx="327" cy="670" r="10" fill="#fff3ca" opacity=".22"/>
+</svg>

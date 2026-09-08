@@ -32,7 +32,7 @@ export type LayeringRecommendation = {
   source: "ai" | "fallback";
 };
 
-const weight: Record<ScentId, number> = { musk:1, vanilla:2, "white-oud":2, "oud-rose":3, junoon:4, "red-musk":3, nazakat:2, "zara-candy":2, "deer-musk":2, saffron:4 };
+const weight: Record<ScentId, number> = { musk:1, vanilla:2, "white-oud":2, "oud-rose":3, junoon:4, "red-musk":3, nazakat:2, "zara-candy":2, "deer-musk":2, afsoon:4, saffron:4 };
 const aliases: Record<string, string[]> = {
   sweet: ["sweet", "creamy", "cosy", "vanilla"], musky: ["musky", "soft", "comforting", "intimate"],
   floral: ["floral", "rose", "romantic", "expressive"], woody: ["woody", "oud", "grounded", "sophisticated"],

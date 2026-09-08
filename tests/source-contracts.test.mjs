@@ -7,9 +7,9 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 test("product data stays honest and size-safe", async () => {
   const products = await read("lib/products.ts");
   assert.doesNotMatch(products, /enabledSizes:\s*\[[^\]]*24/);
-  assert.equal((products.match(/enabledSizes:\s*\[6,\s*12\]/g) ?? []).length, 9);
+  assert.equal((products.match(/enabledSizes:\s*\[6,\s*12\]/g) ?? []).length, 10);
   for (const price of [49900,79900,59900,84900,89900,69900,109900,64900,94900]) assert.match(products, new RegExp(String(price)));
-  for (const name of ["Musk Rizali","Vanilla Musk","White Oud","Oud Rose","JUNOON","Red Musk","NAZAKAT","Zara Candy","Deer Musk"]) assert.match(products,new RegExp(name));
+  for (const name of ["Musk Rizali","Vanilla Musk","White Oud","Oud Rose","JUNOON","Red Musk","NAZAKAT","Zara Candy","Deer Musk","AFSOON"]) assert.match(products,new RegExp(name));
   assert.doesNotMatch(products,/name:\s*"Saffron Amber Oud"/);
   assert.doesNotMatch(products, /rating|reviewCount/i);
 });

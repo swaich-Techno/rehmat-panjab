@@ -12,6 +12,8 @@ type CatalogRow = {
   subtitle: string;
   description: string;
   short_description: string;
+  micro_description?: string | null;
+  card_line?: string | null;
   inspiration_line?: string | null;
   search_aliases?: string[] | null;
   scent_family: string | null;
@@ -22,6 +24,11 @@ type CatalogRow = {
   featured: boolean;
   occasions: string[] | null;
   reviews_enabled: boolean;
+  suitability?: "unisex" | "men" | "women" | null;
+  suitability_note?: string | null;
+  positioning?: string | null;
+  notes?: Record<string, unknown> | null;
+  image_alt_text?: string | null;
   created_at: string;
   product_variants?: Array<{
     id: string;
@@ -38,12 +45,20 @@ function fallbackCatalogue(): StorefrontProduct[] {
     ...product,
     databaseId: null,
     description: product.description,
+    microDescription: product.microDescription ?? product.atmosphere,
+    summary: product.summary ?? product.atmosphere,
     inspirationLine: product.inspirationLine,
     searchAliases: product.searchAliases ?? [],
     suitableFor: product.suitableFor,
+    suitability: product.suitability,
+    suitabilityNote: product.suitabilityNote ?? null,
+    positioning: product.positioning ?? null,
+    notes: product.notes ?? null,
+    journey: product.journey ?? null,
     reviewsEnabled: true,
     scentFamily: null,
-    imageAlt: `${product.name} perfume oil bottle in its campaign setting`,
+    imageAlt: product.imageAlt ?? `${product.name} perfume oil bottle in its campaign setting`,
+    imagePending: product.imagePending ?? false,
     featured: false,
     createdAt: null,
     variants: product.enabledSizes.map((size) => ({
@@ -85,6 +100,13 @@ function mapRow(row: CatalogRow): StorefrontProduct {
       lowStockThreshold: inventory?.low_stock_threshold ?? 2,
     };
   }).filter((variant) => variant.enabled).sort((a, b) => a.sizeMl - b.sizeMl);
+  const noteGroups = row.notes;
+  const asStrings = (value: unknown) => Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
+  const notes = noteGroups ? { top: asStrings(noteGroups.top), heart: asStrings(noteGroups.heart), base: asStrings(noteGroups.base) } : editorial?.notes ?? null;
+  const journeyValue = row.scent_profile?.journey;
+  const journey = journeyValue && typeof journeyValue === "object" && !Array.isArray(journeyValue)
+    ? journeyValue as { opening: string; heart: string; drydown: string }
+    : editorial?.journey ?? null;
 
   return {
     id: editorial?.id ?? row.slug,
@@ -93,17 +115,25 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     name: row.name,
     slug: row.slug,
     subtitle: row.subtitle,
-    atmosphere: row.short_description || row.description || editorial?.atmosphere || "",
+    atmosphere: row.card_line || row.short_description || row.description || editorial?.atmosphere || "",
+    microDescription: row.micro_description || editorial?.microDescription || row.short_description || "",
+    summary: row.short_description || editorial?.summary || row.description || "",
     description: row.description || row.short_description || editorial?.atmosphere || "",
     inspirationLine: row.inspiration_line || editorial?.inspirationLine,
     searchAliases: Array.isArray(row.search_aliases) ? row.search_aliases : editorial?.searchAliases ?? [],
     suitableFor: Array.isArray(row.occasions) ? row.occasions : editorial?.suitableFor ?? [],
+    suitability: row.suitability ?? editorial?.suitability ?? "unisex",
+    suitabilityNote: row.suitability_note ?? editorial?.suitabilityNote ?? null,
+    positioning: row.positioning ?? editorial?.positioning ?? null,
+    notes,
+    journey,
     reviewsEnabled: row.reviews_enabled,
     scentFamily: row.scent_family,
     character,
     color: editorial?.color ?? "#c7b58f",
     image: publicImage(row.campaign_image_path || row.image_path, editorial?.image ?? "/images/hero/rehmat-panjab-homepage-hero.webp"),
-    imageAlt: `${row.name} perfume oil bottle in its campaign setting`,
+    imageAlt: row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil bottle in its campaign setting`,
+    imagePending: row.slug === "afsoon" && (row.campaign_image_path || row.image_path) === "/images/products/product-image-pending.svg",
     status: row.status,
     featured: row.featured,
     createdAt: row.created_at,
@@ -117,7 +147,7 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,inspiration_line,search_aliases,scent_family,status,scent_profile,occasions,reviews_enabled,image_path,campaign_image_path,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");

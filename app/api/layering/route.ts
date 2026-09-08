@@ -9,7 +9,7 @@ import { getStorefrontProducts } from "../../../lib/storefront";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
-const scentId = z.enum(["musk","vanilla","white-oud","oud-rose","junoon","red-musk","nazakat","zara-candy","deer-musk"]);
+const scentId = z.enum(["musk","vanilla","white-oud","oud-rose","junoon","red-musk","nazakat","zara-candy","deer-musk","afsoon"]);
 const requestSchema = z.object({
   mode: z.enum(["guide", "build"]),
   selectedIds: z.array(scentId).max(5).default([]),

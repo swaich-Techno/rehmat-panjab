@@ -10,7 +10,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const { supabase, role } = await requireAdmin();
   if (role !== "super_admin") return <main id="main-content" className="admin-page"><h1>Super-admin access required.</h1></main>;
   const [{ data }, { data: variantRows }] = await Promise.all([
-    supabase.from("products").select("id,product_number,name,slug,status,subtitle,short_description,description,scent_family,scent_profile,occasions,reviews_enabled,image_path,campaign_image_path,featured,seo_title,seo_description,og_image_path").eq("id", id).maybeSingle(),
+    supabase.from("products").select("id,product_number,name,slug,status,subtitle,card_line,micro_description,short_description,description,scent_family,scent_profile,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,image_display_order,featured,seo_title,seo_description,og_image_path").eq("id", id).maybeSingle(),
     supabase.from("product_variants").select("id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold)").eq("product_id", id).order("size_ml"),
   ]);
   if (!data) notFound();

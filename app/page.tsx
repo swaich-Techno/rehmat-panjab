@@ -14,7 +14,7 @@ export default async function Home() {
         <div className="v41-section-heading">
           <div>
             <p className="eyebrow light">Act 02 · Oil / Collection</p>
-            <h2 id="oil-collection-heading">Nine oils.<br /><em>Worn close.</em></h2>
+            <h2 id="oil-collection-heading">Your Oil,<br /><em>Your Atmosphere</em></h2>
           </div>
           <div className="v41-section-aside">
             <p>Each Rehmat carries its own atmosphere inside the same intimate ritual.</p>
