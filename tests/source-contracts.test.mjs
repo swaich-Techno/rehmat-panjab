@@ -16,6 +16,8 @@ test("product data stays honest and size-safe", async () => {
 
 test("catalogue migration archives the retired oil and preserves inventory",async()=>{const migration=await read("supabase/migrations/202609070002_catalogue_promotions_readiness.sql");assert.match(migration,/slug='saffron-amber-oud'/);assert.match(migration,/status='archived'/);assert.match(migration,/search_aliases/);assert.match(migration,/on conflict\(variant_id\) do nothing/);assert.doesNotMatch(migration,/set quantity\s*=/i);});
 
+test("legacy inspiration slugs redirect on the product route",async()=>{const page=await read("app/product/[slug]/page.tsx");assert.match(page,/productRedirects\[slug\].*permanentRedirect/s);assert.match(page,/export default async function ProductPage[\s\S]*productRedirects\[slug\]/);});
+
 test("promotions stay private and quoted totals are server authoritative",async()=>{const [migration,quote,createOrder,admin]=await Promise.all([read("supabase/migrations/202609070002_catalogue_promotions_readiness.sql"),read("lib/quote.ts"),read("app/api/create-order/route.ts"),read("app/api/admin/promotions/route.ts")]);assert.match(migration,/coupons_code_ci_unique/);assert.match(migration,/coupons super admin/);assert.match(quote,/price_paise/);assert.match(quote,/Math\.max\(0,subtotalPaise-discountPaise\)/);assert.match(createOrder,/calculateOrderQuote/);assert.match(admin,/role!=="super_admin"/);});
 
 test("private routes are noindex and admin access is server-side", async () => {

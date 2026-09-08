@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) notFound();
   const [reviews, catalogue, experience] = await Promise.all([
