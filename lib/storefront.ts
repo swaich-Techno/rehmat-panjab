@@ -31,6 +31,7 @@ type CatalogRow = {
   notes?: Record<string, unknown> | null;
   image_alt_text?: string | null;
   created_at: string;
+  product_media?: Array<{ role: "product" | "card" | "hero" | "mood" | "social"; storage_path: string; alt_text: string; is_generated: boolean; sort_order: number }>;
   product_variants?: Array<{
     id: string;
     size_ml: number | string;
@@ -95,6 +96,9 @@ function publicImage(path: string | null, fallback: string) {
 function mapRow(row: CatalogRow): StorefrontProduct {
   const editorial = editorialProducts.find((product) => product.slug === row.slug);
   const media = mediaForSlug(row.slug);
+  const assigned=(role:"product"|"card"|"hero"|"mood"|"social")=>(row.product_media??[]).filter(item=>item.role===role).sort((a,b)=>a.sort_order-b.sort_order)[0];
+  const genuine=assigned("product"),card=assigned("card"),hero=assigned("hero"),mood=assigned("mood"),social=assigned("social");
+  const primary=genuine??card;
   const profileCharacter = row.scent_profile?.character;
   const character = Array.isArray(profileCharacter) && profileCharacter.every((item) => typeof item === "string")
     ? profileCharacter
@@ -143,15 +147,15 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     scentFamily: row.scent_family,
     character,
     color: editorial?.color ?? "#c7b58f",
-    image: media?.card ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
-    imageAlt: media?.alt ?? (row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil by Rehmat Panjab`),
-    imageKind: media ? "campaign" : row.image_path?.includes("product-image-pending") ? "placeholder" : "product",
-    heroImage: media?.hero ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
-    moodImage: media?.mood ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/images/products/product-image-pending.svg"),
-    socialImage: media?.social ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/og.png"),
+    image: primary ? publicImage(primary.storage_path, "/images/products/product-image-pending.svg") : media?.card ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
+    imageAlt: primary?.alt_text ?? media?.alt ?? (row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil by Rehmat Panjab`),
+    imageKind: genuine ? "product" : primary?.is_generated || media ? "campaign" : row.image_path?.includes("product-image-pending") ? "placeholder" : "product",
+    heroImage: genuine ? publicImage(genuine.storage_path, "/images/products/product-image-pending.svg") : hero ? publicImage(hero.storage_path, "/images/products/product-image-pending.svg") : media?.hero ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
+    moodImage: mood ? publicImage(mood.storage_path, "/images/products/product-image-pending.svg") : media?.mood ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/images/products/product-image-pending.svg"),
+    socialImage: social ? publicImage(social.storage_path, "/og.png") : media?.social ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/og.png"),
     imagePending: !media && row.image_path === "/images/products/product-image-pending.svg",
-    campaignImage: media?.mood ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null),
-    campaignImageAlt: media?.alt ?? editorial?.campaignImageAlt ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? `Editorial campaign artwork for ${row.name}; not a product photograph` : null),
+    campaignImage: mood ? publicImage(mood.storage_path, "") : media?.mood ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null),
+    campaignImageAlt: mood?.alt_text ?? media?.alt ?? editorial?.campaignImageAlt ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? `Editorial campaign artwork for ${row.name}; not a product photograph` : null),
     status: row.status,
     featured: row.featured,
     createdAt: row.created_at,
@@ -165,7 +169,7 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_media(role,storage_path,alt_text,is_generated,sort_order),product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");
