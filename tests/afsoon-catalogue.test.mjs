@@ -43,6 +43,7 @@ test("owner-confirmed inventory and availability stay variant-authoritative", as
   assert.match(quiz, /grounded in the active Rehmat fragrance collection/);
   assert.match(styles, /\.cart-layer \{[^}]*overflow: hidden/);
   assert.match(styles, /\.cart-layer:not\(\.is-open\) \{ display: none; \}/);
+  assert.match(styles, /\.collection-media-link \.product-media \{ width: 100%; min-height: 0; \}/);
 });
 
 test("suitability is backend-managed, searchable, filterable and visible", async () => {
