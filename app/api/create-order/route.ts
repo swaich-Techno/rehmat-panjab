@@ -46,26 +46,29 @@ export async function POST(request: Request) {
   const variantIds = [...quantities.keys()];
   const { data: variants, error: variantError } = await supabase
     .from("product_variants")
-    .select("id, product_id, price_paise, enabled")
+    .select("id, product_id, price_paise, enabled, bottle_id")
     .in("id", variantIds);
   if (variantError) return NextResponse.json({ message: "Your cart could not be checked." }, { status: 500 });
 
   const productIds = [...new Set((variants ?? []).map((variant) => variant.product_id))];
-  const [{ data: products, error: productError }, { data: inventory, error: inventoryError }] = await Promise.all([
+  const bottleIds=[...new Set((variants??[]).map(variant=>variant.bottle_id).filter(Boolean))] as string[];
+  const [{ data: products, error: productError }, { data: inventory, error: inventoryError },{data:bottles,error:bottleError}] = await Promise.all([
     supabase.from("products").select("id, status").in("id", productIds),
     supabase.from("inventory").select("variant_id, quantity, reserved").in("variant_id", variantIds),
+    supabase.from("bottles").select("id").in("id",bottleIds).eq("status","active").is("archived_at",null),
   ]);
-  if (productError || inventoryError) return NextResponse.json({ message: "Your cart could not be checked." }, { status: 500 });
+  if (productError || inventoryError || bottleError) return NextResponse.json({ message: "Your cart could not be checked." }, { status: 500 });
 
   const variantById = new Map((variants ?? []).map((variant) => [variant.id, variant]));
   const statusByProduct = new Map((products ?? []).map((product) => [product.id, product.status]));
   const inventoryByVariant = new Map((inventory ?? []).map((row) => [row.variant_id, row]));
+  const activeBottleIds=new Set((bottles??[]).map(bottle=>bottle.id));
   let amount = 0;
 
   for (const [variantId, quantity] of quantities) {
     const variant = variantById.get(variantId);
     const stock = inventoryByVariant.get(variantId);
-    if (!variant || !variant.enabled || statusByProduct.get(variant.product_id) !== "active" || variant.price_paise === null) {
+    if (!variant || !variant.enabled || !variant.bottle_id || !activeBottleIds.has(variant.bottle_id) || statusByProduct.get(variant.product_id) !== "active" || variant.price_paise === null) {
       return NextResponse.json({ message: "An item in your cart is no longer available." }, { status: 409 });
     }
     if (!Number.isInteger(variant.price_paise) || variant.price_paise < 0 || !stock || stock.quantity - stock.reserved < quantity) {

@@ -120,7 +120,7 @@ function mapRow(row: CatalogRow): StorefrontProduct {
       lowStockThreshold: inventory?.low_stock_threshold ?? 2,
       bottle,
     };
-  }).filter((variant) => variant.enabled).sort((a, b) => a.sizeMl - b.sizeMl);
+  }).filter((variant) => variant.enabled && variant.bottle).sort((a, b) => a.sizeMl - b.sizeMl);
   const noteGroups = row.notes;
   const asStrings = (value: unknown) => Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
   const notes = noteGroups ? { top: asStrings(noteGroups.top), heart: asStrings(noteGroups.heart), base: asStrings(noteGroups.base) } : editorial?.notes ?? null;
