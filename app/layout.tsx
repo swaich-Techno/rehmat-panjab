@@ -5,6 +5,7 @@ import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import "./globals.css";
 import { getSiteUrl } from "../lib/site-url";
+import { RehmatGuide } from "./components/rehmat-guide";
 
 export async function generateMetadata(): Promise<Metadata> {
   const origin = getSiteUrl();
@@ -32,6 +33,7 @@ export default function RootLayout({
           <SiteHeader />
           {children}
           <SiteFooter />
+          <RehmatGuide />
         </CartProvider>
       </body>
     </html>

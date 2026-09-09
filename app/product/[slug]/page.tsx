@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: product.name,
     description: product.microDescription || `${product.subtitle}. A concentrated perfume oil from Rehmat Panjab.`,
     alternates: { canonical: `/product/${product.slug}` },
-    openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.image }] },
+    openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.socialImage, width: 1200, height: 630, alt: product.imageAlt }] },
   };
 }
 
@@ -50,7 +50,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     name: product.name,
     description: product.description,
     audience: { "@type": "PeopleAudience", suggestedGender: suitabilityLabels[product.suitability] },
-    image: [product.image.startsWith("http") ? product.image : `${origin}${product.image}`],
+    image: [product.socialImage.startsWith("http") ? product.socialImage : `${origin}${product.socialImage}`],
     ...(COMMERCE_ENABLED ? { sku: product.variants[0]?.sku, offers: product.variants.filter((variant) => isPurchasable(product, variant)).map((variant) => ({
       "@type": "Offer",
       url: `${origin}/product/${product.slug}`,
@@ -66,7 +66,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <main id="main-content" className={`product-page scent-page-${product.id}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema).replace(/</g, "\\u003c") }} />
       <aside className="product-sticky">
-        <ProductMedia product={product} priority />
+        <ProductMedia product={product} priority role="hero" />
         <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · 6 ml ritual</p>
       </aside>
       <div className="product-story">

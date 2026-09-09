@@ -15,6 +15,17 @@ export type ExperienceSettings = {
   whatsappNumber: string;
   whatsappDefaultMessage: string;
   whatsappNotice: string;
+  guideEnabled: boolean;
+  guideGreeting: string;
+  guidePrompts: string[];
+  guideAllowedProducts: string[];
+  guideExcludedProducts: string[];
+  guideSafetyResponse: string;
+  guideEscalationMessage: string;
+  guideMaxRecommendations: number;
+  guideProvider: string;
+  guideDeterministicFallback: boolean;
+  guideRateLimit: number;
 };
 
 export const defaultExperienceSettings: ExperienceSettings = {
@@ -40,6 +51,17 @@ export const defaultExperienceSettings: ExperienceSettings = {
   whatsappNumber: "917009464475",
   whatsappDefaultMessage: "Please confirm availability, delivery charges and payment instructions.",
   whatsappNotice: "This opens a manually confirmed order request. It does not place, reserve or pay for an order.",
+  guideEnabled: true,
+  guideGreeting: "Sat Sri Akal. I’m your Rehmat Guide. Tell me what you would like your fragrance to feel like.",
+  guidePrompts: ["I want something soft for work.","Show me something under ₹700.","What can I layer with Musk Rizali?","Compare JUNOON and AFSOON."],
+  guideAllowedProducts: [],
+  guideExcludedProducts: ["saffron-amber-oud"],
+  guideSafetyResponse: "I can offer fragrance guidance, but not medical or allergy guarantees.",
+  guideEscalationMessage: "For help with an order, please continue on WhatsApp.",
+  guideMaxRecommendations: 3,
+  guideProvider: "deterministic",
+  guideDeterministicFallback: true,
+  guideRateLimit: 12,
 };
 
 export async function getExperienceSettings(): Promise<ExperienceSettings> {
@@ -63,6 +85,17 @@ export async function getExperienceSettings(): Promise<ExperienceSettings> {
       whatsappNumber: String(data.whatsapp_number ?? defaultExperienceSettings.whatsappNumber).replace(/\D/g, "").slice(0, 15),
       whatsappDefaultMessage: String(data.whatsapp_default_message ?? defaultExperienceSettings.whatsappDefaultMessage),
       whatsappNotice: String(data.whatsapp_notice ?? defaultExperienceSettings.whatsappNotice),
+      guideEnabled: data.guide_enabled === undefined ? true : Boolean(data.guide_enabled),
+      guideGreeting: String(data.guide_greeting ?? defaultExperienceSettings.guideGreeting),
+      guidePrompts: Array.isArray(data.guide_prompts) ? data.guide_prompts : defaultExperienceSettings.guidePrompts,
+      guideAllowedProducts: Array.isArray(data.guide_allowed_products) ? data.guide_allowed_products : [],
+      guideExcludedProducts: Array.isArray(data.guide_excluded_products) ? data.guide_excluded_products : defaultExperienceSettings.guideExcludedProducts,
+      guideSafetyResponse: String(data.guide_safety_response ?? defaultExperienceSettings.guideSafetyResponse),
+      guideEscalationMessage: String(data.guide_escalation_message ?? defaultExperienceSettings.guideEscalationMessage),
+      guideMaxRecommendations: Math.max(1,Math.min(5,Number(data.guide_max_recommendations??3))),
+      guideProvider: String(data.guide_provider??"deterministic"),
+      guideDeterministicFallback: data.guide_deterministic_fallback === undefined ? true : Boolean(data.guide_deterministic_fallback),
+      guideRateLimit: Math.max(1,Math.min(60,Number(data.guide_rate_limit??12))),
     };
   } catch {
     return defaultExperienceSettings;

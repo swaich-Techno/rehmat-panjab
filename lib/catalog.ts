@@ -40,6 +40,10 @@ export type StorefrontProduct = {
   color: string;
   image: string;
   imageAlt: string;
+  imageKind: "product" | "campaign" | "placeholder";
+  heroImage: string;
+  moodImage: string;
+  socialImage: string;
   imagePending: boolean;
   campaignImage: string | null;
   campaignImageAlt: string | null;

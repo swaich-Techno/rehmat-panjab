@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 import { products as editorialProducts } from "./products";
 import type { CatalogStatus, StorefrontProduct } from "./catalog";
 import { createSupabaseAdminClient } from "./supabase/admin";
+import { mediaForSlug } from "./product-media-manifest";
 
 type CatalogRow = {
   id: string;
@@ -41,7 +42,9 @@ type CatalogRow = {
 };
 
 function fallbackCatalogue(): StorefrontProduct[] {
-  return editorialProducts.map((product) => ({
+  return editorialProducts.map((product) => {
+    const media = mediaForSlug(product.slug);
+    return ({
     ...product,
     databaseId: null,
     description: product.description,
@@ -57,7 +60,12 @@ function fallbackCatalogue(): StorefrontProduct[] {
     journey: product.journey ?? null,
     reviewsEnabled: true,
     scentFamily: null,
-    imageAlt: product.imageAlt ?? `${product.name} perfume oil bottle in its campaign setting`,
+    image: media?.card ?? product.image,
+    imageAlt: media?.alt ?? product.imageAlt ?? `${product.name} perfume oil by Rehmat Panjab`,
+    imageKind: media ? "campaign" as const : product.imagePending ? "placeholder" as const : "product" as const,
+    heroImage: media?.hero ?? product.image,
+    moodImage: media?.mood ?? product.image,
+    socialImage: media?.social ?? product.image,
     imagePending: product.imagePending ?? false,
     campaignImage: product.campaignImage ?? null,
     campaignImageAlt: product.campaignImageAlt ?? null,
@@ -73,7 +81,8 @@ function fallbackCatalogue(): StorefrontProduct[] {
       availableQuantity: 0,
       lowStockThreshold: 2,
     })),
-  }));
+    });
+  });
 }
 
 function publicImage(path: string | null, fallback: string) {
@@ -85,6 +94,7 @@ function publicImage(path: string | null, fallback: string) {
 
 function mapRow(row: CatalogRow): StorefrontProduct {
   const editorial = editorialProducts.find((product) => product.slug === row.slug);
+  const media = mediaForSlug(row.slug);
   const profileCharacter = row.scent_profile?.character;
   const character = Array.isArray(profileCharacter) && profileCharacter.every((item) => typeof item === "string")
     ? profileCharacter
@@ -133,11 +143,15 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     scentFamily: row.scent_family,
     character,
     color: editorial?.color ?? "#c7b58f",
-    image: publicImage(row.image_path, editorial?.image ?? "/images/hero/rehmat-panjab-homepage-hero.webp"),
-    imageAlt: row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil bottle in its campaign setting`,
-    imagePending: row.slug === "afsoon" && row.image_path === "/images/products/product-image-pending.svg",
-    campaignImage: row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null,
-    campaignImageAlt: editorial?.campaignImageAlt ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? `Editorial campaign artwork for ${row.name}; not a product photograph` : null),
+    image: media?.card ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
+    imageAlt: media?.alt ?? (row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil by Rehmat Panjab`),
+    imageKind: media ? "campaign" : row.image_path?.includes("product-image-pending") ? "placeholder" : "product",
+    heroImage: media?.hero ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
+    moodImage: media?.mood ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/images/products/product-image-pending.svg"),
+    socialImage: media?.social ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/og.png"),
+    imagePending: !media && row.image_path === "/images/products/product-image-pending.svg",
+    campaignImage: media?.mood ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null),
+    campaignImageAlt: media?.alt ?? editorial?.campaignImageAlt ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? `Editorial campaign artwork for ${row.name}; not a product photograph` : null),
     status: row.status,
     featured: row.featured,
     createdAt: row.created_at,

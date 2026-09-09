@@ -8,8 +8,7 @@ import { useCart } from "./cart-provider";
 
 const nav = [
   ["Fragrances", "/collection"],
-  ["Layering Lab", "/layer"],
-  ["Name Your Rehmat", "/find-your-scent"],
+  ["Ask Rehmat Guide", "#rehmat-guide"],
   ["Our Story", "/discover"],
 ];
 
@@ -31,7 +30,7 @@ export function SiteHeader() {
       </Link>
       <nav className={open ? "primary-nav is-open" : "primary-nav"} aria-label="Primary">
         {nav.map(([label, href]) => (
-          <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} data-cursor="OPEN" onClick={() => setOpen(false)}>
+          <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} data-cursor="OPEN" onClick={(event) => { setOpen(false); if(href==="#rehmat-guide"){event.preventDefault();window.dispatchEvent(new Event("open-rehmat-guide"));} }}>
             {label}
           </Link>
         ))}
