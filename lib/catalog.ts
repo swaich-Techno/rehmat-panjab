@@ -13,6 +13,7 @@ export type CatalogVariant = {
   enabled: boolean;
   availableQuantity: number;
   lowStockThreshold: number;
+  bottle?: null | { id:string; name:string; publicLabel:string|null; shortDescription:string|null; photo:string|null; thumbnail:string|null; altText:string|null; applicatorType:string|null; displayOrder:number };
 };
 
 export type StorefrontProduct = {

@@ -7,6 +7,7 @@ import { createRazorpayOrderToken } from "../../../lib/razorpay";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { calculateOrderQuote } from "../../../lib/quote";
+import { getStoreSettings, policiesComplete } from "../../../lib/store-settings";
 
 const requestSchema = z.object({
   lines: z.array(z.object({
@@ -23,6 +24,7 @@ function errorStatus(error: unknown) {
 
 export async function POST(request: Request) {
   if (!COMMERCE_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
+  if (!policiesComplete(await getStoreSettings())) return NextResponse.json({ message: "Checkout is not ready: required merchant and policy settings are incomplete." }, { status: 503 });
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Your cart could not be validated." }, { status: 400 });

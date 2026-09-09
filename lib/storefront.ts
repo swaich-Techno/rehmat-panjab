@@ -38,6 +38,7 @@ type CatalogRow = {
     sku: string;
     price_paise: number | null;
     enabled: boolean;
+    bottles?: { id:string; name:string; public_label:string|null; short_description:string|null; photo_path:string|null; thumbnail_path:string|null; alt_text:string|null; applicator_type:string|null; status:string; display_order:number } | Array<{ id:string; name:string; public_label:string|null; short_description:string|null; photo_path:string|null; thumbnail_path:string|null; alt_text:string|null; applicator_type:string|null; status:string; display_order:number }> | null;
     inventory?: { quantity: number; reserved: number; low_stock_threshold: number } | Array<{ quantity: number; reserved: number; low_stock_threshold: number }> | null;
   }>;
 };
@@ -81,6 +82,7 @@ function fallbackCatalogue(): StorefrontProduct[] {
       enabled: false,
       availableQuantity: 0,
       lowStockThreshold: 2,
+      bottle: null,
     })),
     });
   });
@@ -105,6 +107,8 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     : editorial?.character ?? [];
   const variants = (row.product_variants ?? []).map((variant) => {
     const inventory = Array.isArray(variant.inventory) ? variant.inventory[0] : variant.inventory;
+    const bottleValue=Array.isArray(variant.bottles)?variant.bottles[0]:variant.bottles;
+    const bottle=bottleValue?.status==="active"?{id:bottleValue.id,name:bottleValue.name,publicLabel:bottleValue.public_label,shortDescription:bottleValue.short_description,photo:bottleValue.photo_path?publicImage(bottleValue.photo_path,""):null,thumbnail:bottleValue.thumbnail_path?publicImage(bottleValue.thumbnail_path,""):null,altText:bottleValue.alt_text,applicatorType:bottleValue.applicator_type,displayOrder:bottleValue.display_order}:null;
     return {
       id: variant.id,
       sizeMl: Number(variant.size_ml),
@@ -114,6 +118,7 @@ function mapRow(row: CatalogRow): StorefrontProduct {
       enabled: variant.enabled,
       availableQuantity: Math.max(0, (inventory?.quantity ?? 0) - (inventory?.reserved ?? 0)),
       lowStockThreshold: inventory?.low_stock_threshold ?? 2,
+      bottle,
     };
   }).filter((variant) => variant.enabled).sort((a, b) => a.sizeMl - b.sizeMl);
   const noteGroups = row.notes;
@@ -169,7 +174,7 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_media(role,storage_path,alt_text,is_generated,sort_order),product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_media(role,storage_path,alt_text,is_generated,sort_order),product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold),bottles(id,name,public_label,short_description,photo_path,thumbnail_path,alt_text,applicator_type,status,display_order))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");

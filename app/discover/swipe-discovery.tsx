@@ -18,7 +18,7 @@ export function SwipeDiscovery() {
 
   return (
     <section className="discover-page">
-      <header><p className="eyebrow">Swipe discovery · {String((index % products.length) + 1).padStart(2, "0")} / 05</p><h1>Meet the five<br />by instinct.</h1><p>Swipe or use the controls. Saved choices stay in this session until you sign in.</p></header>
+      <header><p className="eyebrow">Browse by instinct · {String((index % products.length) + 1).padStart(2, "0")} / {String(products.length).padStart(2,"0")}</p><h1>Follow an<br />atmosphere.</h1><p>Swipe or use the controls. Saved choices stay in this session until you sign in.</p></header>
       <div className={`discovery-card scent-${product.id}`} onPointerDown={(event) => { startX.current = event.clientX; }} onPointerUp={(event) => { if (startX.current === null) return; const delta = event.clientX - startX.current; if (Math.abs(delta) > 70) next(delta > 0); startX.current = null; }}>
         <Image src={product.image} alt={`${product.name} campaign`} fill priority unoptimized sizes="(max-width: 700px) 92vw, 520px" />
         <div className="discovery-shade" />

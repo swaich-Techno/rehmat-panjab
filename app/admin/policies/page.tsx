@@ -1,0 +1,6 @@
+import type {SupabaseClient} from "@supabase/supabase-js";
+import {requireAdmin} from "../../../lib/supabase/auth";
+import {defaultStoreSettings,type StoreSettings} from "../../../lib/store-settings-schema";
+import {PolicySettingsForm} from "./policy-settings-form";
+export const dynamic="force-dynamic";
+export default async function Page(){const {supabase,role}=await requireAdmin();if(role!=="super_admin")return <main id="main-content" className="admin-page"><h1>Super-admin access required.</h1></main>;const {data}=await (supabase as unknown as SupabaseClient).from("store_policy_settings").select("merchant,shipping,cancellation,returns,privacy,terms,publish_status,admin_notes").eq("id",true).maybeSingle();const initial=data?{merchant:data.merchant||{},shipping:data.shipping||{},cancellation:data.cancellation||{},returns:data.returns||{},privacy:data.privacy||{},terms:data.terms||{}} as StoreSettings:defaultStoreSettings;return <main id="main-content" className="admin-page"><p className="eyebrow">Private super-admin settings</p><h1>Policies.</h1><p>Incomplete sections stay unpublished. Enter only owner-approved facts; no promise is inferred from a blank field.</p><PolicySettingsForm initial={initial} published={data?.publish_status==="published"} notes={String(data?.admin_notes||"")}/></main>}

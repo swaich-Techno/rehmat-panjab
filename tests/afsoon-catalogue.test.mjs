@@ -62,16 +62,16 @@ test("suitability is backend-managed, searchable, filterable and visible", async
   assert.match(productPage, /suggestedGender/);
 });
 
-test("permanent collection wording and restrained spill cursor are wired", async () => {
+test("permanent collection wording and restrained oil ripple cursor are wired", async () => {
   const [home, collection, layout, cursor, styles] = await Promise.all([
     read("app/page.tsx"), read("app/collection/page.tsx"), read("app/layout.tsx"),
     read("app/components/rehmat-oil-cursor.tsx"), read("app/globals.css"),
   ]);
   for (const source of [home, collection, layout]) assert.match(source, /Your Oil,.*Your Atmosphere/s);
   assert.doesNotMatch(`${home}${collection}${layout}`, /Nine oils\. Nine atmospheres\./);
-  assert.match(cursor, /createOilSpill/);
-  assert.equal((cursor.match(/oil-spill-speck-/g) ?? []).length >= 1, true);
+  assert.match(cursor, /createOilRipple/);
+  assert.doesNotMatch(cursor, /oil-spill-speck-|oil-click-spill/);
   assert.match(cursor, /timers\.forEach/);
-  assert.match(styles, /oil-spill-absorb 620ms/);
+  assert.match(styles, /oil-local-ripple 480ms/);
   assert.doesNotMatch(cursor, /oil-cursor-split/);
 });

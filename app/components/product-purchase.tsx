@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatMoney } from "../../lib/cart";
 import { isPurchasable, type StorefrontProduct } from "../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../lib/commerce";
@@ -21,7 +22,7 @@ export function ProductPurchase({ product, whatsappSettings }: { product: Storef
   return (
     <div className="product-purchase">
       <fieldset>
-        <legend>Choose bottle size</legend>
+        <legend>Available formats</legend>
         <div className="variant-options">
           {product.variants.map((variant) => (
             <button
@@ -31,8 +32,11 @@ export function ProductPurchase({ product, whatsappSettings }: { product: Storef
               aria-pressed={variant.id === selected?.id}
               onClick={() => { setSelectedId(variant.id); setQuantity(1); }}
             >
-              <span>{variant.sizeMl} ml</span>
+              {variant.bottle?.thumbnail||variant.bottle?.photo?<Image src={variant.bottle.thumbnail||variant.bottle.photo||""} width={72} height={90} alt={variant.bottle.altText||`${variant.sizeMl} ml bottle format`}/>:<i className="format-image-pending" aria-hidden="true"/>}
+              <span>{variant.bottle?.publicLabel||`${variant.sizeMl} ml`}</span>
               <small>{variant.pricePaise === null ? "Contact for price" : <>{variant.normalPricePaise&&<del>{formatMoney(variant.normalPricePaise,variant.currency)}</del>} {formatMoney(variant.pricePaise, variant.currency)}</>}</small>
+              {variant.bottle?.applicatorType&&<small>{variant.bottle.applicatorType}</small>}
+              {variant.bottle?.shortDescription&&<small>{variant.bottle.shortDescription}</small>}
             </button>
           ))}
         </div>

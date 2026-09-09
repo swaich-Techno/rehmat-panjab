@@ -11,6 +11,7 @@ const variantSchema = z.object({
   priceRupees: optionalPrice,
   quantity: z.coerce.number().int().min(0).max(1_000_000),
   lowStockThreshold: z.coerce.number().int().min(0).max(1_000_000),
+  bottleId:z.preprocess(value=>value===""?null:value,z.uuid().nullable()),
   enabled: z.boolean(),
 }).refine((value) => !value.enabled || value.priceRupees !== null, { message: "An enabled variant needs a price.", path: ["priceRupees"] });
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Check the variant fields." }, { status: 400 });
   const value = parsed.data;
   const pricePaise = value.priceRupees === null ? null : Math.round(value.priceRupees * 100);
-  const payload = { product_id: value.productId, size_ml: value.sizeMl, sku: value.sku.toUpperCase(), price_paise: pricePaise, enabled: value.enabled, updated_at: new Date().toISOString() };
+  const payload = { product_id: value.productId, size_ml: value.sizeMl, sku: value.sku.toUpperCase(), price_paise: pricePaise,bottle_id:value.bottleId, enabled: value.enabled, updated_at: new Date().toISOString() };
   let variantId = value.id;
   let reserved = 0;
 

@@ -59,7 +59,7 @@ export function HomepageCampaign() {
         <div className="campaign-intro">
           <p>A quiet fragrance ritual from Panjab. Concentrated oils that settle slowly and stay close.</p>
           <div className="button-row">
-            <Link className="button button-dark" href="/find-your-scent" data-cursor="DROP">Find your scent</Link>
+            <button className="button button-dark" type="button" onClick={()=>window.dispatchEvent(new Event("open-rehmat-guide"))}>Ask Rehmat Guide</button>
             <Link className="text-link" href="/collection" data-cursor="VIEW">View the collection <span aria-hidden="true">↗</span></Link>
           </div>
         </div>

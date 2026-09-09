@@ -2,29 +2,19 @@
 
 import { useEffect, useRef } from "react";
 
-const IGNORED_TARGETS = "input, textarea, select, option, form, [contenteditable='true'], .razorpay-checkout, [data-native-cursor]";
+const IGNORED_TARGETS = "input, textarea, select, option, form, p, li, dd, dt, [contenteditable='true'], [data-selectable], .razorpay-checkout, [data-native-cursor]";
 const INTERACTIVE_TARGETS = "a, button, [role='button'], .v41-product-card, .product-card";
 
-function createOilSpill(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
+function createOilRipple(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
   const effect = document.createElement("span");
   effect.className = onControl ? "oil-click-effect is-control" : "oil-click-effect";
   effect.style.setProperty("--oil-x", x + "px");
   effect.style.setProperty("--oil-y", y + "px");
 
-  const ripple = document.createElement("i");
-  ripple.className = "oil-click-ripple";
-  effect.appendChild(ripple);
-  const spill = document.createElement("i");
-  spill.className = "oil-click-spill";
-  effect.appendChild(spill);
-  for (let index = 0; index < 3; index += 1) {
-    const speck = document.createElement("i");
-    speck.className = `oil-spill-speck oil-spill-speck-${index + 1}`;
-    effect.appendChild(speck);
-  }
+  const ripple = document.createElement("i"); ripple.className = "oil-click-ripple"; effect.appendChild(ripple);
 
   document.body.appendChild(effect);
-  const timer = window.setTimeout(() => onDone(effect, timer), 640);
+  const timer = window.setTimeout(() => onDone(effect, timer), 540);
   return { effect, timer };
 }
 
@@ -36,7 +26,8 @@ export function RehmatOilCursor() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finePointer = window.matchMedia("(pointer: fine)");
     const narrowViewport = window.matchMedia("(max-width: 700px)");
-    let cursorEnabled = finePointer.matches && !reduced.matches && !narrowViewport.matches;
+    const excludedRoute=location.pathname.startsWith("/admin")||location.pathname.startsWith("/checkout")||location.pathname.startsWith("/cart");
+    let cursorEnabled = finePointer.matches && !reduced.matches && !narrowViewport.matches && !excludedRoute;
     const cursorPoint = point.current;
     const effects = new Set<HTMLElement>();
     const timers = new Set<number>();
@@ -50,14 +41,14 @@ export function RehmatOilCursor() {
 
       const dx = cursorPoint.x - cursorPoint.px;
       const dy = cursorPoint.y - cursorPoint.py;
-      cursorPoint.px += dx * 0.34;
-      cursorPoint.py += dy * 0.34;
+      cursorPoint.px += dx * 0.46;
+      cursorPoint.py += dy * 0.46;
       const distance = Math.hypot(dx, dy);
       const stretch = 1 + Math.min(distance / 95, 0.18);
       const targetAngle = distance > 0.35 ? Math.atan2(dy, dx) * (180 / Math.PI) + 90 : 0;
       cursorPoint.angle += (targetAngle - cursorPoint.angle) * 0.24;
 
-      el.style.transform = "translate3d(" + (cursorPoint.px - 15) + "px," + (cursorPoint.py - 21) + "px,0)";
+      el.style.transform = "translate3d(" + (cursorPoint.px - 11) + "px," + (cursorPoint.py - 15) + "px,0)";
       el.style.setProperty("--oil-rotate", cursorPoint.angle + "deg");
       el.style.setProperty("--oil-stretch", String(stretch));
       el.style.setProperty("--oil-width", String(2 - stretch));
@@ -106,7 +97,7 @@ export function RehmatOilCursor() {
       const target = event.target as HTMLElement;
       if (!cursorEnabled || target.closest(IGNORED_TARGETS)) return;
       cursorRef.current?.classList.add("is-pressed");
-      const created = createOilSpill(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
+      const created = createOilRipple(event.clientX, event.clientY, Boolean(target.closest(INTERACTIVE_TARGETS)), (effect, timer) => {
         effect.remove();
         effects.delete(effect);
         timers.delete(timer);
@@ -133,7 +124,7 @@ export function RehmatOilCursor() {
       } else if (cursorPoint.active) start();
     };
     const syncCursorMode = () => {
-      cursorEnabled = finePointer.matches && !reduced.matches && !narrowViewport.matches;
+      cursorEnabled = finePointer.matches && !reduced.matches && !narrowViewport.matches && !excludedRoute;
       document.documentElement.classList.toggle("has-rehmat-cursor", cursorEnabled);
       if (!cursorEnabled) leave();
     };
