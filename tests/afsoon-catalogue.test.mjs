@@ -25,12 +25,13 @@ test("Afsoon is fully represented without fabricated stock or photography", asyn
 });
 
 test("owner-confirmed inventory and availability stay variant-authoritative", async () => {
-  const [migration, catalogue, collection, purchase, quiz] = await Promise.all([
+  const [migration, catalogue, collection, purchase, quiz, styles] = await Promise.all([
     read("supabase/migrations/202609080003_active_catalogue_inventory.sql"),
     read("lib/catalog.ts"),
     read("app/collection/collection-catalogue.tsx"),
     read("app/components/product-purchase.tsx"),
     read("app/find-your-scent/scent-quiz.tsx"),
+    read("app/globals.css"),
   ]);
   assert.match(migration, /set quantity = 10/);
   assert.match(migration, /variant\.size_ml in \(6, 12\)/);
@@ -40,6 +41,7 @@ test("owner-confirmed inventory and availability stay variant-authoritative", as
   assert.equal((collection.match(/availabilityLabel\(product\)/g) ?? []).length, 1);
   assert.match(purchase, /filter\(\(variant\) => variant\.availableQuantity > 0\)/);
   assert.match(quiz, /grounded in the active Rehmat fragrance collection/);
+  assert.match(styles, /\.cart-layer \{[^}]*overflow: hidden/);
 });
 
 test("suitability is backend-managed, searchable, filterable and visible", async () => {
