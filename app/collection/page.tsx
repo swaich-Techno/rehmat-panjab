@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getStorefrontProducts } from "../../lib/storefront";
 import { CollectionCatalogue } from "./collection-catalogue";
+import { getExperienceSettings } from "../../lib/experience-settings";
 
 export const metadata: Metadata = {
   title: "The Collection",
@@ -9,18 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default async function CollectionPage() {
-  const products = await getStorefrontProducts();
+  const [products,experience] = await Promise.all([getStorefrontProducts(),getExperienceSettings()]);
   return (
     <main id="main-content" className="collection-page">
-      <header className="page-intro collection-intro">
-        <p className="eyebrow">The catalogue · 01—10</p>
-        <h1>Your Oil,<br /><em>Your Atmosphere</em></h1>
-        <div className="intro-aside">
-          <p>Concentrated perfume oil, worn close to skin. Apply sparingly to pulse points.</p>
-          <span>Choose a bottle size and request your order directly on WhatsApp.</span>
-        </div>
+      <header className="collection-intro">
+        <p className="eyebrow">THE COLLECTION</p>
+        <h1>Your Oil, <em>Your Atmosphere</em></h1>
+        <p>Ten concentrated perfume oils. Explore by mood, notes, suitability or price.</p>
       </header>
-      <CollectionCatalogue products={products} />
+      <CollectionCatalogue products={products} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage}} />
     </main>
   );
 }

@@ -21,7 +21,8 @@ test("Afsoon is fully represented without fabricated stock or photography", asyn
   assert.match(products, /AFSOON fragrance house oil-drop illustration/);
   assert.match(editorialMigration, /afsoon-editorial-campaign\.webp/);
   assert.match(storefront, /image: primary \? publicImage\(primary\.storage_path/);
-  assert.match(productPage, /Editorial campaign artwork · This is not a genuine product photograph\./);
+  assert.match(productPage, /Scent atmosphere/);
+  assert.doesNotMatch(productPage, /Campaign artwork|Campaign image/i);
 });
 
 test("owner-confirmed inventory and availability stay variant-authoritative", async () => {

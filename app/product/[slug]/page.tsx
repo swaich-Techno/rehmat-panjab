@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: product.name,
     description: product.microDescription || `${product.subtitle}. A concentrated perfume oil from Rehmat Panjab.`,
     alternates: { canonical: `/product/${product.slug}` },
-    openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.socialImage, width: 1200, height: 630, alt: product.imageAlt }] },
+    openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.socialImage, width: 1200, height: 630, alt: `${product.name} perfume oil by Rehmat Panjab` }] },
   };
 }
 
@@ -90,7 +90,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="suitable-for"><h3>Suitable for</h3><ul>{product.suitableFor.map((use) => <li key={use}>{use}</li>)}</ul></div>
           <details className="product-details"><summary>Full fragrance portrait</summary><div className="long-description">{product.description.split(/\n\s*\n/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>{product.positioning && <p className="product-positioning"><strong>Positioning</strong> {product.positioning}</p>}</details>
           <details className="product-details"><summary>How to wear it</summary><p>Apply sparingly to pulse points and allow the concentrated perfume oil to settle naturally. Experience varies by skin, climate and application.</p></details>
-          {product.campaignImage && <figure className="product-campaign-inline"><div className="editorial-campaign-image"><Image src={product.campaignImage} alt={product.campaignImageAlt ?? `Editorial campaign artwork for ${product.name}; not a product photograph`} fill sizes="(max-width: 700px) 88vw, 32vw" /></div><figcaption>Editorial campaign artwork · This is not a genuine product photograph.</figcaption></figure>}
+          {product.campaignImage && <figure className="product-campaign-inline"><div className="editorial-campaign-image"><Image src={product.campaignImage} alt={product.campaignImageAlt ?? `${product.name} scent atmosphere`} fill sizes="(max-width: 700px) 88vw, 32vw" /></div><figcaption>Scent atmosphere</figcaption></figure>}
         </section>
         <section className="story-panel format-panel">
           <p className="eyebrow">02 · Bottle and order</p>

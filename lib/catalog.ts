@@ -34,6 +34,7 @@ export type StorefrontProduct = {
   suitabilityNote: string | null;
   positioning: string | null;
   notes: { top: string[]; heart: string[]; base: string[] } | null;
+  notesVerified?: boolean;
   journey: { opening: string; heart: string; drydown: string } | null;
   reviewsEnabled: boolean;
   scentFamily: string | null;

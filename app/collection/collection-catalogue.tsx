@@ -1,78 +1,67 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatMoney } from "../../lib/cart";
-import { availabilityLabel, firstPrice, hasAvailableStock, suitabilityLabels, type StorefrontProduct } from "../../lib/catalog";
+import { availabilityLabel, firstPrice, hasAvailableStock, isPurchasable, suitabilityLabels, type CatalogVariant, type StorefrontProduct } from "../../lib/catalog";
+import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { ProductMedia } from "../components/product-media";
+import { useCart } from "../components/cart-provider";
 
-export function CollectionCatalogue({ products }: { products: StorefrontProduct[] }) {
-  const [query, setQuery] = useState("");
-  const [family, setFamily] = useState("all");
-  const [character, setCharacter] = useState("all");
-  const [suitability, setSuitability] = useState("all");
-  const [size, setSize] = useState("all");
-  const [availability, setAvailability] = useState("all");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [sort, setSort] = useState("featured");
-  const families = [...new Set(products.flatMap((product) => product.scentFamily ? [product.scentFamily] : []))].sort();
-  const characters = [...new Set(products.flatMap((product) => product.character))].sort();
-  const sizes = [...new Set(products.flatMap((product) => product.enabledSizes))].sort((a, b) => a - b);
+type WhatsAppSettings={enabled:boolean;number:string;defaultMessage:string};
+const emptyFilters={family:"all",suitability:"all",size:"all",availability:"all",maxPrice:""};
 
-  const normalized = query.trim().toLowerCase();
-  const maximum = maxPrice ? Number(maxPrice) * 100 : null;
-  const filtered = products.filter((product) => {
-      const price = firstPrice(product);
-      if (normalized && ![product.name, product.subtitle, product.scentFamily, suitabilityLabels[product.suitability], product.suitabilityNote, ...product.character, ...product.searchAliases].filter(Boolean).join(" ").toLowerCase().includes(normalized)) return false;
-      if (family !== "all" && product.scentFamily !== family) return false;
-      if (character !== "all" && !product.character.includes(character)) return false;
-      if (suitability !== "all" && product.suitability !== suitability) return false;
-      if (size !== "all" && !product.enabledSizes.includes(Number(size))) return false;
-      if (availability === "available" && !hasAvailableStock(product)) return false;
-      if (availability === "coming_soon" && product.status !== "coming_soon") return false;
-      if (availability === "sold_out" && (product.status === "coming_soon" || hasAvailableStock(product))) return false;
-      if (maximum !== null && (price === null || price > maximum)) return false;
-      return true;
-  }).sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "newest") return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
-      if (sort === "price-low") return (firstPrice(a) ?? Number.MAX_SAFE_INTEGER) - (firstPrice(b) ?? Number.MAX_SAFE_INTEGER);
-      if (sort === "price-high") return (firstPrice(b) ?? -1) - (firstPrice(a) ?? -1);
-      return Number(b.featured) - Number(a.featured) || a.number.localeCompare(b.number);
-  });
+function whatsappUrl(product:StorefrontProduct,variant:CatalogVariant,quantity:number,coupon:string,settings:WhatsAppSettings){
+  let number=settings.number.replace(/\D/g,"").slice(0,15); if(number.length===10)number=`91${number}`;
+  const text=["Hello Rehmat Panjab, I would like to request an order:",`Product: ${product.name}`,`Size: ${variant.sizeMl} ml`,`Quantity: ${quantity}`,`Unit price: ${formatMoney(variant.pricePaise??0)}`,coupon?`Coupon to verify: ${coupon}`:"","This is an order request until Rehmat Panjab confirms availability, delivery and payment.",settings.defaultMessage].filter(Boolean).join("\n");
+  return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+}
 
-  return (
-    <>
-      <section className="catalogue-controls" aria-label="Filter the collection">
-        <div className="catalogue-search"><label htmlFor="catalogue-search">Search</label><input id="catalogue-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, family, or character" /></div>
-        <div><label htmlFor="catalogue-family">Family</label><select id="catalogue-family" value={family} onChange={(event) => setFamily(event.target.value)}><option value="all">All families</option>{families.map((value) => <option value={value} key={value}>{value}</option>)}</select></div>
-        <div><label htmlFor="catalogue-character">Character</label><select id="catalogue-character" value={character} onChange={(event) => setCharacter(event.target.value)}><option value="all">All characters</option>{characters.map((value) => <option value={value} key={value}>{value}</option>)}</select></div>
-        <div><label htmlFor="catalogue-suitability">Suitability</label><select id="catalogue-suitability" value={suitability} onChange={(event) => setSuitability(event.target.value)}><option value="all">All</option><option value="unisex">Unisex</option><option value="men">Men</option><option value="women">Women</option></select></div>
-        <div><label htmlFor="catalogue-size">Size</label><select id="catalogue-size" value={size} onChange={(event) => setSize(event.target.value)}><option value="all">All sizes</option>{sizes.map((value) => <option value={value} key={value}>{value} ml</option>)}</select></div>
-        <div><label htmlFor="catalogue-availability">Availability</label><select id="catalogue-availability" value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">All statuses</option><option value="available">Available</option><option value="coming_soon">Launching soon</option><option value="sold_out">Sold out</option></select></div>
-        <div><label htmlFor="catalogue-price">Maximum price</label><input id="catalogue-price" type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="₹" /></div>
-        <div><label htmlFor="catalogue-sort">Sort</label><select id="catalogue-sort" value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured</option><option value="newest">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></div>
-        <p aria-live="polite">{filtered.length} {filtered.length === 1 ? "oil" : "oils"}</p>
-      </section>
-      <section className="collection-list" aria-label="Rehmat fragrances">
-        {filtered.length ? filtered.map((product, index) => {
-          const price = firstPrice(product);
-          const pricedVariant=product.variants.filter(item=>item.pricePaise!==null).sort((a,b)=>(a.pricePaise??0)-(b.pricePaise??0))[0];
-          return <article className={`collection-product layout-${index % 2 ? "right" : "left"}`} key={product.databaseId ?? product.id}>
-            <Link className="collection-media-link" href={`/product/${product.slug}`} data-cursor="VIEW"><ProductMedia product={product} priority={index === 0} /></Link>
-            <div className="collection-copy">
-              <div className="number-rule"><span>{product.number}</span><i /></div>
-              <h2><Link href={`/product/${product.slug}`}>{product.name}</Link></h2>
-              {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
-              <p className="product-subtitle">{product.subtitle}</p><p>{product.atmosphere}</p>
-              <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
-              <ul aria-label="Scent character">{product.character.map((word) => <li key={word}>{word}</li>)}</ul>
-              <div className="collection-price">{pricedVariant?.promotionalLabel && <span>{pricedVariant.promotionalLabel}</span>}<strong>{price === null ? "Contact for price" : <>{pricedVariant?.normalPricePaise&&<del>{formatMoney(pricedVariant.normalPricePaise)}</del>} From {formatMoney(price)} {pricedVariant?.normalPricePaise&&<small>Save {formatMoney(pricedVariant.normalPricePaise-price)}</small>}</>}</strong></div>
-              <div className="collection-actions"><span className={`status-dot status-${hasAvailableStock(product) ? "active" : "sold_out"}`}>{availabilityLabel(product)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
-            </div>
-          </article>;
-        }) : <div className="catalogue-empty"><div className="empty-drop" aria-hidden="true" /><h2>No oils match.</h2><p>Clear or widen the filters to return to the full collection.</p><button className="button button-outline" type="button" onClick={() => { setQuery(""); setFamily("all"); setCharacter("all"); setSuitability("all"); setSize("all"); setAvailability("all"); setMaxPrice(""); }}>Clear filters</button></div>}
-      </section>
-    </>
-  );
+function QuickView({product,settings,onClose}:{product:StorefrontProduct;settings:WhatsAppSettings;onClose:()=>void}){
+  const cart=useCart(); const closeRef=useRef<HTMLButtonElement>(null);
+  const available=product.variants.filter(v=>v.enabled&&v.pricePaise!==null&&v.availableQuantity>0);
+  const [selectedId,setSelectedId]=useState(available[0]?.id??product.variants[0]?.id??"");
+  const [quantity,setQuantity]=useState(1),[coupon,setCoupon]=useState(""),[quote,setQuote]=useState<{totalPaise:number;discountPaise:number;couponCode:string|null}|null>(null),[message,setMessage]=useState("");
+  const selected=product.variants.find(v=>v.id===selectedId)??available[0];
+  useEffect(()=>{const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;const overflow=document.body.style.overflow;document.body.style.overflow="hidden";closeRef.current?.focus();const key=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose();};window.addEventListener("keydown",key);return()=>{document.body.style.overflow=overflow;window.removeEventListener("keydown",key);previous?.focus();};},[onClose]);
+  async function applyCoupon(){if(!selected||!coupon.trim())return;setMessage("Checking coupon…");const response=await fetch("/api/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({lines:[{variantId:selected.id,quantity}],couponCode:coupon})});const value=await response.json().catch(()=>({message:"Coupon could not be checked."}));if(!response.ok){setQuote(null);setMessage(value.message);return;}setQuote(value);setMessage(`Coupon applied. Quoted total ${formatMoney(value.totalPaise)}.`);}
+  function add(){if(!selected||!isPurchasable(product,selected))return;cart.add({variantId:selected.id,productSlug:product.slug,productName:product.name,sizeMl:selected.sizeMl,sku:selected.sku,unitPricePaise:selected.pricePaise??0,currency:selected.currency,image:product.image,maxQuantity:selected.availableQuantity,quantity});onClose();}
+  return <div className="quick-view-layer"><button className="quick-view-scrim" type="button" aria-label="Close quick view" onClick={onClose}/><aside className="quick-view-sheet" role="dialog" aria-modal="true" aria-labelledby={`quick-${product.slug}`}>
+    <header><div><p className="eyebrow">Quick view</p><h2 id={`quick-${product.slug}`}>{product.name}</h2></div><button ref={closeRef} type="button" className="quick-view-close" onClick={onClose} aria-label="Close quick view">×</button></header>
+    {product.inspirationLine&&<p className="product-inspiration">{product.inspirationLine}</p>}
+    {product.notes&&<div className="quick-view-notes"><span><b>Top</b>{product.notes.top[0]}</span><span><b>Heart</b>{product.notes.heart[0]}</span><span><b>Base</b>{product.notes.base[0]}</span></div>}
+    <fieldset><legend>Choose size</legend><div className="quick-view-sizes">{product.variants.map(v=><button type="button" key={v.id} className={v.id===selected?.id?"is-selected":""} disabled={v.availableQuantity<1||v.pricePaise===null} aria-pressed={v.id===selected?.id} onClick={()=>{setSelectedId(v.id);setQuantity(1);setQuote(null);}}>{v.sizeMl} ml <strong>{v.pricePaise===null?"Price pending":formatMoney(v.pricePaise)}</strong><small>{v.availableQuantity>0?`${v.availableQuantity} available`:"Unavailable"}</small></button>)}</div></fieldset>
+    {selected&&<div className="quick-view-order"><div className="quantity-stepper" aria-label="Quantity"><button type="button" onClick={()=>setQuantity(v=>Math.max(1,v-1))} aria-label="Decrease quantity">−</button><span aria-live="polite">{quantity}</span><button type="button" onClick={()=>setQuantity(v=>Math.min(selected.availableQuantity,v+1))} disabled={quantity>=selected.availableQuantity} aria-label="Increase quantity">+</button></div><strong>{formatMoney((selected.pricePaise??0)*quantity)}</strong></div>}
+    <div className="quick-view-coupon"><label htmlFor={`coupon-${product.slug}`}>Coupon code</label><div><input id={`coupon-${product.slug}`} value={coupon} maxLength={40} onChange={e=>{setCoupon(e.target.value.toUpperCase());setQuote(null);}}/><button type="button" onClick={applyCoupon} disabled={!coupon.trim()||!selected}>Apply</button></div>{quote&&<small>You save {formatMoney(quote.discountPaise)} · Total {formatMoney(quote.totalPaise)}</small>}</div>
+    <div className="quick-view-actions">{COMMERCE_ENABLED&&selected&&isPurchasable(product,selected)?<button className="button button-dark" type="button" onClick={add}>Add to cart</button>:settings.enabled&&selected?<a className="button button-dark" href={whatsappUrl(product,selected,quantity,coupon,settings)} target="_blank" rel="noreferrer">Order on WhatsApp</a>:null}<Link className="button button-outline" href={`/product/${product.slug}`}>View details</Link></div>
+    <p className="form-message" aria-live="polite">{message}</p>
+  </aside></div>;
+}
+
+export function CollectionCatalogue({products,whatsappSettings}:{products:StorefrontProduct[];whatsappSettings:WhatsAppSettings}){
+  const cart=useCart(); const [query,setQuery]=useState(""),[sort,setSort]=useState("featured"),[filters,setFilters]=useState(emptyFilters),[filtersOpen,setFiltersOpen]=useState(false),[mobile,setMobile]=useState(false),[quick,setQuick]=useState<StorefrontProduct|null>(null),[sizes,setSizes]=useState<Record<string,string>>({});
+  useEffect(()=>{const media=window.matchMedia("(max-width: 700px)");const update=()=>setMobile(media.matches);update();media.addEventListener("change",update);return()=>media.removeEventListener("change",update);},[]);
+  useEffect(()=>{if(!filtersOpen)return;const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setFiltersOpen(false);};window.addEventListener("keydown",closeOnEscape);return()=>window.removeEventListener("keydown",closeOnEscape);},[filtersOpen]);
+  const families=useMemo(()=>[...new Set(products.flatMap(p=>p.scentFamily?[p.scentFamily]:[]))].sort(),[products]);
+  const bottleSizes=useMemo(()=>[...new Set(products.flatMap(p=>p.enabledSizes))].sort((a,b)=>a-b),[products]);
+  const normalized=query.trim().toLowerCase(),maximum=filters.maxPrice?Number(filters.maxPrice)*100:null;
+  const filtered=products.filter(product=>{const price=firstPrice(product);if(normalized&&![product.name,product.subtitle,product.scentFamily,product.inspirationLine].filter(Boolean).join(" ").toLowerCase().includes(normalized))return false;if(filters.family!=="all"&&product.scentFamily!==filters.family)return false;if(filters.suitability!=="all"&&product.suitability!==filters.suitability)return false;if(filters.size!=="all"&&!product.enabledSizes.includes(Number(filters.size)))return false;if(filters.availability==="available"&&!hasAvailableStock(product))return false;if(filters.availability==="sold_out"&&hasAvailableStock(product))return false;if(maximum!==null&&(price===null||price>maximum))return false;return true;}).sort((a,b)=>sort==="name"?a.name.localeCompare(b.name):sort==="newest"?(b.createdAt??"").localeCompare(a.createdAt??""):sort==="price-low"?(firstPrice(a)??Infinity)-(firstPrice(b)??Infinity):sort==="price-high"?(firstPrice(b)??-1)-(firstPrice(a)??-1):Number(b.featured)-Number(a.featured)||a.number.localeCompare(b.number));
+  const updateFilter=(key:keyof typeof emptyFilters,value:string)=>setFilters(current=>({...current,[key]:value}));
+  const clear=()=>{setQuery("");setSort("featured");setFilters(emptyFilters);};
+  const ask=(product:StorefrontProduct)=>window.dispatchEvent(new CustomEvent("open-rehmat-guide",{detail:{productId:product.databaseId??product.id,productSlug:product.slug,productName:product.name}}));
+  return <>
+    <section className="catalogue-toolbar" aria-label="Filter the collection"><div className="catalogue-search"><label htmlFor="catalogue-search">Search</label><input id="catalogue-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search fragrances or notes"/></div><div className="catalogue-sort"><label htmlFor="catalogue-sort">Sort</label><select id="catalogue-sort" value={sort} onChange={e=>setSort(e.target.value)}><option value="featured">Featured</option><option value="newest">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></div><button className="catalogue-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="catalogue-filters" onClick={()=>setFiltersOpen(v=>!v)}>Filters</button>
+      <div id="catalogue-filters" className={`catalogue-filter-panel ${filtersOpen?"is-open":""}`} aria-hidden={mobile&&!filtersOpen}><div><label htmlFor="catalogue-family">Fragrance family</label><select id="catalogue-family" value={filters.family} onChange={e=>updateFilter("family",e.target.value)}><option value="all">All families</option>{families.map(value=><option key={value}>{value}</option>)}</select></div><div><label htmlFor="catalogue-suitability">Suitability</label><select id="catalogue-suitability" value={filters.suitability} onChange={e=>updateFilter("suitability",e.target.value)}><option value="all">All</option><option value="unisex">Unisex</option><option value="men">Men</option><option value="women">Women</option></select></div><div><label htmlFor="catalogue-size">Bottle size</label><select id="catalogue-size" value={filters.size} onChange={e=>updateFilter("size",e.target.value)}><option value="all">All sizes</option>{bottleSizes.map(value=><option value={value} key={value}>{value} ml</option>)}</select></div><div><label htmlFor="catalogue-availability">Availability</label><select id="catalogue-availability" value={filters.availability} onChange={e=>updateFilter("availability",e.target.value)}><option value="all">All statuses</option><option value="available">Available</option><option value="sold_out">Sold out</option></select></div><div><label htmlFor="catalogue-price">Maximum price</label><input id="catalogue-price" type="number" min="0" inputMode="numeric" value={filters.maxPrice} onChange={e=>updateFilter("maxPrice",e.target.value)} placeholder="₹"/></div><button type="button" className="catalogue-clear" onClick={clear}>Clear filters</button></div>
+      {mobile&&filtersOpen&&<button type="button" className="catalogue-filter-floating-close" onClick={()=>setFiltersOpen(false)}>Close filters</button>}
+      <p aria-live="polite">{filtered.length} {filtered.length===1?"oil":"oils"}</p>
+    </section>
+    <section className="collection-grid" aria-label="Rehmat fragrances">{filtered.length?filtered.map((product,index)=>{const selected=product.variants.find(v=>v.id===(sizes[product.slug]??""))??product.variants[0];const price=selected?.pricePaise??firstPrice(product);const canAdd=Boolean(selected&&isPurchasable(product,selected));return <article className="catalogue-card" key={product.databaseId??product.id}>
+      <Link className="catalogue-card-media" href={`/product/${product.slug}`} aria-label={`View ${product.name}`}><ProductMedia product={product} priority={index<4}/><div className="catalogue-hover"><strong>{product.name}</strong>{product.notes&&<div className="catalogue-note-triad"><span><b>Top</b>{product.notes.top[0]}</span><span><b>Heart</b>{product.notes.heart[0]}</span><span><b>Base</b>{product.notes.base[0]}</span></div>}<p>{product.scentFamily??product.subtitle}</p><small>{suitabilityLabels[product.suitability]} · {price===null?"Price on request":`From ${formatMoney(price)}`}</small><em>View details</em></div></Link>
+      <div className="catalogue-card-copy"><div><p className="eyebrow">Rehmat {product.number}</p><h2><Link href={`/product/${product.slug}`}>{product.name}</Link></h2>{product.inspirationLine&&<p className="product-inspiration">{product.inspirationLine}</p>}<p className="catalogue-card-notes">{product.subtitle}</p></div><div className="catalogue-card-meta"><strong>{price===null?"Price on request":formatMoney(price)}</strong><span className={`status-dot status-${hasAvailableStock(product)?"active":"sold_out"}`}>{availabilityLabel(product)}</span></div>
+      <label className="card-size">Size<select value={selected?.id??""} onChange={e=>setSizes(current=>({...current,[product.slug]:e.target.value}))}>{product.variants.map(v=><option key={v.id} value={v.id} disabled={v.availableQuantity<1}>{v.sizeMl} ml · {v.pricePaise===null?"Price pending":formatMoney(v.pricePaise)}</option>)}</select></label>
+      <div className="catalogue-card-actions"><Link className="button button-outline" href={`/product/${product.slug}`}>View details</Link>{COMMERCE_ENABLED&&canAdd&&selected?<button className="button button-dark" type="button" onClick={()=>cart.add({variantId:selected.id,productSlug:product.slug,productName:product.name,sizeMl:selected.sizeMl,sku:selected.sku,unitPricePaise:selected.pricePaise??0,currency:selected.currency,image:product.image,maxQuantity:selected.availableQuantity,quantity:1})}>Add to cart</button>:whatsappSettings.enabled&&selected&&selected.availableQuantity>0?<a className="button button-dark" href={whatsappUrl(product,selected,1,"",whatsappSettings)} target="_blank" rel="noreferrer">Order on WhatsApp</a>:null}</div>
+      <div className="catalogue-card-secondary"><button type="button" className="quick-view-button" onClick={()=>setQuick(product)}>Quick view</button><button type="button" className="ask-product" onClick={()=>ask(product)}>Ask about this fragrance</button></div></div>
+    </article>;}):<div className="catalogue-empty"><div className="empty-drop" aria-hidden="true"/><h2>No oils match.</h2><p>Clear or widen the filters to return to the full collection.</p><button className="button button-outline" type="button" onClick={clear}>Clear filters</button></div>}</section>
+    {quick&&<QuickView product={quick} settings={whatsappSettings} onClose={()=>setQuick(null)}/>}
+  </>;
 }

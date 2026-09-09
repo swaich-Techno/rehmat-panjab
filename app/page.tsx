@@ -6,6 +6,8 @@ import { getStorefrontProducts } from "../lib/storefront";
 import { getStoreSettings, supportedTrustItems } from "../lib/store-settings";
 import { OpenGuideButton } from "./components/open-guide-button";
 import { TrustStrip } from "./components/trust-strip";
+import { availabilityLabel, firstPrice } from "../lib/catalog";
+import { formatMoney } from "../lib/cart";
 
 export default async function Home() {
   const [products,storeSettings] = await Promise.all([getStorefrontProducts(),getStoreSettings()]);
@@ -26,14 +28,14 @@ export default async function Home() {
         </div>
 
         <div className="v41-product-grid">
-          {products.slice(0, 3).map((product) => (
+          {products.slice(0, 4).map((product) => (
             <article className="v41-product-card" key={product.id} style={{ "--scent": product.color } as CSSProperties}>
               <Link href={"/product/" + product.slug} data-cursor="VIEW" aria-label={"View " + product.name}>
                 <ProductMedia product={product} />
               </Link>
               <div className="v41-product-copy">
                 <span>{product.number}</span>
-                <div><h3>{product.name}</h3><p>{product.subtitle}</p></div>
+                <div><h3>{product.name}</h3><p>{firstPrice(product)===null?"Price on request":`From ${formatMoney(firstPrice(product)!)}`} · {availabilityLabel(product)}</p><Link className="v41-card-link" href={`/product/${product.slug}`}>View details</Link></div>
               </div>
             </article>
           ))}

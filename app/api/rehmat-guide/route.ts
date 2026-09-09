@@ -7,7 +7,7 @@ import { createGuideReply, sanitizeGuideInput, type GuideReply } from "../../../
 import { getStorefrontProducts } from "../../../lib/storefront";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
-const schema=z.object({message:z.string().trim().min(1).max(360)}).strict();
+const schema=z.object({message:z.string().trim().min(1).max(360),productId:z.string().uuid().optional()}).strict();
 const localAttempts=new Map<string,{count:number;reset:number}>();
 
 async function allowed(request:Request,limit:number){
@@ -42,6 +42,7 @@ export async function POST(request:Request){
   if(!(await allowed(request,settings.guideRateLimit)))return NextResponse.json({message:"Too many requests. Please return in a few minutes."},{status:429});
   const parsed=schema.safeParse(await request.json().catch(()=>null)); if(!parsed.success)return NextResponse.json({message:"Please keep your fragrance question brief."},{status:400});
   const catalogue=await getStorefrontProducts();
-  const fallback=createGuideReply(parsed.data.message,catalogue,{excluded:[...settings.productExclusions,...settings.guideExcludedProducts],allowed:settings.guideAllowedProducts,max:settings.guideMaxRecommendations});
+  const contextProduct=parsed.data.productId?catalogue.find(product=>product.databaseId===parsed.data.productId):null;
+  const fallback=createGuideReply(parsed.data.message,catalogue,{excluded:[...settings.productExclusions,...settings.guideExcludedProducts],allowed:contextProduct?[contextProduct.slug]:settings.guideAllowedProducts,max:settings.guideMaxRecommendations});
   return NextResponse.json(await providerReply(parsed.data.message,fallback));
 }

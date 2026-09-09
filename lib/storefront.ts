@@ -29,6 +29,7 @@ type CatalogRow = {
   suitability_note?: string | null;
   positioning?: string | null;
   notes?: Record<string, unknown> | null;
+  notes_verified?: boolean;
   image_alt_text?: string | null;
   created_at: string;
   product_media?: Array<{ role: "product" | "card" | "hero" | "mood" | "social"; storage_path: string; alt_text: string; is_generated: boolean; sort_order: number }>;
@@ -59,6 +60,7 @@ function fallbackCatalogue(): StorefrontProduct[] {
     suitabilityNote: product.suitabilityNote ?? null,
     positioning: product.positioning ?? null,
     notes: product.notes ?? null,
+    notesVerified: true,
     journey: product.journey ?? null,
     reviewsEnabled: true,
     scentFamily: null,
@@ -70,7 +72,7 @@ function fallbackCatalogue(): StorefrontProduct[] {
     socialImage: media?.social ?? product.image,
     imagePending: product.imagePending ?? false,
     campaignImage: product.campaignImage ?? null,
-    campaignImageAlt: product.campaignImageAlt ?? null,
+    campaignImageAlt: `${product.name} scent atmosphere`,
     featured: false,
     createdAt: null,
     variants: product.enabledSizes.map((size) => ({
@@ -147,20 +149,21 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     suitabilityNote: row.suitability_note ?? editorial?.suitabilityNote ?? null,
     positioning: row.positioning ?? editorial?.positioning ?? null,
     notes,
+    notesVerified: row.notes_verified === true,
     journey,
     reviewsEnabled: row.reviews_enabled,
     scentFamily: row.scent_family,
     character,
     color: editorial?.color ?? "#c7b58f",
     image: primary ? publicImage(primary.storage_path, "/images/products/product-image-pending.svg") : media?.card ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
-    imageAlt: primary?.alt_text ?? media?.alt ?? (row.image_alt_text || editorial?.imageAlt || `${row.name} perfume oil by Rehmat Panjab`),
+    imageAlt: `${row.name} perfume oil by Rehmat Panjab`,
     imageKind: genuine ? "product" : primary?.is_generated || media ? "campaign" : row.image_path?.includes("product-image-pending") ? "placeholder" : "product",
     heroImage: genuine ? publicImage(genuine.storage_path, "/images/products/product-image-pending.svg") : hero ? publicImage(hero.storage_path, "/images/products/product-image-pending.svg") : media?.hero ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
     moodImage: mood ? publicImage(mood.storage_path, "/images/products/product-image-pending.svg") : media?.mood ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/images/products/product-image-pending.svg"),
     socialImage: social ? publicImage(social.storage_path, "/og.png") : media?.social ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/og.png"),
     imagePending: !media && row.image_path === "/images/products/product-image-pending.svg",
     campaignImage: mood ? publicImage(mood.storage_path, "") : media?.mood ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null),
-    campaignImageAlt: mood?.alt_text ?? media?.alt ?? editorial?.campaignImageAlt ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? `Editorial campaign artwork for ${row.name}; not a product photograph` : null),
+    campaignImageAlt: `${row.name} scent atmosphere`,
     status: row.status,
     featured: row.featured,
     createdAt: row.created_at,
