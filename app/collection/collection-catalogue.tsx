@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { formatMoney } from "../../lib/cart";
-import { firstPrice, statusLabel, suitabilityLabels, type StorefrontProduct } from "../../lib/catalog";
+import { availabilityLabel, firstPrice, hasAvailableStock, suitabilityLabels, type StorefrontProduct } from "../../lib/catalog";
 import { ProductMedia } from "../components/product-media";
 
 export function CollectionCatalogue({ products }: { products: StorefrontProduct[] }) {
@@ -28,9 +28,9 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
       if (character !== "all" && !product.character.includes(character)) return false;
       if (suitability !== "all" && product.suitability !== suitability) return false;
       if (size !== "all" && !product.enabledSizes.includes(Number(size))) return false;
-      if (availability === "available" && product.status !== "active") return false;
+      if (availability === "available" && !hasAvailableStock(product)) return false;
       if (availability === "coming_soon" && product.status !== "coming_soon") return false;
-      if (availability === "sold_out" && product.status !== "sold_out") return false;
+      if (availability === "sold_out" && (product.status === "coming_soon" || hasAvailableStock(product))) return false;
       if (maximum !== null && (price === null || price > maximum)) return false;
       return true;
   }).sort((a, b) => {
@@ -67,8 +67,8 @@ export function CollectionCatalogue({ products }: { products: StorefrontProduct[
               <p className="product-subtitle">{product.subtitle}</p><p>{product.atmosphere}</p>
               <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
               <ul aria-label="Scent character">{product.character.map((word) => <li key={word}>{word}</li>)}</ul>
-              <div className="collection-price"><span>{pricedVariant?.promotionalLabel??statusLabel(product.status)}</span><strong>{price === null ? "Contact for price" : <>{pricedVariant?.normalPricePaise&&<del>{formatMoney(pricedVariant.normalPricePaise)}</del>} From {formatMoney(price)} {pricedVariant?.normalPricePaise&&<small>Save {formatMoney(pricedVariant.normalPricePaise-price)}</small>}</>}</strong></div>
-              <div className="collection-actions"><span className={`status-dot status-${product.status}`}>{statusLabel(product.status)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
+              <div className="collection-price">{pricedVariant?.promotionalLabel && <span>{pricedVariant.promotionalLabel}</span>}<strong>{price === null ? "Contact for price" : <>{pricedVariant?.normalPricePaise&&<del>{formatMoney(pricedVariant.normalPricePaise)}</del>} From {formatMoney(price)} {pricedVariant?.normalPricePaise&&<small>Save {formatMoney(pricedVariant.normalPricePaise-price)}</small>}</>}</strong></div>
+              <div className="collection-actions"><span className={`status-dot status-${hasAvailableStock(product) ? "active" : "sold_out"}`}>{availabilityLabel(product)}</span><Link className="text-link" href={`/product/${product.slug}`} data-cursor="VIEW">Enter the atmosphere ↗</Link></div>
             </div>
           </article>;
         }) : <div className="catalogue-empty"><div className="empty-drop" aria-hidden="true" /><h2>No oils match.</h2><p>Clear or widen the filters to return to the full collection.</p><button className="button button-outline" type="button" onClick={() => { setQuery(""); setFamily("all"); setCharacter("all"); setSuitability("all"); setSize("all"); setAvailability("all"); setMaxPrice(""); }}>Clear filters</button></div>}

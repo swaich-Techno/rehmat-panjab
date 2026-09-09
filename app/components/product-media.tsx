@@ -13,7 +13,6 @@ export function ProductMedia({ product, priority = false, className = "" }: { pr
         priority={priority}
         sizes="(max-width: 767px) 92vw, (max-width: 1200px) 48vw, 42vw"
       />
-      {product.image.includes("product-image-pending") && <span className="media-pending-label">Genuine product image pending</span>}
       <span className="media-index">{product.number}</span>
     </div>
   );

@@ -17,11 +17,29 @@ test("Afsoon is fully represented without fabricated stock or photography", asyn
   assert.match(migration, /where p\.slug='afsoon'[\s\S]*on conflict\(variant_id\) do nothing/);
   assert.match(migration, /select v\.id,0,0,2/);
   assert.doesNotMatch(migration, /on conflict\(variant_id\).*do update/s);
-  assert.match(media, /Genuine product image pending/);
-  assert.match(products, /Afsoon product photograph awaiting owner upload/);
+  assert.doesNotMatch(media, /Genuine product image pending/);
+  assert.match(products, /AFSOON fragrance house oil-drop illustration/);
   assert.match(editorialMigration, /afsoon-editorial-campaign\.webp/);
   assert.match(storefront, /image: publicImage\(row\.image_path/);
   assert.match(productPage, /Editorial campaign artwork · This is not a genuine product photograph\./);
+});
+
+test("owner-confirmed inventory and availability stay variant-authoritative", async () => {
+  const [migration, catalogue, collection, purchase, quiz] = await Promise.all([
+    read("supabase/migrations/202609080003_active_catalogue_inventory.sql"),
+    read("lib/catalog.ts"),
+    read("app/collection/collection-catalogue.tsx"),
+    read("app/components/product-purchase.tsx"),
+    read("app/find-your-scent/scent-quiz.tsx"),
+  ]);
+  assert.match(migration, /set quantity = 10/);
+  assert.match(migration, /variant\.size_ml in \(6, 12\)/);
+  assert.doesNotMatch(migration, /reserved\s*=/);
+  assert.match(catalogue, /variant\.availableQuantity > 0/);
+  assert.match(collection, /availabilityLabel\(product\)/);
+  assert.equal((collection.match(/availabilityLabel\(product\)/g) ?? []).length, 1);
+  assert.match(purchase, /filter\(\(variant\) => variant\.availableQuantity > 0\)/);
+  assert.match(quiz, /grounded in the active Rehmat fragrance collection/);
 });
 
 test("suitability is backend-managed, searchable, filterable and visible", async () => {

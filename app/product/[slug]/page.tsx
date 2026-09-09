@@ -7,7 +7,7 @@ import { ProductMedia } from "../../components/product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
 import { productRedirects, products as editorialProducts } from "../../../lib/products";
-import { isPurchasable, statusLabel, suitabilityLabels } from "../../../lib/catalog";
+import { availabilityLabel, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { getProductReviewSummary } from "../../../lib/reviews";
 import { getStorefrontProduct, getStorefrontProducts } from "../../../lib/storefront";
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </aside>
       <div className="product-story">
         <section className="story-panel story-opening">
-          <p className="eyebrow">Rehmat {product.number} · {statusLabel(product.status)}</p>
+          <p className="eyebrow">Rehmat {product.number} · {availabilityLabel(product)}</p>
           <h1>{product.name}</h1>
           {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
           <p className="product-lede">{product.atmosphere}</p>

@@ -1,3 +1,5 @@
+import { COMMERCE_ENABLED } from "./commerce";
+
 export type CatalogStatus = "coming_soon" | "active" | "sold_out";
 
 export type CatalogVariant = {
@@ -60,9 +62,11 @@ export function isPurchasable(product: StorefrontProduct, variant: CatalogVarian
   return COMMERCE_ENABLED && product.status === "active" && variant.enabled && variant.pricePaise !== null && variant.availableQuantity > 0;
 }
 
-export function statusLabel(status: CatalogStatus) {
-  if (status === "coming_soon") return "Launching soon";
-  if (status === "sold_out") return "Sold out";
-  return "Available";
+export function hasAvailableStock(product: StorefrontProduct) {
+  return product.status === "active" && product.variants.some((variant) => variant.enabled && variant.availableQuantity > 0);
 }
-import { COMMERCE_ENABLED } from "./commerce";
+
+export function availabilityLabel(product: StorefrontProduct) {
+  if (product.status === "coming_soon") return "Launching soon";
+  return hasAvailableStock(product) ? "Available" : "Currently unavailable";
+}

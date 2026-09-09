@@ -46,7 +46,7 @@ export function ScentQuiz({ settings }: { settings: ExperienceSettings }) {
   }
 
   if (!settings.quizEnabled) return <section className="quiz-intro immersive-intro"><div className="quiz-intro-copy"><p className="eyebrow">Name Your Rehmat</p><h1>The guide is resting.</h1><p>Please return soon.</p></div></section>;
-  if (step === -1) return <section className="quiz-intro immersive-intro"><div className="quiz-intro-copy"><p className="eyebrow">Name Your Rehmat · 12 questions</p><h1>Give your scent<br />instinct a <em>name.</em></h1><p>A private, expressive guide grounded in the five Rehmat fragrances. No medical or scientific claims—only considered direction.</p><button className="button button-dark" type="button" onClick={() => setStep(0)}>Begin the portrait</button></div><div className="sensory-orb" aria-hidden="true"><i /><span>Choose by instinct<br />Refine at the end</span></div></section>;
+  if (step === -1) return <section className="quiz-intro immersive-intro"><div className="quiz-intro-copy"><p className="eyebrow">Name Your Rehmat · 12 questions</p><h1>Give your scent<br />instinct a <em>name.</em></h1><p>A private, expressive guide grounded in the active Rehmat fragrance collection. No medical or scientific claims—only considered direction.</p><button className="button button-dark" type="button" onClick={() => setStep(0)}>Begin the portrait</button></div><div className="sensory-orb" aria-hidden="true"><i /><span>Choose by instinct<br />Refine at the end</span></div></section>;
 
   if (complete) {
     const layerIds = alternatives.slice(0, answers.format?.[0] === "three" ? 3 : 2).map((item) => item.id).join(",");
