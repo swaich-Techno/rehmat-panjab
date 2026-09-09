@@ -9,7 +9,7 @@ import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { useCart } from "./cart-provider";
 import { WhatsAppOrder, type WhatsAppOrderSettings } from "./whatsapp-order";
 
-export function ProductPurchase({ product, whatsappSettings }: { product: StorefrontProduct; whatsappSettings: WhatsAppOrderSettings }) {
+export function ProductPurchase({ product, whatsappSettings, policiesPublished=false }: { product: StorefrontProduct; whatsappSettings: WhatsAppOrderSettings; policiesPublished?:boolean }) {
   const cart = useCart();
   const initial = useMemo(() => product.variants.find((variant) => isPurchasable(product, variant)) ?? product.variants[0], [product]);
   const [selectedId, setSelectedId] = useState(initial?.id ?? "");
@@ -72,7 +72,7 @@ export function ProductPurchase({ product, whatsappSettings }: { product: Storef
       </div>}
       {!COMMERCE_ENABLED && <p className="purchase-unavailable">Prefer a personal order? Send your selection to the house on WhatsApp for confirmation.</p>}
       {!COMMERCE_ENABLED && <WhatsAppOrder compact products={[{name:product.name,slug:product.slug,variants:product.variants.filter((variant) => variant.availableQuantity > 0).map(({id,sizeMl,pricePaise,currency})=>({id,sizeMl,pricePaise,currency}))}]} settings={whatsappSettings} />}
-      <p className="purchase-policy-links"><Link href="/policies/shipping">Shipping policy</Link> · <Link href="/policies/returns">Cancellation &amp; refunds</Link></p>
+      {policiesPublished&&<p className="purchase-policy-links"><Link href="/policies/shipping">Shipping</Link> · <Link href="/policies/returns">Cancellation &amp; refunds</Link> · <Link href="/policies/terms">Terms</Link> · <Link href="/policies/privacy">Privacy</Link></p>}
     </div>
   );
 }

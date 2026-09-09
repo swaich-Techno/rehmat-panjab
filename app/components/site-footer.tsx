@@ -1,6 +1,8 @@
 import Link from "next/link";
+import {getPublishedPolicyRecord} from "../../lib/store-settings";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const policies=await getPublishedPolicyRecord();
   return (
     <footer className="site-footer">
       <div>
@@ -17,10 +19,8 @@ export function SiteFooter() {
       <div className="footer-links">
         <p className="eyebrow">House</p>
         <Link href="/contact">Contact</Link>
-        <Link href="/policies/shipping">Shipping policy</Link>
-        <Link href="/policies/returns">Cancellation &amp; refunds</Link>
-        <Link href="/policies/privacy">Privacy policy</Link>
-        <Link href="/policies/terms">Terms &amp; conditions</Link>
+        {policies&&<><Link href="/policies/shipping">Shipping policy</Link><Link href="/policies/returns">Cancellation &amp; refunds</Link><Link href="/policies/privacy">Privacy policy</Link><Link href="/policies/terms">Terms &amp; conditions</Link></>}
+        <button className="footer-preference-button" type="button" data-cookie-preferences>Cookie preferences</button>
       </div>
       <div className="footer-mark" aria-hidden="true">R</div>
       <p className="footer-legal">© 2026 Rehmat Panjab · Concentrated perfume oil</p>

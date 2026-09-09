@@ -1,8 +1,8 @@
 export const merchant={
-  name:"Rehmat Panjab",phone:"7009464475",
-  email:process.env.REHMAT_SUPPORT_EMAIL?.trim()||null,
-  hours:process.env.REHMAT_SUPPORT_HOURS?.trim()||null,
-  address:process.env.REHMAT_BUSINESS_ADDRESS?.trim()||null,
+  name:"Rehmat Panjab",phone:"9876913550",
+  email:process.env.REHMAT_SUPPORT_EMAIL?.trim()||"support@rehmatpanjab.com",
+  hours:process.env.REHMAT_SUPPORT_HOURS?.trim()||"10:00 AM–7:00 PM IST, Monday–Sunday",
+  address:process.env.REHMAT_BUSINESS_ADDRESS?.trim()||"Village Bagli Khurd, Tehsil Samrala, District Ludhiana, Punjab 141412, India",
 };
 
 export const policyConfig={

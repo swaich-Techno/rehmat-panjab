@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "./cart-provider";
 
@@ -35,10 +36,13 @@ async function readResponse(response: Response) {
   return response.json().catch(() => ({ message: "The payment service returned an unreadable response." })) as Promise<Record<string, unknown>>;
 }
 
-export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
+export function RazorpayCheckout({ lines, policyVersion }: { lines: CheckoutLine[]; policyVersion: string }) {
   const { clear } = useCart();
   const [state, setState] = useState<CheckoutState>("idle");
   const [message, setMessage] = useState("Your total will be rechecked securely before the payment window opens.");
+  const [termsAccepted,setTermsAccepted]=useState(false);
+  const [returnsAccepted,setReturnsAccepted]=useState(false);
+  const [marketingConsent,setMarketingConsent]=useState(false);
 
   async function beginCheckout() {
     const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
@@ -55,7 +59,7 @@ export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
       const orderResponse = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines }),
+        body: JSON.stringify({ lines, policyAcceptance:{version:policyVersion,acceptedAt:new Date().toISOString(),marketingConsent} }),
       });
       const order = await readResponse(orderResponse);
       if (!orderResponse.ok) throw new Error(typeof order.message === "string" ? order.message : "Checkout could not start.");
@@ -124,7 +128,8 @@ export function RazorpayCheckout({ lines }: { lines: CheckoutLine[] }) {
   return (
     <div className={`razorpay-checkout state-${state}`}>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" onError={() => { setState("error"); setMessage("Secure checkout could not load. Check your connection and try again."); }} />
-      <button className="button button-dark" type="button" onClick={beginCheckout} disabled={busy || !lines.length}>
+      <div className="checkout-acceptance"><label><input type="checkbox" checked={termsAccepted} onChange={event=>setTermsAccepted(event.target.checked)}/> I accept the <Link href="/policies/terms">Terms and Conditions</Link>.</label><label><input type="checkbox" checked={returnsAccepted} onChange={event=>setReturnsAccepted(event.target.checked)}/> I acknowledge the <Link href="/policies/returns">Cancellation, Return and Refund Policy</Link>.</label><label><input type="checkbox" checked={marketingConsent} onChange={event=>setMarketingConsent(event.target.checked)}/> Send me optional product news and offers.</label></div>
+      <button className="button button-dark" type="button" onClick={beginCheckout} disabled={busy || !lines.length || !termsAccepted || !returnsAccepted}>
         {state === "creating" ? "Preparing secure checkout…" : state === "verifying" ? "Verifying payment…" : "Pay securely with Razorpay"}
       </button>
       <p className="checkout-status" aria-live="polite" aria-atomic="true">{message}</p>

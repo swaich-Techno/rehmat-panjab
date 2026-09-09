@@ -6,6 +6,7 @@ import { SiteHeader } from "./components/site-header";
 import "./globals.css";
 import { getSiteUrl } from "../lib/site-url";
 import { RehmatGuide } from "./components/rehmat-guide";
+import { CookiePreferences } from "./components/cookie-preferences";
 
 export async function generateMetadata(): Promise<Metadata> {
   const origin = getSiteUrl();
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(origin),
     title: { default: "REHMAT PANJAB — Perfume oil, close to skin", template: "%s — REHMAT PANJAB" },
     description: "Concentrated perfume oils from Rehmat Panjab, worn close to skin.",
-    openGraph: { type: "website", siteName: "Rehmat Panjab", title: "REHMAT PANJAB — Perfume oil, close to skin", description: "Your Oil, Your Atmosphere. Find the Rehmat that feels like you.", images: [{ url: socialImage, width: 1792, height: 937, alt: "Rehmat Panjab perfume oil campaign" }] },
+    openGraph: { type: "website", siteName: "Rehmat Panjab", title: "REHMAT PANJAB — Perfume oil, close to skin", description: "Your Oil, Your Atmosphere. Find the Rehmat that feels like you.", images: [{ url: socialImage, width: 1792, height: 937, alt: "Rehmat Panjab rose-gold perfume oil bottle" }] },
     twitter: { card: "summary_large_image", title: "REHMAT PANJAB", description: "Perfume oil, close to skin.", images: [socialImage] },
   };
 }
@@ -34,6 +35,7 @@ export default function RootLayout({
           {children}
           <SiteFooter />
           <RehmatGuide />
+          <CookiePreferences />
         </CartProvider>
       </body>
     </html>

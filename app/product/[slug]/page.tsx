@@ -13,7 +13,7 @@ import { getProductReviewSummary } from "../../../lib/reviews";
 import { getStorefrontProduct, getStorefrontProducts } from "../../../lib/storefront";
 import { getExperienceSettings } from "../../../lib/experience-settings";
 import { getSiteUrl } from "../../../lib/site-url";
-import { getStoreSettings, supportedTrustItems } from "../../../lib/store-settings";
+import { getPublishedPolicyRecord, getStoreSettings, supportedTrustItems } from "../../../lib/store-settings";
 import { TrustStrip } from "../../components/trust-strip";
 
 export function generateStaticParams() {
@@ -38,11 +38,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) notFound();
-  const [reviews, catalogue, experience, storeSettings] = await Promise.all([
+  const [reviews, catalogue, experience, storeSettings, publishedPolicies] = await Promise.all([
     product.databaseId ? getProductReviewSummary(product.databaseId, product.reviewsEnabled) : Promise.resolve({ average: 0, total: 0, breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, reviews: [], submissionsEnabled: false }),
     getStorefrontProducts(),
     getExperienceSettings(),
     getStoreSettings(),
+    getPublishedPolicyRecord(),
   ]);
   const related = catalogue.filter((item) => item.slug !== product.slug).slice(0, 3);
   const purchasable = COMMERCE_ENABLED && product.variants.some((variant) => isPurchasable(product, variant));
@@ -95,7 +96,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel format-panel">
           <p className="eyebrow">02 · Bottle and order</p>
           <h2>Choose your<br />bottle.</h2>
-          <ProductPurchase product={product} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage,notice:experience.whatsappNotice}} />
+          <ProductPurchase product={product} policiesPublished={Boolean(publishedPolicies)} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage,notice:experience.whatsappNotice}} />
           <TrustStrip items={supportedTrustItems(storeSettings)}/>
         </section>
         <ProductReviews productId={product.databaseId ?? "00000000-0000-0000-0000-000000000000"} productName={product.name} summary={reviews} />

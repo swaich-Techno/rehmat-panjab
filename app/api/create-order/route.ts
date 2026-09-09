@@ -7,7 +7,7 @@ import { createRazorpayOrderToken } from "../../../lib/razorpay";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { calculateOrderQuote } from "../../../lib/quote";
-import { getStoreSettings, policiesComplete } from "../../../lib/store-settings";
+import { getPublishedPolicyRecord, policiesComplete } from "../../../lib/store-settings";
 
 const requestSchema = z.object({
   lines: z.array(z.object({
@@ -15,6 +15,7 @@ const requestSchema = z.object({
     quantity: z.number().int().min(1).max(10),
   }).strict()).min(1).max(20),
   couponCode: z.string().trim().max(40).optional(),
+  policyAcceptance:z.object({version:z.string().trim().min(1).max(40),acceptedAt:z.iso.datetime(),marketingConsent:z.boolean()}).strict(),
 }).strict();
 
 function errorStatus(error: unknown) {
@@ -24,10 +25,12 @@ function errorStatus(error: unknown) {
 
 export async function POST(request: Request) {
   if (!COMMERCE_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
-  if (!policiesComplete(await getStoreSettings())) return NextResponse.json({ message: "Checkout is not ready: required merchant and policy settings are incomplete." }, { status: 503 });
+  const publishedPolicy=await getPublishedPolicyRecord();
+  if (!publishedPolicy||!policiesComplete(publishedPolicy.settings)) return NextResponse.json({ message: "Checkout is not ready: required merchant and policy settings are incomplete." }, { status: 503 });
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Your cart could not be validated." }, { status: 400 });
+  if(parsed.data.policyAcceptance.version!==publishedPolicy.version)return NextResponse.json({message:"The policies changed. Please review and accept the current version."},{status:409});
 
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -100,6 +103,9 @@ export async function POST(request: Request) {
       razorpay_order_id: order.id,
       coupon_id: quote.couponId,
       coupon_code: quote.couponCode,
+      policy_version:publishedPolicy.version,
+      policies_accepted_at:new Date().toISOString(),
+      marketing_consent:parsed.data.policyAcceptance.marketingConsent,
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 

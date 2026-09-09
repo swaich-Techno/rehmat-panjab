@@ -1,12 +1,31 @@
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
-import {getStoreSettings} from "../../../lib/store-settings";
-const definitions={
- shipping:{title:"Shipping and Delivery Policy",intro:"Delivery arrangements are confirmed personally before an order is accepted.",group:"shipping",items:[["Where orders ship","shippingRegions"],["Processing time","dispatchTime"],["Delivery estimates","estimatedDeliveryTime"],["Charges","shippingCharge"],["Free-shipping threshold","freeShippingThreshold"],["Courier method","courierMethod"],["Tracking","trackingProcess"],["Delivery attempts","deliveryAttemptRules"],["Address changes","addressChangeRules"],["Lost packages","lostPackageProcess"],["Damage","damagedPackageProcess"]]},
- returns:{title:"Cancellation, Return and Refund Policy",intro:"Please contact Rehmat Panjab promptly about a cancellation, damaged delivery, incorrect item or return request.",group:"returns",items:[["Return-request window","returnRequestWindow"],["Eligibility","eligibilityConditions"],["Opened perfume oil","openedOilRule"],["Used products","usedProductRule"],["Incorrect item","incorrectItemProcess"],["Damaged item","damagedItemProcess"],["Required evidence","evidenceRequirements"],["Return shipping","returnShippingResponsibility"],["Exchanges","exchangeAvailability"],["Store credit","storeCreditAvailability"],["Non-returnable products","nonReturnableProducts"],["Discounted items","discountedItemRules"]]},
- privacy:{title:"Privacy Policy",intro:"Rehmat Panjab uses personal information only for the purposes described in its owner-approved settings.",group:"privacy",items:[["Privacy contact","privacyContactEmail"],["Data collected","dataCollected"],["Purpose","collectionPurpose"],["Supabase","supabaseInvolvement"],["Razorpay","razorpayInvolvement"],["WhatsApp","whatsappInvolvement"],["Analytics and cookies","analyticsCookies"],["Retention","retention"],["Deletion and correction","deletionCorrectionRequests"],["Age requirements","ageRequirements"],["Data security","dataSecurityStatement"]]},
- terms:{title:"Terms and Conditions",intro:"These terms cover website use, manually confirmed WhatsApp order requests and any future online checkout that is separately activated.",group:"terms",items:[["Merchant identity","merchantIdentity"],["Website eligibility","websiteEligibility"],["Product information","productInformationLimitations"],["Pricing and availability","pricingAvailability"],["Order acceptance","orderAcceptance"],["WhatsApp orders","whatsappOrderStatus"],["Payment confirmation","paymentConfirmation"],["Coupons and discounts","couponsDiscounts"],["Shipping","shipping"],["Returns","returns"],["Intellectual property","intellectualProperty"],["Inspired fragrance references","inspirationDisclaimer"],["Misuse","misuseProhibitedConduct"],["Liability","liabilityLimitations"],["Governing law","governingLawJurisdiction"],["Contact","contactDetails"],["Last updated","lastUpdatedDate"]]},
- cancellation:{title:"Cancellation Policy",intro:"Cancellation terms are shown only after they have been supplied and approved by the owner.",group:"cancellation",items:[["Cancellation window","cancellationWindow"],["How to cancel","cancellationMethod"],["Dispatched orders","dispatchedOrdersCancellation"],["Refund method","refundMethod"],["Processing timeline","refundProcessingTimeline"]]},
-} as const;
-export function generateStaticParams(){return Object.keys(definitions).map(slug=>({slug}))}export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const policy=definitions[slug as keyof typeof definitions];return policy?{title:policy.title,alternates:{canonical:`/policies/${slug}`}}:{}}
-export default async function Page({params}:{params:Promise<{slug:string}>}){const {slug}=await params;const policy=definitions[slug as keyof typeof definitions];if(!policy)notFound();const settings=await getStoreSettings();const group=settings[policy.group];const cancellationItems=slug==="returns"?definitions.cancellation.items.map(([label,key])=>[label,settings.cancellation[key]] as const):[];const items=[...cancellationItems,...policy.items.map(([label,key])=>[label,group[key]] as const)].filter(([,value])=>Boolean(value));const support=settings.merchant.supportEmail||settings.merchant.supportPhone;return <main id="main-content" className="legal-page"><p className="eyebrow">Rehmat Panjab</p><h1>{policy.title}</h1><p>{policy.intro}</p>{slug==="terms"&&<p>A WhatsApp message is only an order request until Rehmat Panjab confirms it.</p>}{items.length>0&&<dl>{items.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}{support&&<p>Questions about this policy may be directed to {settings.merchant.supportEmail?<a href={`mailto:${settings.merchant.supportEmail}`}>{settings.merchant.supportEmail}</a>:<a href={`tel:${settings.merchant.supportPhone.replace(/\s/g,"")}`}>{settings.merchant.supportPhone}</a>}.</p>}</main>}
+import Link from "next/link";
+import {getPolicyTemplate,policySlugs,type PolicySlug} from "../../../lib/policy-templates";
+import {getPublishedPolicyRecord} from "../../../lib/store-settings";
+export const dynamic="force-dynamic";
+
+export function generateStaticParams(){return policySlugs.map(slug=>({slug}));}
+
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
+  const {slug}=await params;
+  if(!policySlugs.includes(slug as PolicySlug))return {};
+  const published=await getPublishedPolicyRecord();
+  if(!published)return {robots:{index:false,follow:false}};
+  const policy=getPolicyTemplate(slug as PolicySlug,published.settings);
+  return {title:policy.title,description:policy.description,alternates:{canonical:`/policies/${slug}`},openGraph:{title:policy.title,description:policy.description,url:`/policies/${slug}`}};
+}
+
+export default async function Page({params}:{params:Promise<{slug:string}>}){
+  const {slug}=await params;
+  if(!policySlugs.includes(slug as PolicySlug))notFound();
+  const published=await getPublishedPolicyRecord();
+  if(!published)notFound();
+  const policy=getPolicyTemplate(slug as PolicySlug,published.settings);
+  const date=new Intl.DateTimeFormat("en-IN",{dateStyle:"long",timeZone:"Asia/Kolkata"}).format(new Date(`${published.effectiveDate}T00:00:00+05:30`));
+  return <main id="main-content" className="legal-page policy-document">
+    <header><p className="eyebrow">Rehmat Panjab · Policy {published.version}</p><h1>{policy.title}</h1><p><strong>Last updated:</strong> {date}</p><p>{policy.description}</p></header>
+    {policy.sections.map(section=><section key={section.heading}><h2>{section.heading}</h2>{section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}{section.bullets&&<ul>{section.bullets.map(item=><li key={item}>{item}</li>)}</ul>}</section>)}
+    <nav className="policy-links" aria-label="Customer policies">{policySlugs.filter(item=>item!==slug).map(item=><Link key={item} href={`/policies/${item}`}>{getPolicyTemplate(item,published.settings).title}</Link>)}</nav>
+  </main>;
+}
