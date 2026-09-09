@@ -796,6 +796,7 @@ a:hover .product-media img { transform: scale(1.018); }
 .quantity-stepper span { text-align: center; font-variant-numeric: tabular-nums; }
 
 .cart-layer { position: fixed; z-index: 9000; inset: 0; overflow: hidden; visibility: hidden; pointer-events: none; transition: visibility 0s linear 280ms; }
+.cart-layer:not(.is-open) { display: none; }
 .cart-layer.is-open { visibility: visible; pointer-events: auto; transition-delay: 0s; }
 .cart-scrim { position: absolute; inset: 0; width: 100%; border: 0; background: rgba(6,18,14,.58); opacity: 0; cursor: pointer; transition: opacity 220ms ease; }
 .cart-layer.is-open .cart-scrim { opacity: 1; }

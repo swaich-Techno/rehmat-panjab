@@ -42,6 +42,7 @@ test("owner-confirmed inventory and availability stay variant-authoritative", as
   assert.match(purchase, /filter\(\(variant\) => variant\.availableQuantity > 0\)/);
   assert.match(quiz, /grounded in the active Rehmat fragrance collection/);
   assert.match(styles, /\.cart-layer \{[^}]*overflow: hidden/);
+  assert.match(styles, /\.cart-layer:not\(\.is-open\) \{ display: none; \}/);
 });
 
 test("suitability is backend-managed, searchable, filterable and visible", async () => {
