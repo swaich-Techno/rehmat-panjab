@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import Razorpay from "razorpay";
 import { z } from "zod";
-import { COMMERCE_ENABLED } from "../../../lib/commerce";
+import { RAZORPAY_CHECKOUT_ENABLED } from "../../../lib/commerce";
 import { verifyRazorpayOrderToken, verifyRazorpayPaymentSignature } from "../../../lib/razorpay";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 
@@ -12,13 +13,14 @@ const requestSchema = z.object({
 }).strict();
 
 export async function POST(request: Request) {
-  if (!COMMERCE_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
+  if (!RAZORPAY_CHECKOUT_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ success: false, message: "Payment details are incomplete." }, { status: 400 });
 
+  const keyId = process.env.RAZORPAY_KEY_ID;
   const secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!secret) return NextResponse.json({ success: false, message: "Payment service is not configured." }, { status: 503 });
+  if (!keyId || !secret) return NextResponse.json({ success: false, message: "Payment service is not configured." }, { status: 503 });
 
   const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature, order_token: orderToken } = parsed.data;
   const validOrder = verifyRazorpayOrderToken(orderId, orderToken, secret);
@@ -29,6 +31,12 @@ export async function POST(request: Request) {
 
   const supabaseAdmin = createSupabaseAdminClient();
   if (!supabaseAdmin) return NextResponse.json({ success: false, message: "Order storage is not configured." }, { status: 503 });
+  const {data:internalOrder}=await supabaseAdmin.from("orders").select("id,total_paise,currency,status").eq("razorpay_order_id",orderId).maybeSingle();
+  if(!internalOrder||internalOrder.status==="refunded")return NextResponse.json({success:false,message:"Payment does not match an active order."},{status:409});
+  const payment=await new Razorpay({key_id:keyId,key_secret:secret}).payments.fetch(paymentId).catch(()=>null);
+  if(!payment||payment.order_id!==orderId||payment.status!=="captured"||payment.captured!==true||Number(payment.amount)!==Number(internalOrder.total_paise)||payment.currency!==internalOrder.currency){
+    return NextResponse.json({success:false,message:"Payment has not been captured for the expected order total."},{status:409});
+  }
   const { data: remaining, error } = await supabaseAdmin.rpc("complete_razorpay_order", {
     p_razorpay_order_id: orderId,
     p_razorpay_payment_id: paymentId,

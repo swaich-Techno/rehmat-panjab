@@ -48,7 +48,7 @@ test("customer links and policy safeguards use only the approved contact",async(
   assert.match(current,/\+91 70094 64475/);assert.match(current,/917009464475/);assert.match(contact,/tel:\$\{merchant\.phoneE164\}/);assert.match(contact,/mailto:/);
   assert.doesNotMatch(current,/98769 13550|919876913550|Phone:\s*\+91(?:\D|$)/);
   assert.match(policyApi,/support_email_verified_at/);assert.match(deliveryApi,/\^\\d\{6\}\$/);assert.doesNotMatch(deliveryApi,/Khanna|Samrala/i);
-  assert.match(checkout,/delivery_snapshot/);assert.match(checkout,/delivery charge must be calculated and disclosed before payment/);
+  assert.match(checkout,/delivery_snapshot/);assert.match(checkout,/Shipping charges apply below ₹1,500/);
 });
 
 test("Razorpay.me evidence is admin-only and does not activate checkout",async()=>{const [migration,readiness,commerce]=await Promise.all([read("supabase/migrations/202609100003_contact_and_razorpay_profile.sql"),read("app/admin/readiness/page.tsx"),read("lib/commerce.ts")]);assert.match(migration,/razorpay\.me\/@harkiratsingh5450/);assert.match(migration,/'razorpay_kyc_approved',true/);assert.match(migration,/status='pending'/);assert.match(readiness,/Share only after an order total is manually confirmed/);assert.match(commerce,/NEXT_PUBLIC_COMMERCE_ENABLED/);});

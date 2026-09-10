@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
+import { randomInt } from "node:crypto";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { z } from "zod";
-import { COMMERCE_ENABLED } from "../../../lib/commerce";
+import { RAZORPAY_CHECKOUT_ENABLED } from "../../../lib/commerce";
 import { createRazorpayOrderToken } from "../../../lib/razorpay";
 import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -28,7 +28,7 @@ function errorStatus(error: unknown) {
 }
 
 export async function POST(request: Request) {
-  if (!COMMERCE_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
+  if (!RAZORPAY_CHECKOUT_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
   const publishedPolicy=await getPublishedPolicyRecord();
   if (!publishedPolicy||!policiesComplete(publishedPolicy.settings)) return NextResponse.json({ message: "Checkout is not ready: required merchant and policy settings are incomplete." }, { status: 503 });
 
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
   const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin).catch(()=>null);
   if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
-  if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"The delivery charge must be calculated and disclosed before payment."},{status:409});
+  if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"Shipping charges apply below ₹1,500. Share your order request on WhatsApp and Rehmat Panjab will confirm the courier charge before payment."},{status:409});
   const subtotal=amount; amount=quote.grandTotalPaise;
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return NextResponse.json({ message: "The payment total must be at least ₹1." }, { status: 400 });
@@ -94,8 +94,8 @@ export async function POST(request: Request) {
 
   try {
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
-    const receipt = `rp_${Date.now().toString(36)}_${randomUUID().replaceAll("-", "").slice(0, 12)}`;
-    const order = await razorpay.orders.create({ amount, currency: "INR", receipt });
+    const orderNumber = `RP-${new Date().getUTCFullYear()}-${randomInt(0, 1_000_000).toString().padStart(6, "0")}`;
+    const order = await razorpay.orders.create({ amount, currency: "INR", receipt: orderNumber, payment_capture: true });
     const { data: authData } = await supabase.auth.getUser();
     const { data: savedOrder, error: orderError } = await supabaseAdmin.from("orders").insert({
       user_id: authData.user?.id ?? null,
@@ -105,6 +105,7 @@ export async function POST(request: Request) {
       shipping_paise: quote.shipping.shippingPaise,
       discount_paise: quote.discountPaise,
       total_paise: amount,
+      order_number: orderNumber,
       razorpay_order_id: order.id,
       coupon_id: quote.couponId,
       coupon_code: quote.couponCode,

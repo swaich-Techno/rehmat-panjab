@@ -20,6 +20,9 @@ type RazorpayOptions = {
   handler: (response: PaymentResponse) => void;
   modal: { ondismiss: () => void };
   theme: { color: string };
+  prefill: { email: string; contact: string };
+  readonly: { email: boolean; contact: boolean };
+  method: { upi: boolean; card: boolean; netbanking: boolean; wallet: boolean; emi: boolean; paylater: boolean };
 };
 
 type RazorpayInstance = {
@@ -75,9 +78,12 @@ export function RazorpayCheckout({ lines, policyVersion,address }: { lines: Chec
         amount: order.amount,
         currency: order.currency,
         name: "Rehmat Panjab",
-        description: "Perfume oil order",
+        description: "Rehmat Panjab concentrated perfume oils · Operated by Harkirat Singh",
         order_id: order.order_id,
         theme: { color: "#173d32" },
+        prefill: {email:address?.delivery.email??"",contact:address?.delivery.mobile??""},
+        readonly: {email:true,contact:true},
+        method: {upi:true,card:true,netbanking:true,wallet:true,emi:false,paylater:false},
         handler: async (payment) => {
           paymentStarted = true;
           setState("verifying");

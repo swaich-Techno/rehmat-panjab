@@ -1,1 +1,3 @@
 export const COMMERCE_ENABLED = process.env.NEXT_PUBLIC_COMMERCE_ENABLED === "true";
+export const RAZORPAY_ENABLED = process.env.RAZORPAY_ENABLED === "true";
+export const RAZORPAY_CHECKOUT_ENABLED = COMMERCE_ENABLED && RAZORPAY_ENABLED;
