@@ -15,6 +15,8 @@ const requestSchema = z.object({
     quantity: z.number().int().min(1).max(10),
   }).strict()).min(1).max(20),
   couponCode: z.string().trim().max(40).optional(),
+  customerIdentifier:z.string().trim().max(120).optional(),
+  deliveryPin:z.string().trim().regex(/^\d{6}$/).optional(),
   policyAcceptance:z.object({version:z.string().trim().min(1).max(40),acceptedAt:z.iso.datetime(),marketingConsent:z.boolean()}).strict(),
 }).strict();
 
@@ -80,9 +82,10 @@ export async function POST(request: Request) {
     amount += variant.price_paise * quantity;
   }
 
-  const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode).catch(()=>null);
+  const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin).catch(()=>null);
   if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
-  const subtotal=amount; amount=quote.totalPaise;
+  if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"The delivery charge must be calculated and disclosed before payment."},{status:409});
+  const subtotal=amount; amount=quote.grandTotalPaise;
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return NextResponse.json({ message: "The payment total must be at least ₹1." }, { status: 400 });
   }
@@ -97,7 +100,7 @@ export async function POST(request: Request) {
       status: "pending",
       currency: "INR",
       subtotal_paise: subtotal,
-      shipping_paise: 0,
+      shipping_paise: quote.shipping.shippingPaise,
       discount_paise: quote.discountPaise,
       total_paise: amount,
       razorpay_order_id: order.id,
@@ -106,6 +109,8 @@ export async function POST(request: Request) {
       policy_version:publishedPolicy.version,
       policies_accepted_at:new Date().toISOString(),
       marketing_consent:parsed.data.policyAcceptance.marketingConsent,
+      delivery_method:quote.shipping.deliveryMethod,
+      delivery_snapshot:{method:quote.shipping.deliveryMethod,pin_code:parsed.data.deliveryPin??null,eligible_subtotal_paise:quote.shipping.eligibleSubtotalPaise,shipping_paise:quote.shipping.shippingPaise,confirmed_at:new Date().toISOString()},
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 

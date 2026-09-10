@@ -6,7 +6,7 @@ import { NotifyForm } from "../../components/notify-form";
 import { ProductMedia } from "../../components/product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
-import { productRedirects, products as editorialProducts } from "../../../lib/products";
+import { INSPIRATION_DISCLAIMER, productRedirects, products as editorialProducts } from "../../../lib/products";
 import { availabilityLabel, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { getProductReviewSummary } from "../../../lib/reviews";
@@ -78,6 +78,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="eyebrow">Rehmat {product.number} · {availabilityLabel(product)}</p>
           <h1>{product.name}</h1>
           {product.inspirationLine && <p className="product-inspiration">{product.inspirationLine}</p>}
+          {product.inspirationLine && <p className="inspiration-disclaimer">{INSPIRATION_DISCLAIMER}</p>}
           <p className="product-lede">{product.atmosphere}</p>
           {product.microDescription && <p className="product-micro-description">{product.microDescription}</p>}
           <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>

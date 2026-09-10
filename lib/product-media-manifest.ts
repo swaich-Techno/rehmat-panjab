@@ -29,7 +29,7 @@ export const PRODUCT_MEDIA_MANIFEST = {
   junoon: bottle("junoon", "JUNOON"),
   "red-musk": bottle("red-musk", "Red Musk"),
   nazakat: bottle("nazakat", "NAZAKAT"),
-  "zara-candy": bottle("zara-candy", "Zara Candy"),
+  gulnaar: {...bottle("gulnaar", "GULNAAR"),mood:"/images/bottles/rose-gold-bottle-oil.webp"},
   "deer-musk": bottle("deer-musk", "Deer Musk"),
   afsoon: bottle("afsoon", "AFSOON"),
 } as const;

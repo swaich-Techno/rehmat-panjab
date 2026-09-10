@@ -17,8 +17,8 @@ export async function POST(request:Request){
   if(existingVersion?.status==="published")return NextResponse.json({message:"A published policy version is immutable. Save changes under a new version."},{status:409});
   const {data:current,error:readError}=await db.from("store_policy_settings").select("support_email_verified_at,support_phone_confirmed_at,shipping_calculation_verified_at,courier_configuration_verified_at").eq("id",true).single();
   if(readError)return NextResponse.json({message:"Publication checks could not be read."},{status:500});
-  const checks=[current?.support_email_verified_at,current?.support_phone_confirmed_at,current?.shipping_calculation_verified_at,current?.courier_configuration_verified_at];
-  if(parsed.data.publish&&checks.some(value=>!value))return NextResponse.json({message:"Publishing is blocked until mailbox, phone, shipping and courier checks are verified."},{status:409});
+  const checks=[current?.support_email_verified_at,current?.support_phone_confirmed_at,current?.shipping_calculation_verified_at];
+  if(parsed.data.publish&&checks.some(value=>!value))return NextResponse.json({message:"Publishing is blocked until mailbox, phone and shipping checks are verified."},{status:409});
   const now=new Date().toISOString();
   const payload={...clean,policy_version:parsed.data.policyVersion,policy_effective_date:parsed.data.effectiveDate,publish_status:parsed.data.publish?"published":"draft",owner_approved_at:parsed.data.publish?now:null,publish_confirmed_at:parsed.data.publish?now:null,admin_notes:parsed.data.adminNotes,updated_by:user.id,updated_at:now};
   const {error}=await db.from("store_policy_settings").update(payload).eq("id",true);if(error)return NextResponse.json({message:"Policy settings could not be saved."},{status:500});

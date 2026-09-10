@@ -1,14 +1,15 @@
 import { createSupabaseAdminClient } from "./supabase/admin";
+import { calculateShipping, type ShippingDecision } from "./shipping";
 
 export type QuoteLine = { variantId: string; quantity: number };
-export type OrderQuote = { subtotalPaise:number; discountPaise:number; totalPaise:number; couponCode:string|null; couponId:string|null; promotionalLabel:string|null };
+export type OrderQuote = { subtotalPaise:number; discountPaise:number; totalPaise:number; grandTotalPaise:number|null; couponCode:string|null; couponId:string|null; promotionalLabel:string|null; shipping:ShippingDecision };
 
-function discountAmount(type:string,value:number,eligible:number,max:number|null){
+export function discountAmount(type:string,value:number,eligible:number,max:number|null){
   const raw=type==="percentage"?Math.floor(eligible*Math.min(100,value)/100):value;
   return Math.max(0,Math.min(eligible,max===null?raw:Math.min(raw,max)));
 }
 
-export async function calculateOrderQuote(lines:QuoteLine[],couponInput?:string,customerIdentifier?:string):Promise<OrderQuote>{
+export async function calculateOrderQuote(lines:QuoteLine[],couponInput?:string,customerIdentifier?:string,deliveryPin?:string):Promise<OrderQuote>{
   const admin=createSupabaseAdminClient();
   if(!admin) throw new Error("Order quoting is not configured.");
   const quantities=new Map<string,number>();
@@ -53,5 +54,11 @@ export async function calculateOrderQuote(lines:QuoteLine[],couponInput?:string,
     if(discountPaise&&!autoCombinable&&!coupon.combinable){ if(couponDiscount>discountPaise){discountPaise=couponDiscount;promotionalLabel=coupon.public_description;} }
     else {discountPaise=Math.min(subtotalPaise,discountPaise+couponDiscount); promotionalLabel=coupon.public_description||promotionalLabel;}
   }
-  return {subtotalPaise,discountPaise,totalPaise:Math.max(0,subtotalPaise-discountPaise),couponCode,couponId,promotionalLabel};
+  const totalPaise=Math.max(0,subtotalPaise-discountPaise);
+  const {data:delivery}=await admin.from("local_delivery_settings").select("auto_eligibility_enabled,verified_at").eq("id",true).maybeSingle();
+  const {data:pins}=delivery?.auto_eligibility_enabled&&delivery.verified_at
+    ?await admin.from("local_delivery_pincodes").select("pin_code").eq("active",true)
+    :{data:[] as Array<{pin_code:string}>};
+  const shipping=calculateShipping(totalPaise,deliveryPin,{autoLocalDeliveryEnabled:Boolean(delivery?.auto_eligibility_enabled&&delivery.verified_at),approvedPins:(pins??[]).map(row=>row.pin_code)});
+  return {subtotalPaise,discountPaise,totalPaise,grandTotalPaise:shipping.shippingPaise===null?null:totalPaise+shipping.shippingPaise,couponCode,couponId,promotionalLabel,shipping};
 }

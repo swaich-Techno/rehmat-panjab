@@ -40,7 +40,7 @@ test("Razorpay order creation trusts catalogue prices and handles checkout failu
     readFile(new URL("../app/api/verify-payment/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/razorpay-checkout.tsx", import.meta.url), "utf8"),
   ]);
-  assert.match(createOrder, /select\("id, product_id, price_paise, enabled"\)/);
+  assert.match(createOrder, /select\("id, product_id, price_paise, enabled, bottle_id"\)/);
   assert.match(createOrder, /amount \+= variant\.price_paise \* quantity/);
   assert.doesNotMatch(createOrder, /parsed\.data\.amount/);
   assert.match(verifyPayment, /verifyRazorpayOrderToken/);
@@ -156,6 +156,6 @@ test("product pages omit the scent impression panel without leaving its styles",
   ]);
   assert.doesNotMatch(productPage, /Scent impression|editorial portrait|Fragrance details are still being verified|impression-panel/i);
   assert.doesNotMatch(styles, /impression-panel/);
-  assert.match(productPage, /03 · The ritual/);
-  assert.match(productPage, /04 · Available formats/);
+  assert.match(productPage, /01 · Notes and journey/);
+  assert.match(productPage, /02 · Bottle and order/);
 });

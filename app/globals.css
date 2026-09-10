@@ -215,6 +215,7 @@ a:hover .product-media img { transform: scale(1.018); }
 .product-subtitle { color: var(--forest); font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .product-suitability { margin: 15px 0 0; color: var(--muted-ink); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
 .product-suitability span { color: var(--forest); font-weight: 650; }
+.inspiration-disclaimer{max-width:62ch;color:var(--muted-ink);font-size:.7rem;line-height:1.55}.shipping-outcome{display:grid;gap:4px;padding:12px 0;border-top:1px solid var(--line)}.shipping-outcome span{color:var(--muted-ink)}
 .collection-copy > p:not(.product-subtitle) { max-width: 440px; color: var(--muted-ink); }
 .collection-copy ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 38px; padding: 0; list-style: none; }
 .collection-copy li, .character-chips span { border: 1px solid var(--line); border-radius: 30px; padding: 7px 13px; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; }
