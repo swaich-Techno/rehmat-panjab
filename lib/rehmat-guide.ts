@@ -1,55 +1,40 @@
-import type { StorefrontProduct } from "./catalog";
+import type {StorefrontProduct} from "./catalog";
 
-export type GuideProduct = Pick<StorefrontProduct,"slug"|"name"|"inspirationLine"|"image"|"imageAlt"|"notes"|"suitability"|"suitabilityNote"|"character"|"atmosphere"> & {
-  reason: string;
-  variants: Array<{ sizeMl: number; pricePaise: number; availableQuantity: number }>;
-};
+export type GuideIntent="general_education"|"fragrance_family"|"product_discovery"|"product_comparison"|"budget_size"|"layering"|"occasion_mood"|"live_price_inventory"|"order_preparation"|"unrelated";
+export type GuideKnowledge={topic:string;aliases:string[];explanation:string;sourceTitle:string;sourceUrl:string;sourceLicense:string};
+export type GuideProduct=Pick<StorefrontProduct,"slug"|"name"|"inspirationLine"|"image"|"imageAlt"|"notes"|"suitability"|"suitabilityNote"|"character"|"atmosphere">&{reason:string;variants:Array<{sizeMl:number;pricePaise:number;availableQuantity:number}>};
+export type GuideReply={message:string;products:GuideProduct[];layering:boolean;source:"deterministic"|"knowledge";intent:GuideIntent;sources?:Array<{title:string;url:string;license:string}>};
 
-export type GuideReply = { message: string; products: GuideProduct[]; layering: boolean; source: "deterministic" };
+const numbers:Record<string,number>={one:1,two:2,three:3,four:4,five:5};
+const vocabulary:Record<string,string[]>={soft:["soft","gentle","quiet","work","office","light"],rich:["rich","deep","bold","evening","night","wedding","statement"],sweet:["sweet","vanilla","candy","comfort"],musky:["musk","musky","clean"],floral:["floral","rose","feminine"],woody:["wood","woody","oud","earth"],fruity:["fruit","fruity","berry","berries","cherry","plum","lychee","pear","strawberry","passionfruit"]};
+const fragranceWords=/\b(fragrance|perfume|attar|ittar|oud|musk|amber|note|floral|woody|fruity|gourmand|layer|scent|oil|pulse point)/;
 
-const numbers: Record<string,number> = { one:1,two:2,three:3,four:4,five:5 };
-const vocabulary: Record<string,string[]> = {
-  soft:["soft","gentle","quiet","work","office","light"], rich:["rich","deep","bold","evening","night","wedding","statement"],
-  sweet:["sweet","vanilla","candy","comfort"], musky:["musk","musky","clean"], floral:["floral","rose","feminine","wife","woman"],
-  woody:["wood","woody","oud","earth","natural"], fruity:["fruit","fruity","berry","berries","cherry","plum","lychee","pear","strawberry","passionfruit"],
-};
+export function sanitizeGuideInput(value:unknown){return String(value??"").replace(/[\u0000-\u001f\u007f]/g," ").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim().slice(0,360);}
+export function redactPersonalData(value:unknown){return sanitizeGuideInput(value).replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,"[email]").replace(/(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}\b/g,"[phone]").replace(/\b\d{6}\b/g,"[pin]");}
 
-export function sanitizeGuideInput(value: unknown) {
-  return String(value ?? "").replace(/[\u0000-\u001f\u007f]/g," ").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim().slice(0,360);
-}
+export function classifyGuideIntent(input:unknown):GuideIntent{const q=sanitizeGuideInput(input).toLowerCase();if(!fragranceWords.test(q)&&!/\b(show|recommend|something|price|stock|available|budget|compare|wedding|work|evening|sweet|soft)\b/.test(q))return "unrelated";if(/\b(order|buy|whatsapp|delivery|checkout)\b/.test(q))return "order_preparation";if(/\b(price|cost|stock|inventory|available|availability)\b/.test(q))return "live_price_inventory";if(/\b(layer|combine|combination|apply first)\b/.test(q))return "layering";if(/\b(compare|versus|vs)\b/.test(q)||(/difference between/.test(q)&&/\b(show|sell|available|rehmat|product)\b/.test(q)))return "product_comparison";if(/\b(under|below|within|budget|\d+\s*ml)\b/.test(q))return "budget_size";if(/\b(do you sell|do you have|show me|available rehmat)\b/.test(q)&&fragranceWords.test(q))return "product_discovery";if(/\b(occasion|mood|work|office|wedding|evening|soft|bold|intensity|less sweet|don'?t like)\b/.test(q))return "occasion_mood";if(/\b(family|families|floral|woody|fruity|gourmand|ambery)\b/.test(q))return "fragrance_family";if(fragranceWords.test(q))return "general_education";return "product_discovery";}
 
-function searchable(product: StorefrontProduct) {
-  return [product.name,product.inspirationLine,product.atmosphere,product.summary,product.description,product.scentFamily,...product.character,...product.suitableFor,...(product.notes ? [...product.notes.top,...product.notes.heart,...product.notes.base] : [])].filter(Boolean).join(" ").toLowerCase();
-}
+function searchable(product:StorefrontProduct){return [product.name,product.inspirationLine,product.atmosphere,product.summary,product.description,product.scentFamily,...product.character,...product.suitableFor,...(product.notes?[...product.notes.top,...product.notes.heart,...product.notes.base]:[])].filter(Boolean).join(" ").toLowerCase();}
+function available(product:StorefrontProduct,size?:number,budget?:number){return product.variants.filter(v=>v.enabled&&v.availableQuantity>0&&v.pricePaise!==null&&(!size||v.sizeMl===size)&&(!budget||(v.pricePaise??Infinity)<=budget*100));}
 
-function available(product: StorefrontProduct, size?: number, budget?: number) {
-  return product.variants.filter(v=>v.enabled&&v.availableQuantity>0&&v.pricePaise!==null&&(!size||v.sizeMl===size)&&(!budget||(v.pricePaise??Infinity)<=budget*100));
-}
+function generalReply(query:string,knowledge:GuideKnowledge[],intent:GuideIntent):GuideReply{const matched=knowledge.filter(item=>[item.topic,...item.aliases].some(term=>query.includes(term.toLowerCase()))).slice(0,3);if(!matched.length)return {message:"Fragrance develops in stages and is experienced differently on skin. Ask me about attar, perfume oil, oud, musk, notes, families, layering or pulse points.",products:[],layering:false,source:"deterministic",intent};return {message:`${matched.map(item=>`${item.topic}: ${item.explanation}`).join(" ")} Would you like me to show available Rehmat oils in one of these styles?`,products:[],layering:false,source:"knowledge",intent,sources:matched.map(item=>({title:item.sourceTitle,url:item.sourceUrl,license:item.sourceLicense}))};}
 
-export function createGuideReply(input: unknown, catalogue: StorefrontProduct[], options?: { excluded?: string[]; allowed?: string[]; max?: number }): GuideReply {
-  const query=sanitizeGuideInput(input).toLowerCase();
-  const excluded=new Set(["saffron-amber-oud",...(options?.excluded??[])]);
-  let pool=catalogue.filter(p=>p.status==="active"&&!excluded.has(p.slug)&&(options?.allowed?.length?options.allowed.includes(p.slug):true));
-  const budget=Number(query.match(/(?:under|below|within|budget)\s*(?:₹|rs\.?|inr)?\s*(\d{2,5})/i)?.[1]??0)||undefined;
-  const size=Number(query.match(/\b(6|12)\s*ml\b/i)?.[1]??0)||undefined;
-  const feminine=/\b(wife|woman|women|feminine|her)\b/.test(query); const masculine=/\b(husband|man|men|masculine|him)\b/.test(query);
-  if(feminine) pool=pool.filter(p=>p.suitability!=="men"); if(masculine) pool=pool.filter(p=>p.suitability!=="women");
-  pool=pool.filter(p=>available(p,size,budget).length>0);
-  const named=pool.filter(p=>query.includes(p.name.toLowerCase())||p.searchAliases.some(a=>query.includes(a.toLowerCase())));
-  const wantsLayer=/\blayer|combination|combine\b/.test(query); const wantsCompare=/\bcompare|difference|versus|\bvs\b/.test(query);
-  const countHint=query.match(/\b([1-5])\b/)?.[1]??Object.entries(numbers).find(([word])=>query.includes(word))?.[1]??(wantsCompare?2:wantsLayer?3:options?.max??3);
-  const requestedCount=Math.max(1,Math.min(5,Number(countHint)));
-  const scored=pool.map(product=>{const text=searchable(product); let score=named.includes(product)?50:0; for(const words of Object.values(vocabulary)) for(const word of words) if(query.includes(word)&&text.includes(word)) score+=3; if(/work|day|office/.test(query)&&/work|daily|day|soft|clean/.test(text))score+=2; if(/wedding|evening|night/.test(query)&&/wedding|evening|rich|deep|statement/.test(text))score+=2; return {product,score};}).sort((a,b)=>b.score-a.score||a.product.number.localeCompare(b.product.number));
-  const selected=(named.length>=2&&wantsCompare?named:scored.map(x=>x.product)).slice(0,Math.min(requestedCount,options?.max??5));
-  const products=selected.map(product=>{
-    const variants=available(product,size,budget).map(v=>({sizeMl:v.sizeMl,pricePaise:v.pricePaise!,availableQuantity:v.availableQuantity}));
-    const matched=product.character.find(tag=>query.includes(tag.toLowerCase()))??product.character[0]??"considered";
-    return {...product,reason:`A ${matched.toLowerCase()} match grounded in its approved profile: ${product.atmosphere}`,variants};
-  });
-  if(!query) return {message:"Tell me the mood, occasion, intensity or budget you have in mind.",products:[],layering:false,source:"deterministic"};
-  if(!products.length) return {message:"I couldn’t find an available match for those details. Try a different budget, size or mood.",products:[],layering:wantsLayer,source:"deterministic"};
-  if(/last|longer|longevity|hours/.test(query)) return {message:"Performance varies by skin, climate and application. There is no approved hours-of-longevity claim, so I won’t invent one. Here are the closest profile matches.",products,layering:false,source:"deterministic"};
-  if(wantsLayer) return {message:`Here is a ${products.length}-oil combination using currently available fragrances. The profiles complement one another; no ratio or application order is claimed because none is approved.`,products,layering:true,source:"deterministic"};
-  if(wantsCompare) return {message:"Here is a grounded comparison using the approved profiles and live availability.",products,layering:false,source:"deterministic"};
-  return {message:products.length===1?"This is the strongest current match.":"These are the strongest current matches.",products,layering:false,source:"deterministic"};
+export function createGuideReply(input:unknown,catalogue:StorefrontProduct[],options?:{excluded?:string[];allowed?:string[];max?:number;knowledge?:GuideKnowledge[]}):GuideReply{
+  const query=sanitizeGuideInput(input).toLowerCase(),intent=classifyGuideIntent(query),knowledge=options?.knowledge??[];
+  if(intent==="unrelated")return {message:"Rehmat Guide specialises in fragrance education, Rehmat products, layering and order preparation.",products:[],layering:false,source:"deterministic",intent};
+  const mixed=/\b(do you sell|do you have|available rehmat)\b/.test(query)&&fragranceWords.test(query);
+  if((intent==="general_education"||intent==="fragrance_family")&&!mixed)return generalReply(query,knowledge,intent);
+  const excluded=new Set(["saffron-amber-oud",...(options?.excluded??[])]);let pool=catalogue.filter(p=>p.status==="active"&&!excluded.has(p.slug)&&(options?.allowed?.length?options.allowed.includes(p.slug):true));
+  const budget=Number(query.match(/(?:under|below|within|budget)\s*(?:₹|rs\.?|inr)?\s*(\d{2,5})/i)?.[1]??0)||undefined,size=Number(query.match(/\b(6|12)\s*ml\b/i)?.[1]??0)||undefined;
+  const feminine=/\b(wife|woman|women|feminine|her)\b/.test(query),masculine=/\b(husband|man|men|masculine|him)\b/.test(query);if(feminine)pool=pool.filter(p=>p.suitability!=="men");if(masculine)pool=pool.filter(p=>p.suitability!=="women");pool=pool.filter(p=>available(p,size,budget).length>0);
+  const named=pool.filter(p=>query.includes(p.name.toLowerCase())||p.searchAliases.some(a=>query.includes(a.toLowerCase()))),wantsLayer=intent==="layering",wantsCompare=intent==="product_comparison";
+  const countHint=query.match(/\b([1-5])\b/)?.[1]??Object.entries(numbers).find(([word])=>query.includes(word))?.[1]??(wantsCompare?2:wantsLayer?3:options?.max??3),requestedCount=Math.max(1,Math.min(5,Number(countHint)));
+  const scored=pool.map(product=>{const text=searchable(product);let score=named.includes(product)?50:0;for(const words of Object.values(vocabulary))for(const word of words)if(query.includes(word)&&text.includes(word))score+=3;if(/work|day|office/.test(query)&&/work|daily|day|soft|clean/.test(text))score+=2;if(/wedding|evening|night/.test(query)&&/wedding|evening|rich|deep|statement/.test(text))score+=2;if(/less sweet/.test(query)&&/sweet|candy|vanilla/.test(text))score-=12;return {product,score};}).sort((a,b)=>b.score-a.score||a.product.number.localeCompare(b.product.number));
+  const selected=(named.length&&(wantsCompare||intent==="live_price_inventory"||intent==="order_preparation")?named:scored.map(item=>item.product)).slice(0,Math.min(requestedCount,options?.max??5));
+  const products=selected.map(product=>({...product,reason:`A ${(product.character[0]??"considered").toLowerCase()} match grounded in its approved Rehmat profile.`,variants:available(product,size,budget).map(v=>({sizeMl:v.sizeMl,pricePaise:v.pricePaise!,availableQuantity:v.availableQuantity}))}));
+  if(!products.length)return {message:"I could not find an available Rehmat oil that matches all of those preferences. Which single preference would you like to adjust?",products:[],layering:wantsLayer,source:"deterministic",intent};
+  if(/last|longer|longevity|hours|allergy|medical/.test(query))return {message:"Performance varies by skin, climate and application, and I cannot give medical or allergy guarantees. I will not invent longevity claims.",products:[],layering:false,source:"deterministic",intent};
+  const prefix=mixed?`${generalReply(query,knowledge,"general_education").message} `:"";
+  const message=intent==="live_price_inventory"?"Here are the current server-verified sizes, prices and available quantities.":wantsLayer?`Here is a ${products.length}-oil combination using currently available Rehmat oils. No ratio or application order is claimed unless approved.`:wantsCompare?"Here is a grounded comparison using approved profiles and live availability.":intent==="order_preparation"?"These available items can be prepared as a WhatsApp order request; inventory, delivery and payment remain subject to confirmation.":products.length===1?"This is the strongest current match.":"These are the strongest current matches.";
+  return {message:prefix+message,products,layering:wantsLayer,source:"deterministic",intent};
 }

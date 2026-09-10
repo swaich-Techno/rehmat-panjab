@@ -8,6 +8,7 @@ import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { calculateOrderQuote } from "../../../lib/quote";
 import { getPublishedPolicyRecord, policiesComplete } from "../../../lib/store-settings";
+import {checkoutAddressSchema} from "../../../lib/address";
 
 const requestSchema = z.object({
   lines: z.array(z.object({
@@ -17,6 +18,7 @@ const requestSchema = z.object({
   couponCode: z.string().trim().max(40).optional(),
   customerIdentifier:z.string().trim().max(120).optional(),
   deliveryPin:z.string().trim().regex(/^\d{6}$/).optional(),
+  deliveryAddress:checkoutAddressSchema,
   policyAcceptance:z.object({version:z.string().trim().min(1).max(40),acceptedAt:z.iso.datetime(),marketingConsent:z.boolean()}).strict(),
 }).strict();
 
@@ -110,7 +112,8 @@ export async function POST(request: Request) {
       policies_accepted_at:new Date().toISOString(),
       marketing_consent:parsed.data.policyAcceptance.marketingConsent,
       delivery_method:quote.shipping.deliveryMethod,
-      delivery_snapshot:{method:quote.shipping.deliveryMethod,pin_code:parsed.data.deliveryPin??null,eligible_subtotal_paise:quote.shipping.eligibleSubtotalPaise,shipping_paise:quote.shipping.shippingPaise,confirmed_at:new Date().toISOString()},
+      delivery_snapshot:{...parsed.data.deliveryAddress.delivery,method:quote.shipping.deliveryMethod,eligible_subtotal_paise:quote.shipping.eligibleSubtotalPaise,shipping_paise:quote.shipping.shippingPaise,serviceability_confirmed:false},
+      billing_snapshot:parsed.data.deliveryAddress.billingSameAsDelivery?parsed.data.deliveryAddress.delivery:parsed.data.deliveryAddress.billing,
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 

@@ -26,6 +26,13 @@ export type ExperienceSettings = {
   guideProvider: string;
   guideDeterministicFallback: boolean;
   guideRateLimit: number;
+  guideGeneralKnowledge:boolean;
+  guideProductGrounding:boolean;
+  guideEmergencyDisable:boolean;
+  guideModel:string;
+  guideDailyLimit:number;
+  guideTimeoutMs:number;
+  guideMaxTokens:number;
 };
 
 export const defaultExperienceSettings: ExperienceSettings = {
@@ -62,6 +69,7 @@ export const defaultExperienceSettings: ExperienceSettings = {
   guideProvider: "deterministic",
   guideDeterministicFallback: true,
   guideRateLimit: 12,
+  guideGeneralKnowledge:true,guideProductGrounding:true,guideEmergencyDisable:false,guideModel:"",guideDailyLimit:100,guideTimeoutMs:8000,guideMaxTokens:240,
 };
 
 export async function getExperienceSettings(): Promise<ExperienceSettings> {
@@ -96,6 +104,10 @@ export async function getExperienceSettings(): Promise<ExperienceSettings> {
       guideProvider: String(data.guide_provider??"deterministic"),
       guideDeterministicFallback: data.guide_deterministic_fallback === undefined ? true : Boolean(data.guide_deterministic_fallback),
       guideRateLimit: Math.max(1,Math.min(60,Number(data.guide_rate_limit??12))),
+      guideGeneralKnowledge:data.guide_general_knowledge===undefined?true:Boolean(data.guide_general_knowledge),
+      guideProductGrounding:data.guide_product_grounding===undefined?true:Boolean(data.guide_product_grounding),
+      guideEmergencyDisable:Boolean(data.guide_emergency_disable),
+      guideModel:String(data.guide_model??""),guideDailyLimit:Math.max(1,Math.min(10000,Number(data.guide_daily_limit??100))),guideTimeoutMs:Math.max(1000,Math.min(20000,Number(data.guide_timeout_ms??8000))),guideMaxTokens:Math.max(64,Math.min(1000,Number(data.guide_max_tokens??240))),
     };
   } catch {
     return defaultExperienceSettings;
