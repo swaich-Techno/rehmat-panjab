@@ -55,7 +55,7 @@ export const defaultExperienceSettings: ExperienceSettings = {
   quizEnabled: true,
   portraitWords: ["Quiet", "Golden", "Velvet", "Soft", "Amber", "Oud", "Rose", "Gentle", "Saffron", "White", "Warmth", "Radiance", "Stillness", "Devotion", "Horizon", "Evening"],
   whatsappEnabled: true,
-  whatsappNumber: "917009466475",
+  whatsappNumber: "917009464475",
   whatsappDefaultMessage: "Please confirm availability, delivery charges and payment instructions.",
   whatsappNotice: "This opens a manually confirmed order request. It does not place, reserve or pay for an order.",
   guideEnabled: true,

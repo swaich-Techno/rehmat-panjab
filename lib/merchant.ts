@@ -1,7 +1,7 @@
-const configuredPhone=(process.env.NEXT_PUBLIC_REHMAT_SUPPORT_PHONE??"+917009466475").replace(/\D/g,"");
+const configuredPhone=(process.env.NEXT_PUBLIC_REHMAT_SUPPORT_PHONE??"+917009464475").replace(/\D/g,"");
 
 export const merchant={
-  name:"Rehmat Panjab",phone:"7009466475",phoneE164:`+${configuredPhone.length===10?`91${configuredPhone}`:configuredPhone}`,
+  name:"Rehmat Panjab",phone:"7009464475",phoneE164:`+${configuredPhone.length===10?`91${configuredPhone}`:configuredPhone}`,
   email:process.env.REHMAT_SUPPORT_EMAIL?.trim()||"support@rehmatpanjab.com",
   hours:process.env.REHMAT_SUPPORT_HOURS?.trim()||"10:00 AM–7:00 PM IST, Monday–Sunday",
   address:process.env.REHMAT_BUSINESS_ADDRESS?.trim()||"Village Bagli Khurd, Tehsil Samrala, District Ludhiana, Punjab 141412, India",
