@@ -3,7 +3,7 @@ import type {StorefrontProduct} from "./catalog";
 export type GuideIntent="general_education"|"fragrance_family"|"product_discovery"|"product_comparison"|"budget_size"|"layering"|"occasion_mood"|"live_price_inventory"|"order_preparation"|"unrelated";
 export type GuideKnowledge={topic:string;aliases:string[];explanation:string;sourceTitle:string;sourceUrl:string;sourceLicense:string};
 export type GuideProduct=Pick<StorefrontProduct,"slug"|"name"|"inspirationLine"|"image"|"imageAlt"|"notes"|"suitability"|"suitabilityNote"|"character"|"atmosphere">&{reason:string;variants:Array<{sizeMl:number;pricePaise:number;availableQuantity:number}>};
-export type GuideReply={message:string;products:GuideProduct[];layering:boolean;source:"deterministic"|"knowledge";intent:GuideIntent;sources?:Array<{title:string;url:string;license:string}>};
+export type GuideReply={message:string;products:GuideProduct[];layering:boolean;source:"deterministic"|"knowledge"|"provider";intent:GuideIntent;sources?:Array<{title:string;url:string;license:string}>};
 
 const numbers:Record<string,number>={one:1,two:2,three:3,four:4,five:5};
 const vocabulary:Record<string,string[]>={soft:["soft","gentle","quiet","work","office","light"],rich:["rich","deep","bold","evening","night","wedding","statement"],sweet:["sweet","vanilla","candy","comfort"],musky:["musk","musky","clean"],floral:["floral","rose","feminine"],woody:["wood","woody","oud","earth"],fruity:["fruit","fruity","berry","berries","cherry","plum","lychee","pear","strawberry","passionfruit"]};

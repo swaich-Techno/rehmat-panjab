@@ -40,6 +40,15 @@ test("refunds require super-admin approval and a unique idempotency key",async()
   assert.match(migration,/idempotency_key text not null unique/);
 });
 
+test("live credential diagnostic is protected, non-financial and never returns secrets",async()=>{
+  const route=await read("app/api/admin/readiness/razorpay/route.ts");
+  assert.match(route,/role!=="super_admin"/);
+  assert.match(route,/\/v1\/orders\?count=1/);
+  assert.match(route,/rzp_live_/);
+  assert.doesNotMatch(route,/NextResponse\.json\([^)]*(keyId|keySecret|publicKey)/);
+  assert.doesNotMatch(route,/payments\.create|orders\.create|refunds\.create/);
+});
+
 test("merchant, payment and below-threshold shipping wording is aligned",async()=>{
   const policy=await read("lib/policy-templates.ts");
   assert.match(policy,/Rehmat Panjab is operated by Harkirat Singh/);
