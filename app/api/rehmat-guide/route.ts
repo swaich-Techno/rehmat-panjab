@@ -8,7 +8,7 @@ import {providerReady,rewriteGuideReply} from "../../../lib/fragrance-ai";
 import { getStorefrontProducts } from "../../../lib/storefront";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
-const schema=z.object({message:z.string().trim().min(1).max(360),productId:z.string().uuid().optional(),sessionId:z.string().regex(/^[a-zA-Z0-9_-]{8,80}$/).optional(),excludedProductSlugs:z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(5).optional()}).strict();
+const schema=z.object({message:z.string().trim().min(1).max(360),productId:z.string().uuid().optional(),sessionId:z.string().regex(/^[a-zA-Z0-9_-]{8,80}$/).optional(),excludedProductSlugs:z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(5).optional(),context:z.array(z.string().trim().min(1).max(360)).max(6).optional()}).strict();
 const localAttempts=new Map<string,{count:number;reset:number}>();
 
 async function allowed(request:Request,limit:number){
@@ -33,5 +33,5 @@ export async function POST(request:Request){
   const contextProduct=parsed.data.productId?catalogue.find(product=>product.databaseId===parsed.data.productId):null;
   const fallback=createGuideReply(parsed.data.message,catalogue,{excluded:[...settings.productExclusions,...settings.guideExcludedProducts,...(parsed.data.excludedProductSlugs??[])],allowed:contextProduct?[contextProduct.slug]:settings.guideAllowedProducts,max:settings.guideMaxRecommendations,knowledge});
   const mayRewrite=["general_education","fragrance_family","product_discovery","product_comparison","occasion_mood"].includes(fallback.intent);
-  return NextResponse.json(mayRewrite&&!settings.guideEmergencyDisable?await rewriteGuideReply(parsed.data.message,fallback,parsed.data.sessionId??"anonymous"):fallback);
+  return NextResponse.json(mayRewrite&&!settings.guideEmergencyDisable?await rewriteGuideReply(parsed.data.message,fallback,parsed.data.sessionId??"anonymous",parsed.data.context??[],knowledge):fallback);
 }
