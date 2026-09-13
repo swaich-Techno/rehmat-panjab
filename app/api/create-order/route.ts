@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { calculateOrderQuote } from "../../../lib/quote";
 import { getPublishedPolicyRecord, policiesComplete } from "../../../lib/store-settings";
 import {checkoutAddressSchema} from "../../../lib/address";
+import {isControlledPaymentAdmin} from "../../../lib/controlled-payment";
 
 const requestSchema = z.object({
   lines: z.array(z.object({
@@ -28,17 +29,19 @@ function errorStatus(error: unknown) {
 }
 
 export async function POST(request: Request) {
-  if (!RAZORPAY_CHECKOUT_ENABLED) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
-  const publishedPolicy=await getPublishedPolicyRecord();
-  if (!publishedPolicy||!policiesComplete(publishedPolicy.settings)) return NextResponse.json({ message: "Checkout is not ready: required merchant and policy settings are incomplete." }, { status: 503 });
-
+  const controlled=!RAZORPAY_CHECKOUT_ENABLED&&await isControlledPaymentAdmin(request);
+  if (!RAZORPAY_CHECKOUT_ENABLED&&!controlled) return NextResponse.json({ message: "Checkout is not open yet." }, { status: 503 });
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ message: "Your cart could not be validated." }, { status: 400 });
-  if(parsed.data.policyAcceptance.version!==publishedPolicy.version)return NextResponse.json({message:"The policies changed. Please review and accept the current version."},{status:409});
+  if(controlled&&parsed.data.couponCode)return NextResponse.json({message:"The controlled live test does not accept coupons."},{status:400});
+  const publishedPolicy=controlled?null:await getPublishedPolicyRecord();
+  if(!controlled&&(!publishedPolicy||!policiesComplete(publishedPolicy.settings)))return NextResponse.json({message:"Checkout is not ready: required merchant and policy settings are incomplete."},{status:503});
+  if(!controlled&&parsed.data.policyAcceptance.version!==publishedPolicy!.version)return NextResponse.json({message:"The policies changed. Please review and accept the current version."},{status:409});
 
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
   if (!keyId || !keySecret) return NextResponse.json({ message: "Payment service is not configured." }, { status: 503 });
+  if(controlled&&(!keyId.startsWith("rzp_live_")||keyId!==process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID))return NextResponse.json({message:"Matching Live Mode credentials are required."},{status:503});
 
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = createSupabaseAdminClient();
@@ -109,7 +112,7 @@ export async function POST(request: Request) {
       razorpay_order_id: order.id,
       coupon_id: quote.couponId,
       coupon_code: quote.couponCode,
-      policy_version:publishedPolicy.version,
+      policy_version:controlled?parsed.data.policyAcceptance.version:publishedPolicy!.version,
       policies_accepted_at:new Date().toISOString(),
       marketing_consent:parsed.data.policyAcceptance.marketingConsent,
       delivery_method:quote.shipping.deliveryMethod,
@@ -129,11 +132,13 @@ export async function POST(request: Request) {
       await supabaseAdmin.from("orders").delete().eq("id", savedOrder.id);
       return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
     }
+    if(controlled)await supabaseAdmin.from("audit_logs").insert({actor_id:authData.user?.id??null,action:"razorpay.controlled_test_order_prepared",entity_type:"order",entity_id:savedOrder.id,metadata:{amount_paise:amount,currency:"INR"}});
     return NextResponse.json({
       order_id: order.id,
       amount: Number(order.amount),
       currency: order.currency,
       order_token: createRazorpayOrderToken(order.id, keySecret),
+      ...(controlled?{public_key_id:keyId,internal_order_id:savedOrder.id}:{}),
     });
   } catch (error) {
     const status = errorStatus(error);

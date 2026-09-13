@@ -56,3 +56,11 @@ test("merchant, payment and below-threshold shipping wording is aligned",async()
   assert.match(policy,/Razorpay receives payment and transaction information/);
   assert.doesNotMatch(policy,/Free local delivery|return-to-origin courier costs may be deducted/i);
 });
+
+test("controlled live test stays super-admin-only while public commerce remains disabled",async()=>{
+  const [guard,createOrder,verify,page,client,env]=await Promise.all([read("lib/controlled-payment.ts"),read("app/api/create-order/route.ts"),read("app/api/verify-payment/route.ts"),read("app/admin/readiness/payment-test/page.tsx"),read("app/admin/readiness/payment-test/controlled-payment-test.tsx"),read(".env.example")]);
+  assert.match(guard,/x-rehmat-controlled-test/);assert.match(guard,/super_admin/);
+  assert.match(createOrder,/Matching Live Mode credentials are required/);assert.match(createOrder,/controlled_test_order_prepared/);
+  assert.match(verify,/controlled_test_payment_verified/);assert.match(page,/musk-rizali/);assert.match(page,/vanilla-musk/);
+  assert.match(client,/I APPROVE/);assert.match(client,/No coupon/);assert.match(env,/NEXT_PUBLIC_COMMERCE_ENABLED=false/);assert.match(env,/RAZORPAY_ENABLED=false/);
+});
