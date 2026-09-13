@@ -49,6 +49,13 @@ test("live credential diagnostic is protected, non-financial and never returns s
   assert.doesNotMatch(route,/payments\.create|orders\.create|refunds\.create/);
 });
 
+test("signed webhook diagnostic is protected and proves retry idempotency",async()=>{
+  const route=await read("app/api/admin/readiness/webhook/route.ts");
+  assert.match(route,/role!=="super_admin"/);assert.match(route,/RAZORPAY_WEBHOOK_SECRET/);
+  assert.match(route,/createHmac\("sha256",secret\)/);assert.match(route,/retryBody\.duplicate===true/);
+  assert.doesNotMatch(route,/NextResponse\.json\((?:secret|\{secret)/);
+});
+
 test("merchant, payment and below-threshold shipping wording is aligned",async()=>{
   const policy=await read("lib/policy-templates.ts");
   assert.match(policy,/Rehmat Panjab is operated by Harkirat Singh/);
