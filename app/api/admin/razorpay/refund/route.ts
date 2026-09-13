@@ -2,6 +2,7 @@ import Razorpay from "razorpay";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {RAZORPAY_ENABLED} from "../../../../../lib/commerce";
+import {isControlledPaymentAdmin} from "../../../../../lib/controlled-payment";
 import {requireAdmin} from "../../../../../lib/supabase/auth";
 import {createSupabaseAdminClient} from "../../../../../lib/supabase/admin";
 
@@ -10,7 +11,8 @@ const schema=z.object({orderId:z.uuid(),amountPaise:z.number().int().positive().
 export async function POST(request:Request){
   const {user,role}=await requireAdmin();
   if(role!=="super_admin")return NextResponse.json({message:"Super-admin access required."},{status:403});
-  if(!RAZORPAY_ENABLED)return NextResponse.json({message:"Razorpay is not enabled."},{status:503});
+  const controlledTest=await isControlledPaymentAdmin(request);
+  if(!RAZORPAY_ENABLED&&!controlledTest)return NextResponse.json({message:"Razorpay is not enabled."},{status:503});
   const parsed=schema.safeParse(await request.json().catch(()=>null));
   if(!parsed.success)return NextResponse.json({message:"Check the refund request."},{status:400});
   const keyId=process.env.RAZORPAY_KEY_ID,keySecret=process.env.RAZORPAY_KEY_SECRET;

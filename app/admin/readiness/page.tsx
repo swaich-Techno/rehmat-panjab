@@ -3,6 +3,7 @@ import Link from "next/link";
 import {requireAdmin} from "../../../lib/supabase/auth";
 import {COMMERCE_ENABLED,RAZORPAY_ENABLED} from "../../../lib/commerce";
 import {getStoreSettings,missingStoreFields} from "../../../lib/store-settings";
+import {RazorpayDiagnostic} from "./razorpay-diagnostic";
 
 export const dynamic="force-dynamic";
 const human=(value:string)=>value.split(".").map(part=>part.replace(/([A-Z])/g," $1")).join(" · ");
@@ -21,6 +22,6 @@ export default async function Page(){
   const razorpayChecklist=(providers??[]).find(row=>row.provider==="razorpay")?.checklist as Record<string,unknown>|null;const razorpayLink=typeof razorpayChecklist?.razorpay_payment_link==="string"?razorpayChecklist.razorpay_payment_link:null;
   return <main id="main-content" className="admin-page"><p className="eyebrow">Private super-admin review</p><h1>Store readiness.</h1><p>Commerce remains {COMMERCE_ENABLED?"enabled":"disabled"}; Razorpay is {RAZORPAY_ENABLED?"server-enabled":"server-disabled"}. Public checkout must remain unavailable until every operational check is verified.</p>
     <div className="admin-table readiness-list">{missing.length?missing.map(item=><div key={item}><strong>{human(item)}</strong><span>Owner input required</span></div>):<div><strong>Owner settings</strong><span>Complete</span></div>}</div>
-    <section className="admin-empty"><h2>Provider status</h2><p><strong>Razorpay:</strong> {status.get("razorpay")??"pending"} · verified account Harkirat Singh · public brand Rehmat Panjab</p>{razorpayLink&&<p>Verified Razorpay.me profile: <a className="text-link" href={razorpayLink} target="_blank" rel="noreferrer">razorpay.me/@harkiratsingh5450</a>. Share only after an order total is manually confirmed.</p>}<div className="policy-readiness">{checks.map(([key,label])=><span data-ready={Boolean(completed[key])} key={key}>{label}</span>)}</div><strong>Not ready for live checkout activation.</strong><p><Link className="text-link" href="/admin/readiness/payment-test">Open protected controlled-payment test</Link> · <Link className="text-link" href="/admin/policies">Edit policy settings</Link></p></section>
+    <section className="admin-empty"><h2>Provider status</h2><p><strong>Razorpay:</strong> {status.get("razorpay")??"pending"} · verified account Harkirat Singh · public brand Rehmat Panjab</p>{razorpayLink&&<p>Verified Razorpay.me profile: <a className="text-link" href={razorpayLink} target="_blank" rel="noreferrer">razorpay.me/@harkiratsingh5450</a>. Share only after an order total is manually confirmed.</p>}<RazorpayDiagnostic/><div className="policy-readiness">{checks.map(([key,label])=><span data-ready={Boolean(completed[key])} key={key}>{label}</span>)}</div><strong>Not ready for live checkout activation.</strong><p><Link className="text-link" href="/admin/readiness/payment-test">Open protected controlled-payment test</Link> · <Link className="text-link" href="/admin/policies">Edit policy settings</Link></p></section>
   </main>;
 }
