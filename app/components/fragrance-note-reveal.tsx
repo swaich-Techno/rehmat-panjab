@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import type { StorefrontProduct } from "../../lib/catalog";
-import { fragranceNotePaletteFor, primaryFragranceNotes } from "../../lib/fragrance-note-reveal";
+import { fragranceNotePaletteFor, ingredientVisualsFor, primaryFragranceNotes } from "../../lib/fragrance-note-reveal";
 import { ProductMedia } from "./product-media";
 
 type FragranceNoteRevealProps = {
@@ -14,18 +15,23 @@ type FragranceNoteRevealProps = {
   onDismiss: () => void;
 };
 
-const crackPaths = [
-  "M50 48 36 29 27 20", "M49 47 60 27 67 15", "M51 49 74 39 86 35",
-  "M51 51 74 62 88 68", "M49 52 60 74 64 88", "M47 52 31 72 22 80",
-  "M46 50 25 52 11 58", "M47 47 30 38 17 34", "M52 46 70 18 79 11",
-  "M53 50 83 48 94 43", "M50 53 44 79 38 91", "M46 48 21 24 11 17",
-];
+const ingredientDrops = [
+  { visual: 0, left: "4%", bottom: "7%", size: "58px", delay: "350ms", duration: "920ms", drift: "14px", start: "-34deg", end: "8deg" },
+  { visual: 1, left: "18%", bottom: "4%", size: "48px", delay: "510ms", duration: "980ms", drift: "-18px", start: "29deg", end: "-7deg" },
+  { visual: 2, left: "31%", bottom: "8%", size: "43px", delay: "690ms", duration: "900ms", drift: "12px", start: "-24deg", end: "5deg" },
+  { visual: 0, left: "64%", bottom: "6%", size: "51px", delay: "430ms", duration: "1040ms", drift: "-15px", start: "32deg", end: "-9deg" },
+  { visual: 1, left: "78%", bottom: "9%", size: "44px", delay: "620ms", duration: "940ms", drift: "16px", start: "-27deg", end: "6deg" },
+  { visual: 2, left: "87%", bottom: "4%", size: "55px", delay: "790ms", duration: "980ms", drift: "-12px", start: "38deg", end: "-6deg" },
+  { visual: 0, left: "10%", bottom: "17%", size: "37px", delay: "760ms", duration: "930ms", drift: "20px", start: "-31deg", end: "11deg" },
+  { visual: 2, left: "73%", bottom: "17%", size: "39px", delay: "900ms", duration: "900ms", drift: "-18px", start: "25deg", end: "-8deg" },
+] as const;
 
 export function FragranceNoteReveal({ product, priority = false, active, replay, onActivate, onDismiss }: FragranceNoteRevealProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const palette = fragranceNotePaletteFor(product.slug);
   const notes = primaryFragranceNotes(product.notes);
-  const canReveal = Boolean(palette && notes);
+  const visuals = ingredientVisualsFor(product.slug, product.notes);
+  const canReveal = Boolean(palette && notes && visuals.length);
   const stageId = `fragrance-notes-${product.slug}`;
   const style = palette ? ({
     "--note-light": palette.light,
@@ -67,15 +73,28 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
       <ProductMedia product={product} priority={priority} />
       {canReveal && <span className="fragrance-note-hint" aria-hidden="true">Reveal notes</span>}
     </button>
-    {active && palette && notes && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
-      <span className="sr-only">{product.name} fragrance notes</span>
-      <svg className="fragrance-light-cracks" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        {crackPaths.map((path, index) => <path d={path} key={path} style={{ "--crack-index": index } as CSSProperties} />)}
-      </svg>
+    {active && palette && notes && visuals.length > 0 && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
+      <span className="sr-only">{product.name} fragrance ingredients: {notes.top}, {notes.heart}, and {notes.base}</span>
+      <span className="fragrance-liquid-bloom" aria-hidden="true" />
       <span className="fragrance-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</span>
-      <span className="fragrance-note-label fragrance-note-top"><small>TOP</small><strong>{notes.top}</strong></span>
-      <span className="fragrance-note-label fragrance-note-heart"><small>HEART</small><strong>{notes.heart}</strong></span>
-      <span className="fragrance-note-label fragrance-note-base"><small>BASE</small><strong>{notes.base}</strong></span>
+      <span className="fragrance-ingredients" aria-hidden="true">
+        {ingredientDrops.map((drop, index) => {
+          const visual = visuals[drop.visual % visuals.length];
+          const dropStyle = {
+            "--ingredient-left": drop.left,
+            "--ingredient-bottom": drop.bottom,
+            "--ingredient-size": drop.size,
+            "--ingredient-delay": drop.delay,
+            "--ingredient-duration": drop.duration,
+            "--ingredient-drift": drop.drift,
+            "--ingredient-start-rotation": drop.start,
+            "--ingredient-end-rotation": drop.end,
+          } as CSSProperties;
+          return <i className="fragrance-ingredient" data-ingredient-key={visual.key} key={`${visual.key}-${index}`} style={dropStyle}>
+            <Image src={visual.asset} alt="" width={512} height={512} draggable={false} />
+          </i>;
+        })}
+      </span>
     </div>}
   </div>;
 }

@@ -1,50 +1,78 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 
-const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const root = new URL("../", import.meta.url);
+const read = path => readFile(new URL(path, root), "utf8");
 
-test("reveal text resolves from the authoritative catalogue product", async () => {
+test("ingredient visuals resolve from authoritative product notes and unknown notes fail safely", async () => {
   const [data, reveal, storefront] = await Promise.all([read("lib/fragrance-note-reveal.ts"), read("app/components/fragrance-note-reveal.tsx"), read("lib/storefront.ts")]);
+  assert.match(reveal, /ingredientVisualsFor\(product\.slug, product\.notes\)/);
   assert.match(reveal, /primaryFragranceNotes\(product\.notes\)/);
-  assert.match(reveal, /\{notes\.top\}/);assert.match(reveal, /\{notes\.heart\}/);assert.match(reveal, /\{notes\.base\}/);
   assert.match(storefront, /const notes = noteGroups \? \{ top: asStrings\(noteGroups\.top\), heart: asStrings\(noteGroups\.heart\), base: asStrings\(noteGroups\.base\) \}/);
-  assert.doesNotMatch(data, /Bergamot|Saffron|White Musk|Vanilla Bean|Pink Pepper|Dark Cherry/);
+  assert.match(data, /if \(!notes \|\| !configured\) return \[\]/);
+  assert.match(data, /actual\[index\]\?\.localeCompare\(note/);
+  assert.doesNotMatch(reveal, /fragrance-note-label|>TOP<|>HEART<|>BASE</);
 });
 
-test("all ten catalogue entries have structured note groups without a reveal-side fallback", async () => {
-  const [migration, products, palettes] = await Promise.all([read("supabase/migrations/202609090003_compact_catalogue_bottle_media.sql"), read("lib/products.ts"), read("lib/fragrance-note-reveal.ts")]);
-  const rows = [...migration.matchAll(/\('([^']+)','(\{"top":\[[^']+\})'::jsonb\)/g)].map(([, slug, notes]) => ({ slug, notes: JSON.parse(notes) }));
-  assert.equal(rows.length, 9);
-  for (const { slug, notes } of rows) {
-    assert.ok(notes.top[0] && notes.heart[0] && notes.base[0], `${slug} must provide Top, Heart and Base notes`);
+test("all ten products map three verified notes to approved local assets", async () => {
+  const data = await read("lib/fragrance-note-reveal.ts");
+  const expected = {
+    "musk-rizali": ["bergamot-slice", "saffron-threads", "white-musk-orb"],
+    "vanilla-musk": ["vanilla-pod", "almonds", "white-musk-orb"],
+    "white-oud": ["white-peppercorns", "bergamot-slice", "wood-chips"],
+    "oud-rose": ["rose-petals", "pink-peppercorns", "raspberries"],
+    junoon: ["passionfruit", "rose-petals", "saffron-threads"],
+    "red-musk": ["red-berries", "saffron-threads", "white-musk-orb"],
+    nazakat: ["lychee", "rhubarb", "bergamot-slice"],
+    gulnaar: ["candied-pear", "strawberries", "vanilla-pod"],
+    "deer-musk": ["cardamom-pods", "bergamot-slice", "velvet-musk-dark"],
+    afsoon: ["dark-cherries", "red-berries", "velvet-musk-burgundy"],
+  };
+  for (const [slug, keys] of Object.entries(expected)) {
+    assert.match(data, new RegExp(`"${slug}": \\[([^\\n]+)\\]`));
+    for (const key of keys) assert.match(data, new RegExp(`"${key}"`));
   }
-  const afsoon = products.match(/slug:"afsoon"[\s\S]*?notes:\{top:\[(.*?)\],heart:\[(.*?)\],base:\[(.*?)\]\}/);
-  assert.ok(afsoon);assert.ok(afsoon[1] && afsoon[2] && afsoon[3]);
-  for (const slug of ["musk-rizali","vanilla-musk","white-oud","oud-rose","junoon","red-musk","nazakat","gulnaar","deer-musk","afsoon"]) assert.match(palettes, new RegExp(`"${slug}"`));
 });
 
-test("reveal interaction is single-instance, replayable and keyboard dismissible", async () => {
-  const [catalogue, reveal, data] = await Promise.all([read("app/collection/collection-catalogue.tsx"), read("app/components/fragrance-note-reveal.tsx"), read("lib/fragrance-note-reveal.ts")]);
-  assert.match(catalogue, /activeReveal.*useState/s);
-  assert.match(catalogue, /current\?\.slug===product\.slug\?\{slug:product\.slug,replay:current\.replay\+1\}/);
-  assert.match(catalogue, /active=\{activeReveal\?\.slug===product\.slug\}/);
-  assert.match(reveal, /aria-label=\{canReveal \? `Show fragrance notes for \$\{product\.name\}`/);
+test("transparent ingredient library is complete and optimized locally", async () => {
+  const dir = new URL("public/images/fragrance-notes/", root);
+  const files = (await readdir(dir)).filter(file => file.endsWith(".webp"));
+  assert.equal(files.length, 20);
+  for (const file of files) {
+    const bytes = await readFile(new URL(file, dir));
+    const info = await stat(new URL(file, dir));
+    assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF", `${file} must be WebP`);
+    assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP", `${file} must be WebP`);
+    assert.ok(info.size < 100_000, `${file} should stay lightweight`);
+  }
+});
+
+test("splash, falling physics and reduced motion preserve the settled composition", async () => {
+  const [reveal, styles, data] = await Promise.all([read("app/components/fragrance-note-reveal.tsx"), read("app/globals.css"), read("lib/fragrance-note-reveal.ts")]);
+  assert.match(reveal, /fragrance-liquid-bloom/);
+  assert.match(reveal, /fragrance-ingredient/);
+  assert.match(reveal, /data-ingredient-key=\{visual\.key\}/);
+  assert.match(reveal, /bottom: "(?:4|6|7|8|9|17)%"/);
+  assert.match(styles, /@keyframes fragrance-liquid-bloom/);
+  assert.match(styles, /@keyframes fragrance-ingredient-drop/);
+  assert.match(styles, /100%\{opacity:1;transform:translate3d\(0,0,0\)/);
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-ingredient\{opacity:1!important;transform:rotate/);
+  assert.match(styles, /fragrance-ingredient:nth-child\(n\+7\)\{display:none\}/);
+  for (const color of ["#fffdf2", "#fff0a8", "#f9fdff", "#e8bd58", "#2d0610"]) assert.ok(data.includes(color));
+});
+
+test("accessible notes, replay, single-active state and keyboard dismissal remain intact", async () => {
+  const [catalogue, reveal] = await Promise.all([read("app/collection/collection-catalogue.tsx"), read("app/components/fragrance-note-reveal.tsx")]);
+  assert.match(reveal, /fragrance ingredients: \{notes\.top\}, \{notes\.heart\}, and \{notes\.base\}/);
+  assert.match(reveal, /aria-hidden="true"/);
   assert.match(reveal, /event\.key === "Escape"/);
   assert.match(reveal, /event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(reveal, /key=\{`\$\{product\.slug\}-\$\{replay\}`\}/);
-  assert.match(reveal, /active && palette && notes && <div/);
-  assert.match(reveal, /disabled=\{!canReveal\}/);
-  assert.match(data, /return top && heart && base \? \{ top, heart, base \} : null/);
-});
-
-test("effects are decorative, motion-aware and navigation remains separate", async () => {
-  const [catalogue, reveal, styles] = await Promise.all([read("app/collection/collection-catalogue.tsx"), read("app/components/fragrance-note-reveal.tsx"), read("app/globals.css")]);
-  assert.match(reveal, /fragrance-light-cracks[\s\S]*aria-hidden="true"/);
-  assert.match(reveal, /fragrance-particles[\s\S]*aria-hidden="true"/);
-  assert.match(reveal, /role="status"/);
-  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-light-cracks/);
+  assert.match(catalogue, /current\?\.slug===product\.slug\?\{slug:product\.slug,replay:current\.replay\+1\}/);
+  assert.match(catalogue, /active=\{activeReveal\?\.slug===product\.slug\}/);
   assert.match(catalogue, /href=\{`\/product\/\$\{product\.slug\}`\}>View details<\/Link>/);
+  assert.match(catalogue, /Quick view/i);
 });
 
 test("commerce authority and product media behavior remain intact", async () => {
