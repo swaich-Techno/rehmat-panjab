@@ -10,9 +10,9 @@ test("collection uses a compact responsive commerce grid",async()=>{
   assert.match(catalogue,/catalogue-filter-panel/);assert.match(catalogue,/Quick view/i);assert.match(catalogue,/Order on WhatsApp/);assert.match(catalogue,/Add to cart/);
 });
 
-test("card interaction exposes one verified note from each layer",async()=>{
-  const [catalogue,media]=await Promise.all([read("app/collection/collection-catalogue.tsx"),read("app/components/product-media.tsx")]);
-  assert.match(catalogue,/product\.notes\.top\[0\]/);assert.match(catalogue,/product\.notes\.heart\[0\]/);assert.match(catalogue,/product\.notes\.base\[0\]/);
+test("card interaction exposes one structured catalogue note from each layer",async()=>{
+  const [catalogue,media,reveal]=await Promise.all([read("app/collection/collection-catalogue.tsx"),read("app/components/product-media.tsx"),read("app/components/fragrance-note-reveal.tsx")]);
+  assert.match(catalogue,/FragranceNoteReveal/);assert.match(reveal,/primaryFragranceNotes\(product\.notes\)/);assert.match(reveal,/\{notes\.top\}/);assert.match(reveal,/\{notes\.heart\}/);assert.match(reveal,/\{notes\.base\}/);
   assert.match(media,/product\.notesVerified/);assert.match(media,/rose-gold-bottle-oil\.webp/);assert.match(media,/rose-gold-bottle-reference\.jpeg/);
 });
 
