@@ -64,7 +64,7 @@ test("splash, falling physics and reduced motion preserve the settled compositio
 
 test("accessible notes, replay, single-active state and keyboard dismissal remain intact", async () => {
   const [catalogue, reveal] = await Promise.all([read("app/collection/collection-catalogue.tsx"), read("app/components/fragrance-note-reveal.tsx")]);
-  assert.match(reveal, /fragrance ingredients: \{notes\.top\}, \{notes\.heart\}, and \{notes\.base\}/);
+  assert.match(reveal, /fragrance ingredients: \{noteSummary\}/);
   assert.match(reveal, /aria-hidden="true"/);
   assert.match(reveal, /event\.key === "Escape"/);
   assert.match(reveal, /event\.key === "Enter" \|\| event\.key === " "/);
@@ -73,6 +73,19 @@ test("accessible notes, replay, single-active state and keyboard dismissal remai
   assert.match(catalogue, /active=\{activeReveal\?\.slug===product\.slug\}/);
   assert.match(catalogue, /href=\{`\/product\/\$\{product\.slug\}`\}>View details<\/Link>/);
   assert.match(catalogue, /Quick view/i);
+});
+
+test("every reveal exposes complete note groups and ingredient names on hover or focus", async () => {
+  const [reveal, styles] = await Promise.all([read("app/components/fragrance-note-reveal.tsx"), read("app/globals.css")]);
+  assert.match(reveal, /product\.notes\?\.top\.filter\(Boolean\)/);
+  assert.match(reveal, /product\.notes\?\.heart\.filter\(Boolean\)/);
+  assert.match(reveal, /product\.notes\?\.base\.filter\(Boolean\)/);
+  assert.match(reveal, /fragrance-note-map/);
+  assert.match(reveal, /fragrance-ingredient-name/);
+  assert.match(reveal, /title=\{visual\.note\}/);
+  assert.match(reveal, /tabIndex=\{isPrimary \? 0 : undefined\}/);
+  assert.match(styles, /fragrance-ingredient:hover \.fragrance-ingredient-name/);
+  assert.match(styles, /fragrance-ingredient:focus-visible \.fragrance-ingredient-name/);
 });
 
 test("commerce authority and product media behavior remain intact", async () => {

@@ -32,6 +32,12 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
   const notes = primaryFragranceNotes(product.notes);
   const visuals = ingredientVisualsFor(product.slug, product.notes);
   const canReveal = Boolean(palette && notes && visuals.length);
+  const noteGroups = [
+    { label: "Top", notes: product.notes?.top.filter(Boolean) ?? [] },
+    { label: "Heart", notes: product.notes?.heart.filter(Boolean) ?? [] },
+    { label: "Base", notes: product.notes?.base.filter(Boolean) ?? [] },
+  ];
+  const noteSummary = noteGroups.flatMap((group) => group.notes).join(", ");
   const stageId = `fragrance-notes-${product.slug}`;
   const style = palette ? ({
     "--note-light": palette.light,
@@ -74,12 +80,19 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
       {canReveal && <span className="fragrance-note-hint" aria-hidden="true">Reveal notes</span>}
     </button>
     {active && palette && notes && visuals.length > 0 && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
-      <span className="sr-only">{product.name} fragrance ingredients: {notes.top}, {notes.heart}, and {notes.base}</span>
+      <span className="sr-only">{product.name} fragrance ingredients: {noteSummary}</span>
       <span className="fragrance-liquid-bloom" aria-hidden="true" />
       <span className="fragrance-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</span>
-      <span className="fragrance-ingredients" aria-hidden="true">
+      <span className="fragrance-note-map" aria-hidden="true">
+        {noteGroups.map((group) => <span key={group.label}>
+          <b>{group.label}</b>
+          <small>{group.notes.join(" · ")}</small>
+        </span>)}
+      </span>
+      <span className="fragrance-ingredients">
         {ingredientDrops.map((drop, index) => {
           const visual = visuals[drop.visual % visuals.length];
+          const isPrimary = index < visuals.length;
           const dropStyle = {
             "--ingredient-left": drop.left,
             "--ingredient-bottom": drop.bottom,
@@ -90,8 +103,19 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
             "--ingredient-start-rotation": drop.start,
             "--ingredient-end-rotation": drop.end,
           } as CSSProperties;
-          return <i className="fragrance-ingredient" data-ingredient-key={visual.key} key={`${visual.key}-${index}`} style={dropStyle}>
+          return <i
+            className="fragrance-ingredient"
+            data-ingredient-key={visual.key}
+            key={`${visual.key}-${index}`}
+            style={dropStyle}
+            role={isPrimary ? "img" : undefined}
+            aria-label={isPrimary ? visual.note : undefined}
+            aria-hidden={isPrimary ? undefined : true}
+            tabIndex={isPrimary ? 0 : undefined}
+            title={visual.note}
+          >
             <Image src={visual.asset} alt="" width={512} height={512} draggable={false} />
+            <span className="fragrance-ingredient-name" aria-hidden="true">{visual.note}</span>
           </i>;
         })}
       </span>
