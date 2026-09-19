@@ -56,6 +56,18 @@ test("signed webhook diagnostic is protected and proves retry idempotency",async
   assert.doesNotMatch(route,/NextResponse\.json\((?:secret|\{secret)/);
 });
 
+test("captured-payment Telegram alerts are server-only, optional and webhook-idempotent",async()=>{
+  const [telegram,webhook,readiness,diagnostic,env]=await Promise.all([read("lib/telegram.ts"),read("app/api/razorpay/webhook/route.ts"),read("app/api/admin/readiness/telegram/route.ts"),read("app/admin/readiness/razorpay-diagnostic.tsx"),read(".env.example")]);
+  assert.match(telegram,/import "server-only"/);
+  assert.match(telegram,/TELEGRAM_BOT_TOKEN/);assert.match(telegram,/TELEGRAM_ORDER_CHAT_ID/);
+  assert.match(telegram,/api\.telegram\.org\/bot\$\{token\}\/sendMessage/);
+  assert.doesNotMatch(telegram,/NEXT_PUBLIC_TELEGRAM/);
+  assert.match(webhook,/sendTelegramOrderAlert/);assert.match(webhook,/claimError\?\.code==="23505"/);
+  assert.match(readiness,/role!=="super_admin"/);assert.match(readiness,/telegram_message_sent/);
+  assert.match(diagnostic,/Send Telegram test alert/);
+  assert.match(env,/TELEGRAM_BOT_TOKEN=/);assert.match(env,/TELEGRAM_ORDER_CHAT_ID=/);
+});
+
 test("merchant, payment and below-threshold shipping wording is aligned",async()=>{
   const policy=await read("lib/policy-templates.ts");
   assert.match(policy,/Rehmat Panjab is operated by Harkirat Singh/);

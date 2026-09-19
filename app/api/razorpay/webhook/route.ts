@@ -1,6 +1,7 @@
 import {NextResponse} from "next/server";
 import {verifyRazorpayWebhookSignature} from "../../../../lib/razorpay";
 import {createSupabaseAdminClient} from "../../../../lib/supabase/admin";
+import {sendTelegramOrderAlert} from "../../../../lib/telegram";
 
 type Entity={id?:string;order_id?:string;payment_id?:string;amount?:number;currency?:string;status?:string;captured?:boolean};
 type EventBody={event?:string;payload?:{payment?:{entity?:Entity};order?:{entity?:Entity};refund?:{entity?:Entity}}};
@@ -27,11 +28,13 @@ export async function POST(request:Request){
     if(!supported.has(event.event)){await admin.from("razorpay_webhook_events").update({status:"ignored",processed_at:new Date().toISOString()}).eq("event_id",eventId);return NextResponse.json({received:true});}
     if(event.event==="payment.captured"){
       if(!payment?.id||!payment.order_id||payment.status!=="captured"||payment.captured!==true)throw new Error("incomplete_captured_payment");
-      const {data:order}=await admin.from("orders").select("id,total_paise,currency,coupon_id,subtotal_paise,discount_paise,user_id").eq("razorpay_order_id",payment.order_id).maybeSingle();
+      const {data:order}=await admin.from("orders").select("id,order_number,total_paise,currency,coupon_id,subtotal_paise,discount_paise,user_id").eq("razorpay_order_id",payment.order_id).maybeSingle();
       if(!order||Number(order.total_paise)!==Number(payment.amount)||order.currency!==payment.currency)throw new Error("payment_mismatch");
       const {error}=await admin.rpc("complete_razorpay_order",{p_razorpay_order_id:payment.order_id,p_razorpay_payment_id:payment.id});
       if(error)throw error;
       if(order.coupon_id&&order.discount_paise)await admin.from("coupon_redemptions").upsert({coupon_id:order.coupon_id,order_id:order.id,customer_identifier:order.user_id,eligible_subtotal_paise:order.subtotal_paise??0,discount_paise:order.discount_paise,confirmation_status:"confirmed",payment_status:"paid",idempotency_reference:`razorpay:${payment.id}`},{onConflict:"idempotency_reference"});
+      const alert=await sendTelegramOrderAlert({orderNumber:order.order_number,totalPaise:Number(order.total_paise),currency:order.currency});
+      if(alert.sent||alert.reason!=="not_configured")await admin.from("audit_logs").insert({action:alert.sent?"telegram.order_alert_sent":"telegram.order_alert_failed",entity_type:"order",entity_id:order.id,metadata:{reason:alert.sent?"sent":alert.reason}});
     }else if(event.event==="payment.failed"&&payment?.order_id){
       await admin.from("orders").update({status:"payment_failed",updated_at:new Date().toISOString()}).eq("razorpay_order_id",payment.order_id).in("status",["pending","payment_pending"]);
     }else if((event.event==="refund.processed"||event.event==="refund.failed")&&refund?.id&&refund.payment_id){
