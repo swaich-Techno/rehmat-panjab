@@ -4,8 +4,9 @@ import { products } from "../../lib/products";
 import type { ScentId } from "../../lib/products";
 import { getStorefrontProducts } from "../../lib/storefront";
 import { LayeringLab } from "./layering-lab";
+import {pageMetadata} from "../../lib/seo";
 
-export const metadata: Metadata = { title: "AI Layering Lab", description: "Create grounded fragrance layering guidance using active Rehmat Panjab oils.", alternates: { canonical: "/layer" } };
+export const metadata: Metadata = pageMetadata({title:"Perfume Oil Layering Lab",description:"Explore grounded fragrance layering combinations using active Rehmat Panjab perfume oils and their verified scent profiles.",path:"/layer"});
 
 export default async function LayerPage({searchParams}:{searchParams:Promise<{products?:string}>}) {
   const [settings, storefront] = await Promise.all([getExperienceSettings(), getStorefrontProducts()]);

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import type {Metadata} from "next";
 import { HomepageCampaign } from "./components/homepage-campaign";
 import { ProductMedia } from "./components/product-media";
 import { getStorefrontProducts } from "../lib/storefront";
@@ -8,11 +9,18 @@ import { OpenGuideButton } from "./components/open-guide-button";
 import { TrustStrip } from "./components/trust-strip";
 import { availabilityLabel, firstPrice } from "../lib/catalog";
 import { formatMoney } from "../lib/cart";
+import {JsonLd} from "./components/json-ld";
+import {pageMetadata} from "../lib/seo";
+import {getSiteUrl} from "../lib/site-url";
+
+export const metadata:Metadata=pageMetadata({title:"Concentrated Perfume Oils",description:"Discover Rehmat Panjab concentrated perfume oils and choose a personal scent by mood, fragrance notes and occasion.",path:"/"});
 
 export default async function Home() {
   const [products,storeSettings] = await Promise.all([getStorefrontProducts(),getStoreSettings()]);
+  const origin=getSiteUrl();
   return (
     <main id="main-content" className="home-v41">
+      <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:"Rehmat Panjab",url:origin,logo:`${origin}/icon.png`},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin}]}/>
       <HomepageCampaign />
 
       <section className="v41-oil-act" aria-labelledby="oil-collection-heading">

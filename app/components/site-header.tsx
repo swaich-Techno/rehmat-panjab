@@ -30,7 +30,7 @@ export function SiteHeader() {
       </Link>
       <nav className={open ? "primary-nav is-open" : "primary-nav"} aria-label="Primary">
         {nav.map(([label, href]) => (
-          <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} data-cursor="OPEN" onClick={(event) => { setOpen(false); if(href==="#rehmat-guide"){event.preventDefault();window.dispatchEvent(new Event("open-rehmat-guide"));} }}>
+          <Link key={href} href={href==="#rehmat-guide"&&pathname!=="/"?"/#rehmat-guide":href} aria-current={pathname === href ? "page" : undefined} data-cursor="OPEN" onClick={(event) => { setOpen(false); if(href==="#rehmat-guide"&&pathname==="/"){event.preventDefault();window.dispatchEvent(new Event("open-rehmat-guide"));} }}>
             {label}
           </Link>
         ))}

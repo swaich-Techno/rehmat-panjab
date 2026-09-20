@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OpenGuideButton } from "../components/open-guide-button";
+import {pageMetadata} from "../../lib/seo";
 
-export const metadata: Metadata = { title: "Our Story", description: "The meaning, atmosphere and close-to-skin ritual of Rehmat Panjab.", alternates: { canonical: "/discover" } };
+export const metadata: Metadata = pageMetadata({title:"Our Story and Fragrance Ritual",description:"Discover the meaning behind Rehmat Panjab and our considered approach to concentrated perfume oils, atmosphere and personal ritual.",path:"/discover"});
 export default function DiscoverPage() { return <main id="main-content" className="story-page">
   <section className="story-page-hero"><p className="eyebrow">THE HOUSE · REHMAT PANJAB</p><h1>Perfume oil,<br/>worn close.</h1><p>Rehmat Panjab creates concentrated perfume oils shaped around atmosphere, memory and personal ritual. Each fragrance is designed to unfold slowly, remain close to the skin and become part of the person wearing it.</p></section>
   <div className="story-page-grid">

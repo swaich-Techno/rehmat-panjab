@@ -3,6 +3,7 @@ import {notFound} from "next/navigation";
 import Link from "next/link";
 import {getPolicyTemplate,policySlugs,type PolicySlug} from "../../../lib/policy-templates";
 import {getPublishedPolicyRecord} from "../../../lib/store-settings";
+import {pageMetadata} from "../../../lib/seo";
 export const dynamic="force-dynamic";
 
 export function generateStaticParams(){return policySlugs.map(slug=>({slug}));}
@@ -13,7 +14,7 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
   const published=await getPublishedPolicyRecord();
   if(!published)return {robots:{index:false,follow:false}};
   const policy=getPolicyTemplate(slug as PolicySlug,published.settings);
-  return {title:policy.title,description:policy.description,alternates:{canonical:`/policies/${slug}`},openGraph:{title:policy.title,description:policy.description,url:`/policies/${slug}`}};
+  return pageMetadata({title:policy.title,description:policy.description,path:`/policies/${slug}`});
 }
 
 export default async function Page({params}:{params:Promise<{slug:string}>}){

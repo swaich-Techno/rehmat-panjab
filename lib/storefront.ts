@@ -4,6 +4,7 @@ import { products as editorialProducts } from "./products";
 import type { CatalogStatus, StorefrontProduct } from "./catalog";
 import { createSupabaseAdminClient } from "./supabase/admin";
 import { mediaForSlug } from "./product-media-manifest";
+import {cache} from "react";
 
 type CatalogRow = {
   id: string;
@@ -172,7 +173,7 @@ function mapRow(row: CatalogRow): StorefrontProduct {
   };
 }
 
-export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
+async function loadStorefrontProducts(): Promise<StorefrontProduct[]> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
@@ -191,6 +192,8 @@ export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
     return {...variant,normalPricePaise:price,pricePaise:price-saving,promotionalLabel:discount.public_label};
   })}));
 }
+
+export const getStorefrontProducts=cache(loadStorefrontProducts);
 
 export async function getStorefrontProduct(slug: string) {
   return (await getStorefrontProducts()).find((product) => product.slug === slug);

@@ -15,6 +15,8 @@ import { getExperienceSettings } from "../../../lib/experience-settings";
 import { getSiteUrl } from "../../../lib/site-url";
 import { getPublishedPolicyRecord, getStoreSettings, supportedTrustItems } from "../../../lib/store-settings";
 import { TrustStrip } from "../../components/trust-strip";
+import {JsonLd} from "../../components/json-ld";
+import {pageMetadata} from "../../../lib/seo";
 
 export function generateStaticParams() {
   return editorialProducts.map((product) => ({ slug: product.slug }));
@@ -25,12 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) return {};
-  return {
-    title: product.name,
-    description: product.microDescription || `${product.subtitle}. A concentrated perfume oil from Rehmat Panjab.`,
-    alternates: { canonical: `/product/${product.slug}` },
-    openGraph: { title: `${product.name} — Rehmat Panjab`, description: product.atmosphere, images: [{ url: product.socialImage, width: 1200, height: 630, alt: `${product.name} perfume oil by Rehmat Panjab` }] },
-  };
+  const description=product.microDescription||`${product.subtitle}. Discover this concentrated perfume oil from Rehmat Panjab.`;
+  return pageMetadata({title:product.name,description,path:`/product/${product.slug}`,image:product.socialImage,imageAlt:`${product.name} perfume oil by Rehmat Panjab`,robots:product.status==="active"?{index:true,follow:true}:{index:false,follow:true}});
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -48,27 +46,30 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const related = catalogue.filter((item) => item.slug !== product.slug).slice(0, 3);
   const purchasable = COMMERCE_ENABLED && product.variants.some((variant) => isPurchasable(product, variant));
   const origin = getSiteUrl();
-  const productSchema = {
+  const offerVariants=product.status==="active"?product.variants.filter(variant=>variant.enabled&&variant.pricePaise!==null):[];
+  const productSchema:Record<string,unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
+    url:`${origin}/product/${product.slug}`,
+    brand:{"@type":"Brand",name:"Rehmat Panjab"},
     audience: { "@type": "PeopleAudience", suggestedGender: suitabilityLabels[product.suitability] },
     image: [product.socialImage.startsWith("http") ? product.socialImage : `${origin}${product.socialImage}`],
-    ...(COMMERCE_ENABLED ? { sku: product.variants[0]?.sku, offers: product.variants.filter((variant) => isPurchasable(product, variant)).map((variant) => ({
+    ...(offerVariants.length?{offers:offerVariants.map((variant) => ({
       "@type": "Offer",
       url: `${origin}/product/${product.slug}`,
       priceCurrency: variant.currency,
       price: ((variant.pricePaise ?? 0) / 100).toFixed(2),
       sku: variant.sku,
       availability: variant.availableQuantity > 0 && product.status === "active" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    })) } : {}),
+    }))}:{}),
     ...(reviews.total ? { aggregateRating: { "@type": "AggregateRating", ratingValue: reviews.average.toFixed(1), reviewCount: reviews.total } } : {}),
   };
 
   return (
     <main id="main-content" className={`product-page scent-page-${product.id}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema).replace(/</g, "\\u003c") }} />
+      <JsonLd data={productSchema}/>
       <aside className="product-sticky">
         <ProductMedia product={product} priority role="hero" />
         <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · Bottle formats</p>
