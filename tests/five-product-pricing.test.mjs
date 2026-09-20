@@ -24,13 +24,15 @@ test("owner-approved five-product prices, costs and stock are recorded exactly",
 });
 
 test("unverified fragrance facts are not invented and costs stay in admin data", async () => {
-  const [migration, api, admin] = await Promise.all([
+  const [migration, api, admin, collection] = await Promise.all([
     readFile(migrationUrl, "utf8"),
     readFile(new URL("../app/api/admin/variants/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/products/variant-manager.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/collection/page.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(migration, /notes_verified = false/);
   assert.match(migration, /'\{\}'::jsonb, false/);
   assert.match(api, /oil_cost_paise/);
   assert.match(admin, /Oil cost \(₹, internal\)/);
+  assert.match(collection, /\{products\.length\} concentrated perfume oils/);
 });

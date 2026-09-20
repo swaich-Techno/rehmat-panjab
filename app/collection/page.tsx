@@ -16,7 +16,7 @@ export default async function CollectionPage() {
       <header className="collection-intro">
         <p className="eyebrow">THE COLLECTION</p>
         <h1>Your Oil, <em>Your Atmosphere</em></h1>
-        <p>Ten concentrated perfume oils. Explore by mood, notes, suitability or price.</p>
+        <p>{products.length} concentrated perfume oils. Explore by mood, notes, suitability or price.</p>
       </header>
       <CollectionCatalogue products={products} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage}} />
     </main>
