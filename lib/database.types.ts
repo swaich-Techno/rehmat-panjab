@@ -8,8 +8,8 @@ export type Database = {
         Relationships: [];
       };
       product_variants: {
-        Row: { id: string; product_id: string; size_ml: number; sku: string; price_paise: number | null; bottle_id:string|null; enabled: boolean; created_at: string; updated_at: string };
-        Insert: { id?: string; product_id: string; size_ml: number; sku: string; price_paise?: number | null; bottle_id?:string|null; enabled?: boolean; updated_at?: string };
+        Row: { id: string; product_id: string; size_ml: number; sku: string; price_paise: number | null; oil_cost_paise: number | null; bottle_id:string|null; enabled: boolean; created_at: string; updated_at: string };
+        Insert: { id?: string; product_id: string; size_ml: number; sku: string; price_paise?: number | null; oil_cost_paise?: number | null; bottle_id?:string|null; enabled?: boolean; updated_at?: string };
         Update: Partial<Database["public"]["Tables"]["product_variants"]["Insert"]>;
         Relationships: [];
       };
