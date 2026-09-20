@@ -15,6 +15,11 @@ export const FRAGRANCE_NOTE_PALETTES = {
   "gulnaar": { light: "#ffe0a1", middle: "#e88739", deep: "#a63b22" },
   "deer-musk": { light: "#c7a56a", middle: "#705338", deep: "#171718" },
   "afsoon": { light: "#d57b68", middle: "#7d1e32", deep: "#2d0610" },
+  "amber-veil": { light: "#fff1b8", middle: "#d59b47", deep: "#684326" },
+  "velvet-oud": { light: "#f7dfd9", middle: "#a65c64", deep: "#3b2029" },
+  "purple-oud": { light: "#e5d4ed", middle: "#72507d", deep: "#2d2038" },
+  "golden-dream": { light: "#fff1b0", middle: "#d89a35", deep: "#805126" },
+  "dubai-chocolate": { light: "#e5b77d", middle: "#8b4d2e", deep: "#351c18" },
 } as const satisfies Record<string, FragranceNotePalette>;
 
 const ingredientAsset = (key: string) => `/images/fragrance-notes/${key}.webp`;
@@ -31,6 +36,11 @@ export const FRAGRANCE_INGREDIENT_VISUALS = {
   "gulnaar": [["Candied Pear", "candied-pear"], ["Strawberry", "strawberries"], ["Vanilla", "vanilla-pod"]],
   "deer-musk": [["Cardamom", "cardamom-pods"], ["Bergamot", "bergamot-slice"], ["Velvet Musk", "velvet-musk-dark"]],
   "afsoon": [["Dark Cherry", "dark-cherries"], ["Red Berries", "red-berries"], ["Velvet Musk", "velvet-musk-burgundy"]],
+  "amber-veil": [["Saffron", "saffron-threads"], ["Jasmine", "jasmine-sambac"], ["Cedarwood", "wood-chips"]],
+  "velvet-oud": [["Soft Rose", "rose-petals"], ["Oud", "wood-chips"], ["Vanilla", "vanilla-pod"]],
+  "purple-oud": [["Warm Spice", "cardamom-pods"], ["Dark Oud", "wood-chips"], ["Amber", "amber-resin"]],
+  "golden-dream": [["Vanilla", "vanilla-pod"], ["Caramel", "caramel"], ["Amber", "amber-resin"]],
+  "dubai-chocolate": [["Chocolate", "dark-chocolate"], ["Vanilla", "vanilla-pod"], ["Hazelnut", "hazelnuts"]],
 } as const satisfies Record<string, readonly (readonly [string, string])[]>;
 
 export function fragranceNotePaletteFor(slug: string): FragranceNotePalette | null {

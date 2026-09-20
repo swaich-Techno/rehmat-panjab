@@ -15,7 +15,7 @@ test("ingredient visuals resolve from authoritative product notes and unknown no
   assert.doesNotMatch(reveal, /fragrance-note-label|>TOP<|>HEART<|>BASE</);
 });
 
-test("all ten products map three verified notes to approved local assets", async () => {
+test("all configured products map three verified notes to approved local assets", async () => {
   const data = await read("lib/fragrance-note-reveal.ts");
   const expected = {
     "musk-rizali": ["bergamot-slice", "saffron-threads", "white-musk-orb"],
@@ -28,6 +28,11 @@ test("all ten products map three verified notes to approved local assets", async
     gulnaar: ["candied-pear", "strawberries", "vanilla-pod"],
     "deer-musk": ["cardamom-pods", "bergamot-slice", "velvet-musk-dark"],
     afsoon: ["dark-cherries", "red-berries", "velvet-musk-burgundy"],
+    "amber-veil": ["saffron-threads", "jasmine-sambac", "wood-chips"],
+    "velvet-oud": ["rose-petals", "wood-chips", "vanilla-pod"],
+    "purple-oud": ["cardamom-pods", "wood-chips", "amber-resin"],
+    "golden-dream": ["vanilla-pod", "caramel", "amber-resin"],
+    "dubai-chocolate": ["dark-chocolate", "vanilla-pod", "hazelnuts"],
   };
   for (const [slug, keys] of Object.entries(expected)) {
     assert.match(data, new RegExp(`"${slug}": \\[([^\\n]+)\\]`));
@@ -38,7 +43,7 @@ test("all ten products map three verified notes to approved local assets", async
 test("transparent ingredient library is complete and optimized locally", async () => {
   const dir = new URL("public/images/fragrance-notes/", root);
   const files = (await readdir(dir)).filter(file => file.endsWith(".webp"));
-  assert.equal(files.length, 20);
+  assert.equal(files.length, 25);
   for (const file of files) {
     const bytes = await readFile(new URL(file, dir));
     const info = await stat(new URL(file, dir));

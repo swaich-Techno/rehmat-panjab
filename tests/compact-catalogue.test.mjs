@@ -5,7 +5,7 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),"utf8");
 
 test("collection uses a compact responsive commerce grid",async()=>{
   const [page,catalogue,styles]=await Promise.all([read("app/collection/page.tsx"),read("app/collection/collection-catalogue.tsx"),read("app/globals.css")]);
-  assert.match(page,/THE COLLECTION/);assert.match(page,/Ten concentrated perfume oils/);
+  assert.match(page,/THE COLLECTION/);assert.match(page,/\{products\.length\} concentrated perfume oils/);
   assert.match(styles,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);assert.match(styles,/@media\(max-width:1250px\).*repeat\(3,minmax\(0,1fr\)\)/s);assert.match(styles,/@media\(max-width:900px\).*repeat\(2,minmax\(0,1fr\)\)/s);
   assert.match(catalogue,/catalogue-filter-panel/);assert.match(catalogue,/Quick view/i);assert.match(catalogue,/Order on WhatsApp/);assert.match(catalogue,/Add to cart/);
 });
