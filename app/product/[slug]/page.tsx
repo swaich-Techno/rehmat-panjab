@@ -27,7 +27,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) return {};
-  const description=product.microDescription||`${product.subtitle}. Discover this concentrated perfume oil from Rehmat Panjab.`;
+  const suppliedDescription=product.microDescription?.trim();
+  const occasions=product.suitableFor.slice(0,3).join(", ").toLowerCase();
+  const description=suppliedDescription&&suppliedDescription.length>=90?suppliedDescription:`Explore ${product.name}, a concentrated perfume oil from Rehmat Panjab with ${product.subtitle.toLowerCase()}, suited to ${occasions}.`;
   return pageMetadata({title:product.name,description,path:`/product/${product.slug}`,image:product.socialImage,imageAlt:`${product.name} perfume oil by Rehmat Panjab`,robots:product.status==="active"?{index:true,follow:true}:{index:false,follow:true}});
 }
 

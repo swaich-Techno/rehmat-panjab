@@ -13,7 +13,7 @@ import {JsonLd} from "./components/json-ld";
 import {pageMetadata} from "../lib/seo";
 import {getSiteUrl} from "../lib/site-url";
 
-export const metadata:Metadata=pageMetadata({title:"Concentrated Perfume Oils",description:"Discover Rehmat Panjab concentrated perfume oils and choose a personal scent by mood, fragrance notes and occasion.",path:"/"});
+export const metadata:Metadata=pageMetadata({title:"Rehmat Panjab — Concentrated Perfume Oils",description:"Discover Rehmat Panjab concentrated perfume oils and choose a personal scent by mood, fragrance notes and occasion.",path:"/"});
 
 export default async function Home() {
   const [products,storeSettings] = await Promise.all([getStorefrontProducts(),getStoreSettings()]);
