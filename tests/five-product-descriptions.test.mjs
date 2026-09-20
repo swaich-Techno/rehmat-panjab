@@ -32,6 +32,6 @@ test("legacy internal-reference slugs redirect to public Rehmat names", async ()
 
 test("the brand signature is present in the shared footer", async () => {
   const footer = await read("app/components/site-footer.tsx");
-  assert.match(footer, /Pure · Authentic · Timeless/);
+  assert.match(footer, /Pure • Authentic • Timeless/);
   assert.match(footer, /Premium Arabian attars crafted for everyday luxury and unforgettable moments\./);
 });

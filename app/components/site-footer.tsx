@@ -9,7 +9,7 @@ export async function SiteFooter() {
       <div>
         <p className="eyebrow">The house</p>
         <p className="footer-statement">Perfume oil,<br />worn close.</p>
-        <p className="footer-signature">Pure · Authentic · Timeless</p>
+        <p className="footer-signature">Pure • Authentic • Timeless</p>
         <p className="footer-description">Premium Arabian attars crafted for everyday luxury and unforgettable moments.</p>
       </div>
       <div className="footer-links">
