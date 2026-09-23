@@ -17,6 +17,7 @@ import { getPublishedPolicyRecord, getStoreSettings, supportedTrustItems } from 
 import { TrustStrip } from "../../components/trust-strip";
 import {JsonLd} from "../../components/json-ld";
 import {pageMetadata} from "../../../lib/seo";
+import {searchCollectionsForProduct} from "../../../lib/search-collections";
 
 export function generateStaticParams() {
   return editorialProducts.map((product) => ({ slug: product.slug }));
@@ -27,10 +28,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (productRedirects[slug]) permanentRedirect(`/product/${productRedirects[slug]}`);
   const product = await getStorefrontProduct(slug);
   if (!product) return {};
-  const suppliedDescription=product.microDescription?.trim();
-  const occasions=product.suitableFor.slice(0,3).join(", ").toLowerCase();
-  const description=suppliedDescription&&suppliedDescription.length>=90?suppliedDescription:`Explore ${product.name}, a concentrated perfume oil from Rehmat Panjab with ${product.subtitle.toLowerCase()}, suited to ${occasions}.`;
-  return pageMetadata({title:product.name,description,path:`/product/${product.slug}`,image:product.socialImage,imageAlt:`${product.name} perfume oil by Rehmat Panjab`,robots:product.status==="active"?{index:true,follow:true}:{index:false,follow:true}});
+  const sizes=product.variants.filter(variant=>variant.enabled&&variant.pricePaise!==null).map(variant=>`${variant.sizeMl} ml`);
+  const notes=product.notes?[...product.notes.top.slice(0,1),...product.notes.heart.slice(0,1),...product.notes.base.slice(0,1)].join(", "):product.subtitle.replaceAll("/",",");
+  const family=product.scentFamily?.trim()||product.character.slice(0,2).join(" and ");
+  const description=`Explore ${product.name}, a ${family.toLowerCase()} concentrated perfume oil with ${notes}. Available in ${sizes.join(" and ")} for India delivery.`;
+  return pageMetadata({title:`${product.name} Perfume Oil – ${sizes.join(" & ")} | Rehmat Panjab India`,description,path:`/product/${product.slug}`,image:product.socialImage,imageAlt:`${product.name} perfume oil by Rehmat Panjab`,robots:product.status==="active"?{index:true,follow:true}:{index:false,follow:true}});
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -49,29 +51,28 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const purchasable = COMMERCE_ENABLED && product.variants.some((variant) => isPurchasable(product, variant));
   const origin = getSiteUrl();
   const offerVariants=product.status==="active"?product.variants.filter(variant=>variant.enabled&&variant.pricePaise!==null):[];
+  const canonicalUrl=`${origin}/product/${product.slug}`;
   const productSchema:Record<string,unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
+    "@context":"https://schema.org",
+    "@type":"ProductGroup",
+    "@id":`${canonicalUrl}#product-group`,
     name: product.name,
     description: product.description,
-    url:`${origin}/product/${product.slug}`,
+    url:canonicalUrl,
+    productGroupID:product.databaseId??product.slug,
+    variesBy:"https://schema.org/size",
     brand:{"@type":"Brand",name:"Rehmat Panjab"},
     audience: { "@type": "PeopleAudience", suggestedGender: suitabilityLabels[product.suitability] },
     image: [product.socialImage.startsWith("http") ? product.socialImage : `${origin}${product.socialImage}`],
-    ...(offerVariants.length?{offers:offerVariants.map((variant) => ({
-      "@type": "Offer",
-      url: `${origin}/product/${product.slug}`,
-      priceCurrency: variant.currency,
-      price: ((variant.pricePaise ?? 0) / 100).toFixed(2),
-      sku: variant.sku,
-      availability: variant.availableQuantity > 0 && product.status === "active" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    }))}:{}),
+    hasVariant:offerVariants.map(variant=>({"@type":"Product",name:`${product.name} ${variant.sizeMl} ml`,sku:variant.sku,size:`${variant.sizeMl} ml`,image:product.socialImage.startsWith("http")?product.socialImage:`${origin}${product.socialImage}`,isVariantOf:{"@id":`${canonicalUrl}#product-group`},offers:{"@type":"Offer",url:canonicalUrl,priceCurrency:variant.currency,price:((variant.pricePaise??0)/100).toFixed(2),availability:variant.availableQuantity>0?"https://schema.org/InStock":"https://schema.org/OutOfStock",itemCondition:"https://schema.org/NewCondition",seller:{"@type":"Organization",name:"Rehmat Panjab",url:origin}}})),
     ...(reviews.total ? { aggregateRating: { "@type": "AggregateRating", ratingValue: reviews.average.toFixed(1), reviewCount: reviews.total } } : {}),
   };
+  const breadcrumbSchema={"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Home",item:origin},{"@type":"ListItem",position:2,name:"Collection",item:`${origin}/collection`},{"@type":"ListItem",position:3,name:product.name,item:canonicalUrl}]};
+  const categoryLinks=searchCollectionsForProduct(product).slice(0,4);
 
   return (
     <main id="main-content" className={`product-page scent-page-${product.id}`}>
-      <JsonLd data={productSchema}/>
+      <JsonLd data={[breadcrumbSchema,productSchema]}/>
       <aside className="product-sticky">
         <ProductMedia product={product} priority role="hero" />
         <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · Bottle formats</p>
@@ -84,6 +85,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {product.inspirationLine && <p className="inspiration-disclaimer">{INSPIRATION_DISCLAIMER}</p>}
           <p className="product-lede">{product.atmosphere}</p>
           {product.microDescription && <p className="product-micro-description">{product.microDescription}</p>}
+          <p className="product-micro-description">Concentrated perfume oil designed for a lasting, close-to-skin fragrance experience. Performance varies by skin, climate and application.</p>
           <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
           <div className="character-chips">{product.character.map((word) => <span key={word}>{word}</span>)}</div>
         </section>
@@ -104,7 +106,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <TrustStrip items={supportedTrustItems(storeSettings)}/>
         </section>
         <ProductReviews productId={product.databaseId ?? "00000000-0000-0000-0000-000000000000"} productName={product.name} summary={reviews} />
-        <section className="story-panel related-panel"><p className="eyebrow">Continue exploring</p><h2>Related<br />fragrances.</h2><div className="related-fragrances">{related.map((item) => <Link key={item.slug} href={`/product/${item.slug}`}><span>{item.number}</span><strong>{item.name}</strong><small>{item.atmosphere}</small></Link>)}</div><Link className="button button-outline" href="/layer">Explore this fragrance in Layering Lab</Link></section>
+        <section className="story-panel related-panel"><p className="eyebrow">Continue exploring</p><h2>Related<br />fragrances.</h2><div className="related-fragrances">{related.map((item) => <Link key={item.slug} href={`/product/${item.slug}`}><span>{item.number}</span><strong>{item.name}</strong><small>{item.atmosphere}</small></Link>)}</div><nav className="product-seo-links" aria-label="Related fragrance collections">{categoryLinks.map(item=><Link key={item.slug} href={`/collection/${item.slug}`}>{item.name}</Link>)}<Link href="/guides/understanding-fragrance-notes">Understand fragrance notes</Link></nav><Link className="button button-outline" href="/layer">Explore this fragrance in Layering Lab</Link></section>
         {!purchasable && product.status === "sold_out" && <section className="story-panel notify-panel"><p className="eyebrow">Availability notice</p><h2>Return when<br />it is replenished.</h2><p>Leave your email for one considered back-in-stock note.</p><NotifyForm productSlug={product.slug} /></section>}
       </div>
     </main>

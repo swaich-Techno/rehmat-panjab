@@ -7,6 +7,7 @@ import "./globals.css";
 import { getSiteUrl } from "../lib/site-url";
 import { RehmatGuide } from "./components/rehmat-guide";
 import { CookiePreferences } from "./components/cookie-preferences";
+import {isPreviewDeployment} from "../lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const origin = getSiteUrl();
@@ -14,10 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(origin),
     title: { default: "Rehmat Panjab — Concentrated Perfume Oils", template: "%s — Rehmat Panjab" },
-    description: "Discover concentrated perfume oils from Rehmat Panjab, created for personal rituals, memorable occasions and everyday luxury.",
+    description: "Your Oil, Your Atmosphere. Discover concentrated perfume oils from Rehmat Panjab for personal rituals, memorable occasions and everyday luxury.",
     alternates:{canonical:"/"},
     openGraph: { type: "website", siteName: "Rehmat Panjab", title: "Rehmat Panjab — Concentrated Perfume Oils", description: "Discover concentrated perfume oils created for personal rituals, memorable occasions and everyday luxury.", url:"/", images: [{ url: socialImage, width: 1792, height: 937, alt: "Rehmat Panjab rose-gold perfume oil bottle" }] },
     twitter: { card: "summary_large_image", title: "REHMAT PANJAB", description: "Perfume oil, close to skin.", images: [socialImage] },
+    robots:isPreviewDeployment?{index:false,follow:false,nocache:true}:{index:true,follow:true},
   };
 }
 

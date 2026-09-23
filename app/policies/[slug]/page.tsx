@@ -4,6 +4,8 @@ import Link from "next/link";
 import {getPolicyTemplate,policySlugs,type PolicySlug} from "../../../lib/policy-templates";
 import {getPublishedPolicyRecord} from "../../../lib/store-settings";
 import {pageMetadata} from "../../../lib/seo";
+import {getSiteUrl} from "../../../lib/site-url";
+import {JsonLd} from "../../components/json-ld";
 export const dynamic="force-dynamic";
 
 export function generateStaticParams(){return policySlugs.map(slug=>({slug}));}
@@ -24,7 +26,9 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
   if(!published)notFound();
   const policy=getPolicyTemplate(slug as PolicySlug,published.settings);
   const date=new Intl.DateTimeFormat("en-IN",{dateStyle:"long",timeZone:"Asia/Kolkata"}).format(new Date(`${published.effectiveDate}T00:00:00+05:30`));
+  const origin=getSiteUrl();
   return <main id="main-content" className="legal-page policy-document">
+    <JsonLd data={{"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Home",item:origin},{"@type":"ListItem",position:2,name:policy.title,item:`${origin}/policies/${slug}`}]}}/>
     <header><p className="eyebrow">Rehmat Panjab · Policy {published.version}</p><h1>{policy.title}</h1><p><strong>Last updated:</strong> {date}</p><p>{policy.description}</p></header>
     {policy.sections.map(section=><section key={section.heading}><h2>{section.heading}</h2>{section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}{section.bullets&&<ul>{section.bullets.map(item=><li key={item}>{item}</li>)}</ul>}</section>)}
     <nav className="policy-links" aria-label="Customer policies">{policySlugs.filter(item=>item!==slug).map(item=><Link key={item} href={`/policies/${item}`}>{getPolicyTemplate(item,published.settings).title}</Link>)}</nav>

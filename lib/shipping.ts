@@ -1,4 +1,4 @@
-export const FREE_SHIPPING_THRESHOLD_PAISE=150000;
+export const FREE_SHIPPING_THRESHOLD_PAISE=100000;
 
 export type ShippingMethod="free_local_delivery"|"free_standard_shipping"|"standard_shipping_pending";
 export type ShippingDecision={

@@ -5,6 +5,8 @@ import { getExperienceSettings } from "../../lib/experience-settings";
 import {JsonLd} from "../components/json-ld";
 import {pageMetadata} from "../../lib/seo";
 import {getSiteUrl} from "../../lib/site-url";
+import Link from "next/link";
+import {searchCollections} from "../../lib/search-collections";
 
 export const metadata: Metadata = pageMetadata({title:"The Perfume Oil Collection",description:"Explore Rehmat Panjab concentrated perfume oils by fragrance family, mood, bottle size, occasion and availability.",path:"/collection"});
 
@@ -20,6 +22,7 @@ export default async function CollectionPage() {
         <h1>Your Oil, <em>Your Atmosphere</em></h1>
         <p>{products.length} concentrated perfume oils. Explore by mood, notes, suitability or price.</p>
       </header>
+      <nav className="seo-collection-nav" aria-label="Browse perfume oil collections">{searchCollections.map(collection=><Link key={collection.slug} href={`/collection/${collection.slug}`}>{collection.name}</Link>)}</nav>
       <CollectionCatalogue products={products} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage}} />
     </main>
   );

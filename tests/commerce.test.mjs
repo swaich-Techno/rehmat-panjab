@@ -96,7 +96,9 @@ test("catalogue visibility, purchasing, and admin mutations are server guarded",
   assert.match(header, /COMMERCE_ENABLED && <button className="header-cart"/);
   assert.match(purchase, /!COMMERCE_ENABLED && <p className="purchase-unavailable"/);
   assert.match(cartPage, /if \(!COMMERCE_ENABLED\) notFound\(\)/);
-  assert.match(productPage, /COMMERCE_ENABLED \? \{ sku:.*offers:/s);
+  assert.match(productPage, /"@type":"ProductGroup"/);
+  assert.match(productPage, /hasVariant:offerVariants\.map/);
+  assert.match(productPage, /"@type":"Offer"/);
 });
 
 test("reviews are pending, private by default, rate limited, and moderated server-side", async () => {

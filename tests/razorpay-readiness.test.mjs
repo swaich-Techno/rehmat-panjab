@@ -71,7 +71,7 @@ test("captured-payment Telegram alerts are server-only, optional and webhook-ide
 test("merchant, payment and below-threshold shipping wording is aligned",async()=>{
   const policy=await read("lib/policy-templates.ts");
   assert.match(policy,/Rehmat Panjab is operated by Harkirat Singh/);
-  assert.match(policy,/Shipping charges apply below ₹1,500/);
+  assert.match(policy,/below ₹1,000/);
   assert.match(policy,/Razorpay receives payment and transaction information/);
   assert.doesNotMatch(policy,/Free local delivery|return-to-origin courier costs may be deducted/i);
 });

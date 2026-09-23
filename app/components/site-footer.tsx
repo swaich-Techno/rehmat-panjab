@@ -18,11 +18,13 @@ export async function SiteFooter() {
         <Link href="/find-your-scent">Find your scent</Link>
         <Link href="/create-your-fragrance">Create your Rehmat</Link>
         <Link href="/layer">Layering lab</Link>
+        <Link href="/guides">Fragrance guides</Link>
       </div>
       <div className="footer-links">
         <p className="eyebrow">House</p>
         <Link href="/contact">Contact</Link>
-        <a href={`tel:${merchant.phoneE164}`}>+91 70094 64475</a>
+        <a href={`tel:${merchant.phoneE164}`}>{merchant.phone}</a>
+        <a href={`https://wa.me/${merchant.whatsapp}`} target="_blank" rel="noreferrer">WhatsApp support</a>
         <a href={`mailto:${merchant.email}`}>{merchant.email}</a>
         {policies&&<><Link href="/policies/shipping">Shipping policy</Link><Link href="/policies/returns">Cancellation &amp; refunds</Link><Link href="/policies/privacy">Privacy policy</Link><Link href="/policies/terms">Terms &amp; conditions</Link></>}
         <button className="footer-preference-button" type="button" data-cookie-preferences>Cookie preferences</button>

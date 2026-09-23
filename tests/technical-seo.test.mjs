@@ -40,7 +40,7 @@ test("brand icons and structured data are explicit and factual",async()=>{
   assert.ok(icon.size>0);assert.ok(apple.size>0);
   assert.match(home,/"@type":"Organization"/);assert.match(home,/"@type":"WebSite"/);
   assert.match(collection,/"@type":"CollectionPage"/);assert.match(collection,/"@type":"ItemList"/);
-  assert.match(product,/"@type": "Product"/);assert.match(product,/"@type": "Offer"/);assert.match(product,/priceCurrency: variant\.currency/);assert.match(product,/brand:\{"@type":"Brand",name:"Rehmat Panjab"\}/);
+  assert.match(product,/"@type":"ProductGroup"/);assert.match(product,/"@type":"Product"/);assert.match(product,/"@type":"Offer"/);assert.match(product,/priceCurrency:variant\.currency/);assert.match(product,/brand:\{"@type":"Brand",name:"Rehmat Panjab"\}/);
   assert.doesNotMatch(`${home}${collection}${product}`,/priceValidUntil|gtin|mpn/);
 });
 

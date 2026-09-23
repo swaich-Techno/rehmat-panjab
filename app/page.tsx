@@ -12,6 +12,7 @@ import { formatMoney } from "../lib/cart";
 import {JsonLd} from "./components/json-ld";
 import {pageMetadata} from "../lib/seo";
 import {getSiteUrl} from "../lib/site-url";
+import {merchant} from "../lib/merchant";
 
 export const metadata:Metadata=pageMetadata({title:"Rehmat Panjab — Concentrated Perfume Oils",description:"Discover Rehmat Panjab concentrated perfume oils and choose a personal scent by mood, fragrance notes and occasion.",path:"/"});
 
@@ -20,7 +21,7 @@ export default async function Home() {
   const origin=getSiteUrl();
   return (
     <main id="main-content" className="home-v41">
-      <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:"Rehmat Panjab",url:origin,logo:`${origin}/icon.png`},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin}]}/>
+      <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]}/>
       <HomepageCampaign />
 
       <section className="v41-oil-act" aria-labelledby="oil-collection-heading">

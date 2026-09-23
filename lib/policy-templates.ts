@@ -1,7 +1,7 @@
 import type {StoreSettings} from "./store-settings-schema";
 
-export const POLICY_VERSION="2026-09-10.2";
-export const POLICY_DATE="September 10, 2026";
+export const POLICY_VERSION="2026-09-22.1";
+export const POLICY_DATE="September 22, 2026";
 export const policySlugs=["shipping","returns","terms","privacy"] as const;
 export type PolicySlug=(typeof policySlugs)[number];
 export type PolicySection={heading:string;paragraphs:string[];bullets?:string[]};
@@ -15,7 +15,7 @@ export function getPolicyTemplate(slug:PolicySlug,settings:StoreSettings):Policy
   const shipping:PolicyTemplate={title:"Shipping Policy",description:"How Rehmat Panjab processes and delivers orders within India.",sections:[
     {heading:"Order processing",paragraphs:["Rehmat Panjab currently accepts and delivers orders within India only. Cash on Delivery is not available.","Confirmed orders are normally prepared and dispatched within 1–2 business days. Processing may take longer during public holidays, unusually high order volumes, address-verification issues or circumstances outside our reasonable control.","Orders placed through WhatsApp remain order requests until Rehmat Panjab confirms the products, price, delivery address and payment."]},
     {heading:"Delivery estimates",paragraphs:["After dispatch, delivery is normally expected within 3–7 business days. Delivery times are estimates rather than guarantees and may vary by destination, courier operations, weather, public holidays, transport disruption and other circumstances outside our control."]},
-    {heading:"Shipping charges",paragraphs:["Orders with an eligible merchandise subtotal of ₹1,500 or more receive free standard shipping. Eligibility is calculated after product discounts and coupons, excluding shipping charges.","Shipping charges apply below ₹1,500. Share your order request on WhatsApp and Rehmat Panjab will confirm the courier charge before payment.","Coupons do not reduce shipping charges unless an offer expressly states otherwise."]},
+    {heading:"Shipping charges",paragraphs:["Orders with an eligible product subtotal of ₹1,000 or more receive free standard shipping. Eligibility is calculated after product discounts and coupons, excluding shipping charges.","For eligible product subtotals below ₹1,000, the available delivery charge is calculated and disclosed before payment or manual order confirmation.","Coupons do not reduce shipping charges unless an offer expressly states otherwise."]},
     {heading:"Tracking",paragraphs:["When tracking is available, Rehmat Panjab will send shipment or tracking information using the customer’s provided email address, phone number, WhatsApp number or another available order-contact method.","Courier delivery may be arranged manually. No active shipping-platform integration is represented until onboarding and production verification are complete."]},
     {heading:"Address accuracy and changes",paragraphs:["Customers are responsible for providing a complete and accurate name, phone number, postal code and delivery address.","An address-change request must be submitted within 12 hours of ordering and before dispatch. We cannot guarantee a change after an order has been packed, handed to a courier or dispatched.","Additional charges caused by an incorrect or incomplete address may be payable by the customer."]},
     {heading:"Failed delivery",paragraphs:["If delivery fails because the customer is unavailable, refuses delivery, provides an incorrect address or does not respond to the courier, the parcel may be returned to Rehmat Panjab.","Failed deliveries and any reshipment request are reviewed manually. Return-to-origin charges are not deducted automatically."]},

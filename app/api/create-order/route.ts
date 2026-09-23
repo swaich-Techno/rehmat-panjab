@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
   const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin).catch(()=>null);
   if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
-  if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"Shipping charges apply below ₹1,500. Share your order request on WhatsApp and Rehmat Panjab will confirm the courier charge before payment."},{status:409});
+  if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"Shipping charges apply below ₹1,000 and will be disclosed before payment. Share your order request on WhatsApp for confirmation."},{status:409});
   const subtotal=amount; amount=quote.grandTotalPaise;
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return NextResponse.json({ message: "The payment total must be at least ₹1." }, { status: 400 });

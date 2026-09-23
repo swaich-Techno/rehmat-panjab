@@ -7,14 +7,14 @@ import {products,productRedirects} from "../lib/products.ts";
 const read=(path)=>readFile(new URL(`../${path}`,import.meta.url),"utf8");
 
 test("shipping uses exact post-discount INR minor-unit boundaries",()=>{
-  assert.equal(FREE_SHIPPING_THRESHOLD_PAISE,150000);
-  assert.equal(calculateShipping(149999).freeShipping,false);
-  assert.equal(calculateShipping(150000).deliveryMethod,"free_standard_shipping");
-  assert.equal(calculateShipping(150001).shippingPaise,0);
-  const below=176469-calculatePercentageDiscountPaise(176469,15);
-  const exact=176470-calculatePercentageDiscountPaise(176470,15);
-  assert.equal(below,149999);assert.equal(calculateShipping(below).freeShipping,false);
-  assert.equal(exact,150000);assert.equal(calculateShipping(exact).freeShipping,true);
+  assert.equal(FREE_SHIPPING_THRESHOLD_PAISE,100000);
+  assert.equal(calculateShipping(99999).freeShipping,false);
+  assert.equal(calculateShipping(100000).deliveryMethod,"free_standard_shipping");
+  assert.equal(calculateShipping(100001).shippingPaise,0);
+  const below=117645-calculatePercentageDiscountPaise(117645,15);
+  const exact=117646-calculatePercentageDiscountPaise(117646,15);
+  assert.equal(below,99999);assert.equal(calculateShipping(below).freeShipping,false);
+  assert.equal(exact,100000);assert.equal(calculateShipping(exact).freeShipping,true);
 });
 
 test("local delivery requires an exact approved PIN and verified activation",()=>{
@@ -48,7 +48,7 @@ test("customer links and policy safeguards use only the approved contact",async(
   assert.match(current,/\+91 70094 64475/);assert.match(current,/917009464475/);assert.match(contact,/tel:\$\{merchant\.phoneE164\}/);assert.match(contact,/mailto:/);
   assert.doesNotMatch(current,/98769 13550|919876913550|Phone:\s*\+91(?:\D|$)/);
   assert.match(policyApi,/support_email_verified_at/);assert.match(deliveryApi,/\^\\d\{6\}\$/);assert.doesNotMatch(deliveryApi,/Khanna|Samrala/i);
-  assert.match(checkout,/delivery_snapshot/);assert.match(checkout,/Shipping charges apply below ₹1,500/);
+  assert.match(checkout,/delivery_snapshot/);assert.match(checkout,/Shipping charges apply below ₹1,000/);
 });
 
 test("Razorpay.me evidence is admin-only and does not activate checkout",async()=>{const [migration,readiness,commerce]=await Promise.all([read("supabase/migrations/202609100003_contact_and_razorpay_profile.sql"),read("app/admin/readiness/page.tsx"),read("lib/commerce.ts")]);assert.match(migration,/razorpay\.me\/@harkiratsingh5450/);assert.match(migration,/'razorpay_kyc_approved',true/);assert.match(migration,/status='pending'/);assert.match(readiness,/Share only after an order total is manually confirmed/);assert.match(commerce,/NEXT_PUBLIC_COMMERCE_ENABLED/);});
