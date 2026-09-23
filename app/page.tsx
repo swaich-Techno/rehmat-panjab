@@ -24,7 +24,7 @@ export default async function Home() {
       <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]}/>
       <HomepageCampaign />
 
-      <section className="v41-oil-act" aria-labelledby="oil-collection-heading">
+      <section id="featured-fragrances" className="v41-oil-act" aria-labelledby="oil-collection-heading">
         <div className="v41-section-heading">
           <div>
             <p className="eyebrow light">Featured fragrances</p>

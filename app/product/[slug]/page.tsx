@@ -6,6 +6,7 @@ import { NotifyForm } from "../../components/notify-form";
 import { ProductMedia } from "../../components/product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
+import { ProductStoryMotion } from "../../components/product-story-motion";
 import { INSPIRATION_DISCLAIMER, productRedirects, products as editorialProducts } from "../../../lib/products";
 import { availabilityLabel, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
@@ -73,6 +74,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <main id="main-content" className={`product-page scent-page-${product.id}`}>
       <JsonLd data={[breadcrumbSchema,productSchema]}/>
+      <ProductStoryMotion />
       <aside className="product-sticky">
         <ProductMedia product={product} priority role="hero" />
         <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · Bottle formats</p>
