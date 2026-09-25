@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { z } from "zod";
@@ -15,13 +15,14 @@ const requestSchema = z.object({
   lines: z.array(z.object({
     variantId: z.string().uuid(),
     quantity: z.number().int().min(1).max(10),
-  }).strict()).min(1).max(20),
+  }).strict()).max(20),
+  testerPacks:z.array(z.object({packSize:z.union([z.literal(2),z.literal(3),z.literal(5)]),variantIds:z.array(z.string().uuid()).min(2).max(5),quantity:z.number().int().min(1).max(10)}).strict()).max(10).default([]),
   couponCode: z.string().trim().max(40).optional(),
   customerIdentifier:z.string().trim().max(120).optional(),
   deliveryPin:z.string().trim().regex(/^\d{6}$/).optional(),
   deliveryAddress:checkoutAddressSchema,
   policyAcceptance:z.object({version:z.string().trim().min(1).max(40),acceptedAt:z.iso.datetime(),marketingConsent:z.boolean()}).strict(),
-}).strict();
+}).strict().refine(value=>value.lines.length+value.testerPacks.length>0,{message:"Your cart is empty."});
 
 function errorStatus(error: unknown) {
   if (!error || typeof error !== "object" || !("statusCode" in error)) return 500;
@@ -49,6 +50,10 @@ export async function POST(request: Request) {
 
   const quantities = new Map<string, number>();
   for (const line of parsed.data.lines) quantities.set(line.variantId, (quantities.get(line.variantId) ?? 0) + line.quantity);
+  for(const pack of parsed.data.testerPacks){
+    if(pack.variantIds.length!==pack.packSize||new Set(pack.variantIds).size!==pack.packSize)return NextResponse.json({message:`Choose exactly ${pack.packSize} different fragrances.`},{status:400});
+    for(const variantId of pack.variantIds)quantities.set(variantId,(quantities.get(variantId)??0)+pack.quantity);
+  }
   if ([...quantities.values()].some((quantity) => quantity > 10)) {
     return NextResponse.json({ message: "A maximum of 10 units is allowed per item." }, { status: 400 });
   }
@@ -87,7 +92,7 @@ export async function POST(request: Request) {
     amount += variant.price_paise * quantity;
   }
 
-  const quote=await calculateOrderQuote([...quantities].map(([variantId,quantity])=>({variantId,quantity})),parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin).catch(()=>null);
+  const quote=await calculateOrderQuote(parsed.data.lines,parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin,parsed.data.testerPacks).catch(()=>null);
   if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
   if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"Shipping charges apply below ₹1,000 and will be disclosed before payment. Share your order request on WhatsApp for confirmation."},{status:409});
   const subtotal=amount; amount=quote.grandTotalPaise;
@@ -121,12 +126,12 @@ export async function POST(request: Request) {
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 
-    const orderItems = [...quantities].map(([variantId, quantity]) => ({
+    const orderItems = parsed.data.lines.map(({variantId, quantity}) => ({
       order_id: savedOrder.id,
       variant_id: variantId,
       quantity,
       unit_price_paise: variantById.get(variantId)!.price_paise!,
-    }));
+    })).concat(parsed.data.testerPacks.flatMap(pack=>{const testerPackGroupId=randomUUID();return pack.variantIds.map(variantId=>({order_id:savedOrder.id,variant_id:variantId,quantity:pack.quantity,unit_price_paise:variantById.get(variantId)!.price_paise!,tester_pack_group_id:testerPackGroupId,tester_pack_size:pack.packSize}));}));
     const { error: itemError } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemError) {
       await supabaseAdmin.from("orders").delete().eq("id", savedOrder.id);

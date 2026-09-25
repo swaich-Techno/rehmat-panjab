@@ -2,7 +2,7 @@ import type {StorefrontProduct} from "./catalog";
 
 export type GuideIntent="general_education"|"fragrance_family"|"product_discovery"|"product_comparison"|"budget_size"|"layering"|"occasion_mood"|"live_price_inventory"|"order_preparation"|"unrelated";
 export type GuideKnowledge={topic:string;aliases:string[];explanation:string;sourceTitle:string;sourceUrl:string;sourceLicense:string};
-export type GuideProduct=Pick<StorefrontProduct,"slug"|"name"|"inspirationLine"|"image"|"imageAlt"|"notes"|"suitability"|"suitabilityNote"|"character"|"atmosphere">&{reason:string;variants:Array<{sizeMl:number;pricePaise:number;availableQuantity:number}>};
+export type GuideProduct=Pick<StorefrontProduct,"slug"|"name"|"inspirationLine"|"image"|"imageAlt"|"notes"|"suitability"|"suitabilityNote"|"character"|"atmosphere">&{reason:string;variants:Array<{id:string;sku:string;sizeMl:number;pricePaise:number;availableQuantity:number}>};
 export type GuideReply={message:string;products:GuideProduct[];layering:boolean;source:"deterministic"|"knowledge"|"provider";intent:GuideIntent;sources?:Array<{title:string;url:string;license:string}>};
 
 const numbers:Record<string,number>={one:1,two:2,three:3,four:4,five:5};
@@ -31,7 +31,7 @@ export function createGuideReply(input:unknown,catalogue:StorefrontProduct[],opt
   const countHint=query.match(/\b([1-5])\b/)?.[1]??Object.entries(numbers).find(([word])=>query.includes(word))?.[1]??(wantsCompare?2:wantsLayer?3:options?.max??3),requestedCount=Math.max(1,Math.min(5,Number(countHint)));
   const scored=pool.map(product=>{const text=searchable(product);let score=named.includes(product)?50:0;for(const words of Object.values(vocabulary))for(const word of words)if(query.includes(word)&&text.includes(word))score+=3;if(/work|day|office/.test(query)&&/work|daily|day|soft|clean/.test(text))score+=2;if(/wedding|evening|night/.test(query)&&/wedding|evening|rich|deep|statement/.test(text))score+=2;if(/less sweet/.test(query)&&/sweet|candy|vanilla/.test(text))score-=12;return {product,score};}).sort((a,b)=>b.score-a.score||a.product.number.localeCompare(b.product.number));
   const selected=(named.length&&(wantsCompare||intent==="live_price_inventory"||intent==="order_preparation")?named:scored.map(item=>item.product)).slice(0,Math.min(requestedCount,options?.max??5));
-  const products=selected.map(product=>({...product,reason:`A ${(product.character[0]??"considered").toLowerCase()} match grounded in its approved Rehmat profile.`,variants:available(product,size,budget).map(v=>({sizeMl:v.sizeMl,pricePaise:v.pricePaise!,availableQuantity:v.availableQuantity}))}));
+  const products=selected.map(product=>({...product,reason:`A ${(product.character[0]??"considered").toLowerCase()} match grounded in its approved Rehmat profile.`,variants:available(product,size,budget).map(v=>({id:v.id,sku:v.sku,sizeMl:v.sizeMl,pricePaise:v.pricePaise!,availableQuantity:v.availableQuantity}))}));
   if(!products.length)return {message:"I could not find an available Rehmat oil that matches all of those preferences. Which single preference would you like to adjust?",products:[],layering:wantsLayer,source:"deterministic",intent};
   if(/last|longer|longevity|hours|allergy|medical/.test(query))return {message:"Performance varies by skin, climate and application, and I cannot give medical or allergy guarantees. I will not invent longevity claims.",products:[],layering:false,source:"deterministic",intent};
   const prefix=mixed?`${generalReply(query,knowledge,"general_education").message} `:"";

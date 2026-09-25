@@ -1,0 +1,4 @@
+import {redirect} from "next/navigation";
+import {createSupabaseServerClient} from "../../../lib/supabase/server";
+import {ProfileForm} from "./profile-form";
+export default async function ProfilePage(){const client=await createSupabaseServerClient();const {data}=client?await client.auth.getUser():{data:{user:null}};if(!client||!data.user)redirect("/account/sign-in?returnTo=/account/profile");const {data:profile}=await client.from("profiles").select("display_name").eq("id",data.user.id).maybeSingle();return <main id="main-content" className="account-page account-detail"><p className="eyebrow">Customer account</p><h1>Your profile.</h1><p>Your email is verified by Supabase and cannot be changed here.</p><ProfileForm email={data.user.email??""} displayName={profile?.display_name??""}/></main>;}

@@ -62,9 +62,10 @@ test("splash, falling physics and reduced motion preserve the settled compositio
   assert.match(styles, /@keyframes fragrance-liquid-bloom/);
   assert.match(styles, /@keyframes fragrance-ingredient-drop/);
   assert.match(styles, /100%\{opacity:1;transform:translate3d\(0,0,0\)/);
-  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-ingredient\{opacity:1!important;transform:rotate/);
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-ingredient,.fragrance-note-map,.fragrance-note-map>span\{opacity:1!important;transform:none!important\}/);
   assert.match(styles, /fragrance-ingredient:nth-child\(n\+7\)\{display:none\}/);
   for (const color of ["#fffdf2", "#fff0a8", "#f9fdff", "#e8bd58", "#2d0610"]) assert.ok(data.includes(color));
+  for (const slug of ["mahnoor","milaap","sukoon-oud","shaan-oud","samandar","neel","ishq","siyah-oud","safaa-musk","adaa"]) assert.match(data,new RegExp(`"${slug}": \\{`));
 });
 
 test("accessible notes, replay, single-active state and keyboard dismissal remain intact", async () => {

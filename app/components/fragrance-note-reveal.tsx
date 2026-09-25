@@ -31,7 +31,7 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
   const palette = fragranceNotePaletteFor(product.slug);
   const notes = primaryFragranceNotes(product.notes);
   const visuals = ingredientVisualsFor(product.slug, product.notes);
-  const canReveal = Boolean(palette && notes && visuals.length);
+  const canReveal = Boolean(palette && notes);
   const noteGroups = [
     { label: "Top", notes: product.notes?.top.filter(Boolean) ?? [] },
     { label: "Heart", notes: product.notes?.heart.filter(Boolean) ?? [] },
@@ -79,7 +79,7 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
       <ProductMedia product={product} priority={priority} />
       {canReveal && <span className="fragrance-note-hint" aria-hidden="true">Reveal notes</span>}
     </button>
-    {active && palette && notes && visuals.length > 0 && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
+    {active && palette && notes && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
       <span className="sr-only">{product.name} fragrance ingredients: {noteSummary}</span>
       <span className="fragrance-liquid-bloom" aria-hidden="true" />
       <span className="fragrance-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</span>
@@ -89,7 +89,7 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
           <small>{group.notes.join(" · ")}</small>
         </span>)}
       </span>
-      <span className="fragrance-ingredients">
+      {visuals.length > 0 && <span className="fragrance-ingredients">
         {ingredientDrops.map((drop, index) => {
           const visual = visuals[drop.visual % visuals.length];
           const isPrimary = index < visuals.length;
@@ -118,7 +118,7 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
             <span className="fragrance-ingredient-name" aria-hidden="true">{visual.note}</span>
           </i>;
         })}
-      </span>
+      </span>}
     </div>}
   </div>;
 }

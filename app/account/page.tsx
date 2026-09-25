@@ -1,0 +1,9 @@
+import Link from "next/link";
+import {redirect} from "next/navigation";
+import type {SupabaseClient} from "@supabase/supabase-js";
+import {createSupabaseServerClient} from "../../lib/supabase/server";
+import {formatMoney} from "../../lib/cart";
+import {SignOutButton} from "./sign-out-button";
+import {ClaimOrder} from "./claim-order";
+
+export default async function AccountPage(){const client=await createSupabaseServerClient();const {data}=client?await client.auth.getUser():{data:{user:null}};if(!client||!data.user)redirect("/account/sign-in?returnTo=/account");const db=client as unknown as SupabaseClient;const [{data:profile},{data:orders}]=await Promise.all([db.from("profiles").select("display_name").eq("id",data.user.id).maybeSingle(),db.from("orders").select("id,order_number,status,total_paise,currency,created_at").eq("user_id",data.user.id).order("created_at",{ascending:false}).limit(3)]);return <main id="main-content" className="account-page"><header><div><p className="eyebrow">Customer account</p><h1>Welcome{profile?.display_name?`, ${profile.display_name}`:""}.</h1><p>{data.user.email}</p></div><SignOutButton/></header><section className="account-cards"><Link href="/account/orders"><span>Orders</span><strong>{orders?.length??0} recent</strong></Link><Link href="/account/profile"><span>Profile</span><strong>Personal details</strong></Link><Link href="/account/addresses"><span>Addresses</span><strong>Private delivery details</strong></Link></section><section className="account-orders-preview"><div><h2>Recent orders</h2><Link href="/account/orders">View all</Link></div>{orders?.length?orders.map(order=><Link href={`/account/orders/${order.id}`} key={order.id}><span>{order.order_number??order.id.slice(0,8)}</span><b>{order.status.replaceAll("_"," ")}</b><strong>{formatMoney(order.total_paise??0,order.currency)}</strong></Link>):<p>No completed website orders are associated with this account yet.</p>}</section><ClaimOrder/></main>;}

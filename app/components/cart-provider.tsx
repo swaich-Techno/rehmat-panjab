@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { addCartLine, cartCount, cartSubtotal, formatMoney, parseStoredCart, updateCartQuantity, type CartLine, type CartLineInput } from "../../lib/cart";
+import { addCartLine, cartCount, cartSubtotal, formatMoney, mergeCartLines, parseStoredCart, updateCartQuantity, type CartLine, type CartLineInput } from "../../lib/cart";
 
 const STORAGE_KEY = "rehmat-cart-v1";
 
@@ -27,15 +27,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const lastSynced = useRef("");
 
   useEffect(() => {
     const storedLines = parseStoredCart(window.localStorage.getItem(STORAGE_KEY));
     let cancelled = false;
-    queueMicrotask(() => {
-      if (cancelled) return;
+    const hydrate=async()=>{
       setLines(storedLines);
-      setHydrated(true);
-    });
+      try{
+        const response=await fetch("/api/account/cart",{headers:{accept:"application/json"}});
+        if(response.status===401){if(!cancelled)setHydrated(true);return;}
+        const remote=await response.json();
+        if(!response.ok||!Array.isArray(remote.lines))throw new Error("Saved cart unavailable");
+        const merged=mergeCartLines(parseStoredCart(JSON.stringify(remote.lines)),storedLines);
+        const saved=await fetch("/api/account/cart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({lines:merged})});
+        const result=await saved.json();
+        const authoritative=parseStoredCart(JSON.stringify(result.lines));
+        if(!cancelled){lastSynced.current=JSON.stringify(authoritative);setLines(authoritative);setHydrated(true);}
+      }catch{if(!cancelled)setHydrated(true);}
+    };
+    void hydrate();
     return () => {
       cancelled = true;
     };
@@ -45,9 +56,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
   }, [hydrated, lines]);
 
+  useEffect(()=>{
+    if(!hydrated)return;
+    const serialized=JSON.stringify(lines);if(serialized===lastSynced.current)return;
+    const timer=window.setTimeout(async()=>{try{const response=await fetch("/api/account/cart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({lines})});if(response.status===401)return;const value=await response.json();if(!response.ok||!Array.isArray(value.lines))return;const authoritative=parseStoredCart(JSON.stringify(value.lines));lastSynced.current=JSON.stringify(authoritative);if(lastSynced.current!==serialized)setLines(authoritative);}catch{/* Guest carts remain local when account sync is unavailable. */}},500);
+    return()=>window.clearTimeout(timer);
+  },[hydrated,lines]);
+
   const add = useCallback((line: CartLineInput) => {
     setLines((current) => addCartLine(current, line));
-    setAnnouncement(`${line.productName}, ${line.sizeMl} ml added to cart.`);
+    setAnnouncement(`${line.productName} added to cart.`);
     setOpen(true);
   }, []);
   const update = useCallback((variantId: string, quantity: number) => {
@@ -127,7 +145,7 @@ function CartDrawer() {
               <Image src={line.image} alt="" width={92} height={112} unoptimized />
               <div>
                 <h3><Link href={`/product/${line.productSlug}`} onClick={close}>{line.productName}</Link></h3>
-                <p>{line.sizeMl} ml · {line.sku}</p>
+                <p>{line.testerPack ? `${line.testerPack.packSize} × 3 ml · ${line.testerPack.selected.map((item) => item.productName).join(", ")}` : `${line.sizeMl} ml · ${line.sku}`}</p>
                 <strong>{formatMoney(line.unitPricePaise, line.currency)}</strong>
                 <div className="cart-line-actions">
                   <div className="quantity-stepper" aria-label={`Quantity for ${line.productName}`}>

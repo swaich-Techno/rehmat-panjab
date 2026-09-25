@@ -76,15 +76,15 @@ export function HomepageCampaign() {
         <div className="campaign-sticky">
           <h1 className="sr-only">Rehmat Panjab — perfume oil, close to skin</h1>
           <div className="campaign-scene campaign-scene-wide" aria-hidden="true">
-            <Image src="/images/hero/rehmat-panjab-homepage-hero.webp" fill priority unoptimized sizes="100vw" alt="" />
+            <Image src="/images/hero/rehmat-panjab-homepage-hero.webp" width="1731" height="909" priority unoptimized sizes="100vw" alt="" />
           </div>
           <div className="campaign-scene campaign-scene-macro" aria-hidden="true">
-            <Image src="/images/hero/rehmat-panjab-homepage-hero.webp" fill priority unoptimized sizes="100vw" alt="" />
+            <Image src="/images/hero/rehmat-panjab-homepage-hero.webp" width="1731" height="909" priority unoptimized sizes="100vw" alt="" />
             <span className="campaign-glass-sweep" />
           </div>
           <div className="campaign-scene campaign-scene-bottle" aria-hidden="true">
-            <div className="campaign-atmosphere"><Image src="/images/products/campaign/musk-rizali-hero.webp" fill sizes="100vw" alt="" /></div>
-            <div className="campaign-bottle"><Image src="/images/bottles/rose-gold-bottle-oil.webp" fill priority sizes="(max-width: 700px) 66vw, 34vw" alt="" /></div>
+            <div className="campaign-atmosphere"><Image src="/images/products/campaign/musk-rizali-hero.webp" width="1200" height="1500" unoptimized sizes="100vw" alt="" /></div>
+            <div className="campaign-bottle"><Image src="/images/bottles/rose-gold-bottle-oil.webp" width="960" height="1200" priority unoptimized sizes="(max-width: 700px) 66vw, 34vw" alt="" /></div>
             <span className="campaign-bottle-shadow" />
           </div>
           <span className="campaign-refraction" aria-hidden="true" />

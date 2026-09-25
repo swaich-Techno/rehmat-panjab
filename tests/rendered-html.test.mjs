@@ -13,13 +13,13 @@ test("server-renders the Rehmat homepage", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /REHMAT PANJAB/);
+  assert.match(html, /Rehmat Panjab/);
   assert.match(html, /Perfume oil,/);
   assert.match(html, /close to skin/);
   assert.match(html, /Find your scent/);
   assert.match(html, /Create your Rehmat/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
-  assert.doesNotMatch(html, /₹|BUY NOW|Top Notes:/i);
+  assert.doesNotMatch(html, /\u00e2\u201a\u00b9|BUY NOW/i);
 });
 
 test("server-renders the core public routes", async () => {

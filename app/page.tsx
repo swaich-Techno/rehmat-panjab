@@ -13,6 +13,8 @@ import {JsonLd} from "./components/json-ld";
 import {pageMetadata} from "../lib/seo";
 import {getSiteUrl} from "../lib/site-url";
 import {merchant} from "../lib/merchant";
+import {TesterPreview} from "./components/tester-preview";
+import {ProductAddButton} from "./components/product-add-button";
 
 export const metadata:Metadata=pageMetadata({title:"Rehmat Panjab — Concentrated Perfume Oils",description:"Discover Rehmat Panjab concentrated perfume oils and choose a personal scent by mood, fragrance notes and occasion.",path:"/"});
 
@@ -23,6 +25,8 @@ export default async function Home() {
     <main id="main-content" className="home-v41">
       <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]}/>
       <HomepageCampaign />
+
+      <TesterPreview />
 
       <section id="featured-fragrances" className="v41-oil-act" aria-labelledby="oil-collection-heading">
         <div className="v41-section-heading">
@@ -44,7 +48,7 @@ export default async function Home() {
               </Link>
               <div className="v41-product-copy">
                 <span>{product.number}</span>
-                <div><h3>{product.name}</h3><p>{firstPrice(product)===null?"Price on request":`From ${formatMoney(firstPrice(product)!)}`} · {availabilityLabel(product)}</p><Link className="v41-card-link" href={`/product/${product.slug}`}>View details</Link></div>
+                <div><h3>{product.name}</h3><p>{firstPrice(product)===null?"Price on request":`From ${formatMoney(firstPrice(product)!)}`} · {availabilityLabel(product)}</p><span className="v41-card-actions"><Link className="v41-card-link" href={`/product/${product.slug}`}>View details</Link><ProductAddButton product={product} className="v41-card-add"/></span></div>
               </div>
             </article>
           ))}

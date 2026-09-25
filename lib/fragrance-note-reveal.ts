@@ -20,6 +20,16 @@ export const FRAGRANCE_NOTE_PALETTES = {
   "purple-oud": { light: "#e5d4ed", middle: "#72507d", deep: "#2d2038" },
   "golden-dream": { light: "#fff1b0", middle: "#d89a35", deep: "#805126" },
   "dubai-chocolate": { light: "#e5b77d", middle: "#8b4d2e", deep: "#351c18" },
+  "mahnoor": { light: "#f6d5b4", middle: "#c34f72", deep: "#6f173b" },
+  "milaap": { light: "#ead9bd", middle: "#b77945", deep: "#7c3948" },
+  "sukoon-oud": { light: "#bf8750", middle: "#71322c", deep: "#2e1715" },
+  "shaan-oud": { light: "#b79864", middle: "#675069", deep: "#241b19" },
+  "samandar": { light: "#d3bd62", middle: "#48b8b8", deep: "#12577a" },
+  "neel": { light: "#fff9dc", middle: "#e2c948", deep: "#2c61a1" },
+  "ishq": { light: "#f7ead8", middle: "#eaa09a", deep: "#c86d6f" },
+  "siyah-oud": { light: "#be784d", middle: "#713945", deep: "#292729" },
+  "safaa-musk": { light: "#fffdf5", middle: "#e4ddcf", deep: "#a8a8a4" },
+  "adaa": { light: "#e3bd76", middle: "#cb426b", deep: "#8c214c" },
 } as const satisfies Record<string, FragranceNotePalette>;
 
 const ingredientAsset = (key: string) => `/images/fragrance-notes/${key}.webp`;

@@ -9,6 +9,12 @@ export type CartLine = {
   image: string;
   quantity: number;
   maxQuantity: number;
+  kind?: "product" | "tester-pack";
+  testerPack?: {
+    packSize: 2 | 3 | 5;
+    discountPercent: number;
+    selected: Array<{ variantId: string; productId: string; productSlug: string; productName: string; sku: string }>;
+  };
 };
 
 export type CartLineInput = Omit<CartLine, "quantity"> & { quantity?: number };
@@ -39,8 +45,23 @@ export function cartCount(lines: CartLine[]) {
   return lines.reduce((total, line) => total + line.quantity, 0);
 }
 
+export function mergeCartLines(authoritative: CartLine[], guest: CartLine[]) {
+  const merged = authoritative.map((line) => ({ ...line }));
+  for (const candidate of guest) {
+    const index = merged.findIndex((line) => line.variantId === candidate.variantId);
+    if (index < 0) { merged.push(candidate); continue; }
+    const current = merged[index];
+    merged[index] = { ...current, quantity: Math.min(current.maxQuantity, current.quantity + candidate.quantity) };
+  }
+  return merged;
+}
+
 export function formatMoney(paise: number, currency = "INR") {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 0 }).format(paise / 100);
+}
+
+export function roundPaiseToWholeRupee(paise: number) {
+  return Math.round(paise / 100) * 100;
 }
 
 export function parseStoredCart(value: string | null): CartLine[] {
@@ -61,6 +82,13 @@ export function parseStoredCart(value: string | null): CartLine[] {
       && Number.isInteger(line.quantity) && line.quantity > 0
       && Number.isInteger(line.maxQuantity) && line.maxQuantity > 0
       && line.quantity <= line.maxQuantity
+      && (line.kind !== "tester-pack" || (
+        line.testerPack
+        && [2, 3, 5].includes(line.testerPack.packSize)
+        && Array.isArray(line.testerPack.selected)
+        && line.testerPack.selected.length === line.testerPack.packSize
+        && new Set(line.testerPack.selected.map((item: { productId?: unknown }) => item.productId)).size === line.testerPack.packSize
+      ))
     ));
   } catch {
     return [];

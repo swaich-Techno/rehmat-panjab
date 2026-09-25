@@ -7,6 +7,7 @@ import { useCart } from "./cart-provider";
 import type {CheckoutAddress} from "../../lib/address";
 
 type CheckoutLine = { variantId: string; quantity: number };
+type TesterPackLine = { packSize: 2 | 3 | 5; variantIds: string[]; quantity: number };
 type PaymentResponse = { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string };
 type CheckoutState = "idle" | "creating" | "verifying" | "success" | "cancelled" | "error";
 
@@ -40,7 +41,7 @@ async function readResponse(response: Response) {
   return response.json().catch(() => ({ message: "The payment service returned an unreadable response." })) as Promise<Record<string, unknown>>;
 }
 
-export function RazorpayCheckout({ lines, policyVersion,address }: { lines: CheckoutLine[]; policyVersion: string;address:CheckoutAddress|null }) {
+export function RazorpayCheckout({ lines, testerPacks=[], policyVersion,address }: { lines: CheckoutLine[]; testerPacks?:TesterPackLine[]; policyVersion: string;address:CheckoutAddress|null }) {
   const { clear } = useCart();
   const [state, setState] = useState<CheckoutState>("idle");
   const [message, setMessage] = useState("Your total will be rechecked securely before the payment window opens.");
@@ -63,7 +64,7 @@ export function RazorpayCheckout({ lines, policyVersion,address }: { lines: Chec
       const orderResponse = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines,deliveryAddress:address,deliveryPin:address?.delivery.pinCode,customerIdentifier:address?.delivery.email,policyAcceptance:{version:policyVersion,acceptedAt:new Date().toISOString(),marketingConsent} }),
+        body: JSON.stringify({ lines,testerPacks,deliveryAddress:address,deliveryPin:address?.delivery.pinCode,customerIdentifier:address?.delivery.email,policyAcceptance:{version:policyVersion,acceptedAt:new Date().toISOString(),marketingConsent} }),
       });
       const order = await readResponse(orderResponse);
       if (!orderResponse.ok) throw new Error(typeof order.message === "string" ? order.message : "Checkout could not start.");

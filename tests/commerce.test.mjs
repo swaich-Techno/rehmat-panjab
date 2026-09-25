@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { addCartLine, cartCount, cartSubtotal, parseStoredCart, updateCartQuantity } from "../lib/cart.ts";
+import { addCartLine, cartCount, cartSubtotal, mergeCartLines, parseStoredCart, updateCartQuantity } from "../lib/cart.ts";
 import { createRazorpayOrderToken, verifyRazorpayOrderToken, verifyRazorpayPaymentSignature } from "../lib/razorpay.ts";
 
 const sample = { variantId: "variant-1", productSlug: "musk-rizali", productName: "Musk Rizali", sizeMl: 6, sku: "RP-MR-06", unitPricePaise: 49900, currency: "INR", image: "/musk.webp", maxQuantity: 3 };
@@ -20,6 +20,13 @@ test("persisted cart rejects malformed or stock-breaking lines", () => {
   assert.deepEqual(parseStoredCart("not-json"), []);
   assert.deepEqual(parseStoredCart(JSON.stringify([{ ...sample, quantity: 4 }])), []);
   assert.equal(parseStoredCart(JSON.stringify([{ ...sample, quantity: 2 }])).length, 1);
+});
+
+test("guest cart merge keeps current signed-in price and inventory authority",()=>{
+  const authoritative=[{...sample,unitPricePaise:59900,maxQuantity:2,quantity:1}];
+  const guest=[{...sample,unitPricePaise:1,maxQuantity:99,quantity:2}];
+  const merged=mergeCartLines(authoritative,guest);
+  assert.equal(merged[0].unitPricePaise,59900);assert.equal(merged[0].maxQuantity,2);assert.equal(merged[0].quantity,2);
 });
 
 test("Razorpay signatures and server-issued order tokens reject tampering", () => {

@@ -11,7 +11,9 @@ export function ProductMedia({ product, priority = false, className = "" }: { pr
       <Image
         src={source}
         alt={`${product.name} perfume oil by Rehmat Panjab`}
-        fill
+        width={notesConfirmed?960:1122}
+        height={notesConfirmed?1200:1402}
+        unoptimized
         priority={priority}
         sizes="(max-width: 767px) 92vw, (max-width: 1200px) 48vw, 42vw"
       />

@@ -34,9 +34,10 @@ export function SiteHeader() {
             {label}
           </Link>
         ))}
+        <Link className="mobile-account-link" href="/account" aria-current={pathname.startsWith("/account") ? "page" : undefined} onClick={()=>setOpen(false)}>Account</Link>
       </nav>
       <div className="header-actions">
-        <Link href="/my-rehmat" className="archive-link" data-cursor="KEY">My Rehmat</Link>
+        <Link href="/account" className="archive-link" data-cursor="KEY">Account</Link>
         {COMMERCE_ENABLED && <button className="header-cart" type="button" onClick={cart.show} aria-label={`Open cart, ${cart.count} ${cart.count === 1 ? "item" : "items"}`} aria-haspopup="dialog">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h2l1.6 9.2h9.8L20 9H7M9.5 19a.8.8 0 1 0 0-1.6.8.8 0 0 0 0 1.6Zm7 0a.8.8 0 1 0 0-1.6.8.8 0 0 0 0 1.6Z" /></svg>
           <span>Cart</span><b aria-hidden="true">{cart.count}</b>

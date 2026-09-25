@@ -24,7 +24,7 @@ test("sitemap contains only active public products on the www origin",async()=>{
 
 test("robots preserve private-route blocking and advertise the canonical sitemap",async()=>{
   const robots=await read("app/robots.ts");
-  for(const route of ["/admin","/auth/","/api/","/cart","/my-rehmat"])assert.match(robots,new RegExp(route.replaceAll("/","\\/")));
+  for(const route of ["/admin","/auth/","/account/","/api/","/cart","/my-rehmat"])assert.match(robots,new RegExp(route.replaceAll("/","\\/")));
   assert.match(robots,/sitemap: `\$\{origin\}\/sitemap\.xml`/);
 });
 
@@ -51,5 +51,8 @@ test("public metadata is unique and images retain stable geometry",async()=>{
   assert.equal(new Set(descriptions).size,paths.length);
   const [hero,media,css]=await Promise.all([read("app/components/homepage-campaign.tsx"),read("app/components/product-media.tsx"),read("app/globals.css")]);
   assert.match(hero,/width="1731"/);assert.match(hero,/height="909"/);
-  assert.match(media,/fill/);assert.match(media,/sizes=/);assert.match(css,/\.product-media[^}]*aspect-ratio: 4 \/ 5/s);
+  assert.match(hero,/width="1200"/);assert.match(hero,/height="1500"/);
+  assert.match(hero,/width="960"/);assert.match(hero,/height="1200"/);
+  assert.equal((hero.match(/unoptimized/g)??[]).length,4);
+  assert.match(media,/width=\{notesConfirmed\?960:1122\}/);assert.match(media,/height=\{notesConfirmed\?1200:1402\}/);assert.match(media,/unoptimized/);assert.match(media,/sizes=/);assert.match(css,/\.product-media[^}]*aspect-ratio: 4 \/ 5/s);
 });
