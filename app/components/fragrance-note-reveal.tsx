@@ -59,9 +59,6 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
     if (event.key === "Escape" && active) {
       event.stopPropagation();
       onDismiss();
-    } else if ((event.key === "Enter" || event.key === " ") && canReveal && !event.repeat) {
-      event.preventDefault();
-      onActivate();
     }
   }
 

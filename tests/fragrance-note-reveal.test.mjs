@@ -73,7 +73,9 @@ test("accessible notes, replay, single-active state and keyboard dismissal remai
   assert.match(reveal, /fragrance ingredients: \{noteSummary\}/);
   assert.match(reveal, /aria-hidden="true"/);
   assert.match(reveal, /event\.key === "Escape"/);
-  assert.match(reveal, /event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(reveal, /type="button"/);
+  assert.match(reveal, /onClick=\{onActivate\}/);
+  assert.doesNotMatch(reveal, /event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(reveal, /key=\{`\$\{product\.slug\}-\$\{replay\}`\}/);
   assert.match(catalogue, /current\?\.slug===product\.slug\?\{slug:product\.slug,replay:current\.replay\+1\}/);
   assert.match(catalogue, /active=\{activeReveal\?\.slug===product\.slug\}/);
