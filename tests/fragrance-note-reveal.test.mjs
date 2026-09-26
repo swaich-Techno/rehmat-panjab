@@ -5,12 +5,14 @@ import { readdir, readFile, stat } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = path => readFile(new URL(path, root), "utf8");
 
-test("ingredient visuals resolve from authoritative product notes and unknown notes fail safely", async () => {
+test("ingredient visuals resolve from authoritative product notes with a local fallback", async () => {
   const [data, reveal, storefront] = await Promise.all([read("lib/fragrance-note-reveal.ts"), read("app/components/fragrance-note-reveal.tsx"), read("lib/storefront.ts")]);
   assert.match(reveal, /ingredientVisualsFor\(product\.slug, product\.notes\)/);
   assert.match(reveal, /primaryFragranceNotes\(product\.notes\)/);
   assert.match(storefront, /const notes = noteGroups \? \{ top: asStrings\(noteGroups\.top\), heart: asStrings\(noteGroups\.heart\), base: asStrings\(noteGroups\.base\) \}/);
-  assert.match(data, /if \(!notes \|\| !configured\) return \[\]/);
+  assert.match(data, /if \(!notes\) return \[\]/);
+  assert.match(data, /if \(!configured\)/);
+  assert.match(data, /aliases\.find/);
   assert.match(data, /actual\[index\]\?\.localeCompare\(note/);
   assert.doesNotMatch(reveal, /fragrance-note-label|>TOP<|>HEART<|>BASE</);
 });
@@ -53,17 +55,22 @@ test("transparent ingredient library is complete and optimized locally", async (
   }
 });
 
-test("splash, falling physics and reduced motion preserve the settled composition", async () => {
+test("bottle opening, rising note tiers and reduced motion preserve the settled composition", async () => {
   const [reveal, styles, data] = await Promise.all([read("app/components/fragrance-note-reveal.tsx"), read("app/globals.css"), read("lib/fragrance-note-reveal.ts")]);
   assert.match(reveal, /fragrance-liquid-bloom/);
   assert.match(reveal, /fragrance-ingredient/);
   assert.match(reveal, /data-ingredient-key=\{visual\.key\}/);
-  assert.match(reveal, /bottom: "(?:4|6|7|8|9|17)%"/);
+  assert.match(reveal, /tier: "Base"/);
+  assert.match(reveal, /tier: "Heart"/);
+  assert.match(reveal, /tier: "Top"/);
+  assert.match(reveal, /fragrance-bottle-cap/);
   assert.match(styles, /@keyframes fragrance-liquid-bloom/);
-  assert.match(styles, /@keyframes fragrance-ingredient-drop/);
-  assert.match(styles, /100%\{opacity:1;transform:translate3d\(0,0,0\)/);
-  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-ingredient,.fragrance-note-map,.fragrance-note-map>span\{opacity:1!important;transform:none!important\}/);
-  assert.match(styles, /fragrance-ingredient:nth-child\(n\+7\)\{display:none\}/);
+  assert.match(styles, /@keyframes fragrance-cap-lift/);
+  assert.match(styles, /@keyframes fragrance-ingredient-rise/);
+  assert.match(styles, /100%\{opacity:1;transform:translate3d\(-50%,0,0\)/);
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*fragrance-bottle-cap\{display:none!important\}/);
+  assert.match(styles, /fragrance-ingredient\{opacity:1!important;transform:translate3d\(-50%,0,0\)!important\}/);
+  assert.match(styles, /fragrance-note-map>span:nth-child\(3\)\{animation-delay:1320ms\}/);
   for (const color of ["#fffdf2", "#fff0a8", "#f9fdff", "#e8bd58", "#2d0610"]) assert.ok(data.includes(color));
   for (const slug of ["mahnoor","milaap","sukoon-oud","shaan-oud","samandar","neel","ishq","siyah-oud","safaa-musk","adaa"]) assert.match(data,new RegExp(`"${slug}": \\{`));
 });
@@ -73,8 +80,10 @@ test("accessible notes, replay, single-active state and keyboard dismissal remai
   assert.match(reveal, /fragrance ingredients: \{noteSummary\}/);
   assert.match(reveal, /aria-hidden="true"/);
   assert.match(reveal, /event\.key === "Escape"/);
+  assert.match(reveal, /\(hover: hover\) and \(pointer: fine\)/);
+  assert.match(reveal, /document\.addEventListener\("pointerdown", dismiss\)/);
   assert.match(reveal, /type="button"/);
-  assert.match(reveal, /onClick=\{onActivate\}/);
+  assert.match(reveal, /onClick=\{\(\) => \{ cancelQueuedReveal\(\); transientReveal\.current = false; onActivate\(\); \}\}/);
   assert.doesNotMatch(reveal, /event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(reveal, /key=\{`\$\{product\.slug\}-\$\{replay\}`\}/);
   assert.match(catalogue, /current\?\.slug===product\.slug\?\{slug:product\.slug,replay:current\.replay\+1\}/);
@@ -91,7 +100,7 @@ test("every reveal exposes complete note groups and ingredient names on hover or
   assert.match(reveal, /fragrance-note-map/);
   assert.match(reveal, /fragrance-ingredient-name/);
   assert.match(reveal, /title=\{visual\.note\}/);
-  assert.match(reveal, /tabIndex=\{isPrimary \? 0 : undefined\}/);
+  assert.match(reveal, /tabIndex=\{0\}/);
   assert.match(styles, /fragrance-ingredient:hover \.fragrance-ingredient-name/);
   assert.match(styles, /fragrance-ingredient:focus-visible \.fragrance-ingredient-name/);
 });

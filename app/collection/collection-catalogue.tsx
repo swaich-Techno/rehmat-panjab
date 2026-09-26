@@ -6,6 +6,7 @@ import { formatMoney } from "../../lib/cart";
 import { availabilityLabel, firstPrice, hasAvailableStock, isPurchasable, suitabilityLabels, type CatalogVariant, type StorefrontProduct } from "../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../lib/commerce";
 import { FragranceNoteReveal } from "../components/fragrance-note-reveal";
+import { InteractiveProductMedia } from "../components/interactive-product-media";
 import { useCart } from "../components/cart-provider";
 import {INSPIRATION_DISCLAIMER} from "../../lib/products";
 
@@ -29,6 +30,7 @@ function QuickView({product,settings,onClose}:{product:StorefrontProduct;setting
   function add(){if(!selected||!isPurchasable(product,selected))return;cart.add({variantId:selected.id,productSlug:product.slug,productName:product.name,sizeMl:selected.sizeMl,sku:selected.sku,unitPricePaise:selected.pricePaise??0,currency:selected.currency,image:product.image,maxQuantity:selected.availableQuantity,quantity});onClose();}
   return <div className="quick-view-layer"><button className="quick-view-scrim" type="button" aria-label="Close quick view" onClick={onClose}/><aside className="quick-view-sheet" role="dialog" aria-modal="true" aria-labelledby={`quick-${product.slug}`}>
     <header><div><p className="eyebrow">Quick view</p><h2 id={`quick-${product.slug}`}>{product.name}</h2></div><button ref={closeRef} type="button" className="quick-view-close" onClick={onClose} aria-label="Close quick view">×</button></header>
+    <InteractiveProductMedia product={product}/>
     {product.inspirationLine&&<><p className="product-inspiration">{product.inspirationLine}</p><p className="inspiration-disclaimer">{INSPIRATION_DISCLAIMER}</p></>}
     {product.notes&&<div className="quick-view-notes"><span><b>Top</b>{product.notes.top[0]}</span><span><b>Heart</b>{product.notes.heart[0]}</span><span><b>Base</b>{product.notes.base[0]}</span></div>}
     <fieldset><legend>Choose size</legend><div className="quick-view-sizes">{product.variants.map(v=><button type="button" key={v.id} className={v.id===selected?.id?"is-selected":""} disabled={v.availableQuantity<1||v.pricePaise===null} aria-pressed={v.id===selected?.id} onClick={()=>{setSelectedId(v.id);setQuantity(1);setQuote(null);}}>{v.sizeMl} ml <strong>{v.pricePaise===null?"Price pending":formatMoney(v.pricePaise)}</strong><small>{v.availableQuantity>0?`${v.availableQuantity} available`:"Unavailable"}</small></button>)}</div></fieldset>

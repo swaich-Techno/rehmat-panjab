@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { NotifyForm } from "../../components/notify-form";
-import { ProductMedia } from "../../components/product-media";
+import { InteractiveProductMedia } from "../../components/interactive-product-media";
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
 import { ProductStoryMotion } from "../../components/product-story-motion";
@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <JsonLd data={[breadcrumbSchema,productSchema]}/>
       <ProductStoryMotion />
       <aside className="product-sticky">
-        <ProductMedia product={product} priority role="hero" />
+        <InteractiveProductMedia product={product} priority />
         <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · Bottle formats</p>
       </aside>
       <div className="product-story">

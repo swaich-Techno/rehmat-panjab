@@ -67,7 +67,16 @@ export function primaryFragranceNotes(groups: CatalogueNoteGroups): PrimaryFragr
 export function ingredientVisualsFor(slug: string, groups: CatalogueNoteGroups): FragranceIngredientVisual[] {
   const notes = primaryFragranceNotes(groups);
   const configured = FRAGRANCE_INGREDIENT_VISUALS[slug as keyof typeof FRAGRANCE_INGREDIENT_VISUALS];
-  if (!notes || !configured) return [];
+  if (!notes) return [];
+  if (!configured) {
+    const aliases: Array<[RegExp,string]> = [
+      [/bergamot|citrus|lemon/i,"bergamot-slice"],[/rose/i,"rose-petals"],[/oud|wood|cedar|sandal/i,"wood-chips"],
+      [/musk/i,"white-musk-orb"],[/amber/i,"amber-resin"],[/vanilla/i,"vanilla-pod"],[/saffron/i,"saffron-threads"],
+      [/berry|berries/i,"red-berries"],[/pepper|spice/i,"pink-peppercorns"],[/jasmine|floral|flower/i,"jasmine-sambac"],
+      [/caramel|sweet/i,"caramel"],[/chocolate|cocoa/i,"dark-chocolate"],[/nut|almond|hazelnut/i,"hazelnuts"],
+    ];
+    return [notes.top, notes.heart, notes.base].map((note) => ({ note, key: aliases.find(([pattern]) => pattern.test(note))?.[1] ?? "amber-resin", asset: ingredientAsset(aliases.find(([pattern]) => pattern.test(note))?.[1] ?? "amber-resin") }));
+  }
   const actual = [notes.top, notes.heart, notes.base];
   return configured.flatMap(([note, key], index) => actual[index]?.localeCompare(note, undefined, { sensitivity: "accent" }) === 0
     ? [{ note: actual[index], key, asset: ingredientAsset(key) }]
