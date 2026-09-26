@@ -23,6 +23,7 @@ test("customer data is owner-scoped and guest claims require the verified order 
 test("signed-in cart merge and Buy Again revalidate current catalogue authority",async()=>{
   const [provider,cartApi,reprice,buyAgain,client]=await Promise.all([read("app/components/cart-provider.tsx"),read("app/api/account/cart/route.ts"),read("lib/account-cart.ts"),read("app/api/account/orders/[orderId]/buy-again/route.ts"),read("app/account/orders/buy-again.tsx")]);
   assert.match(provider,/mergeCartLines/);assert.match(provider,/\/api\/account\/cart/);assert.match(cartApi,/repriceCartItems/);assert.match(reprice,/price_paise/);assert.match(reprice,/quantity-stock\.reserved/);assert.match(reprice,/calculateTesterPackPrice/);
+  assert.match(provider,/remote\.authenticated===false/);assert.match(cartApi,/authenticated:false,lines:null/);
   assert.match(buyAgain,/\.eq\("user_id",data\.user\.id\)/);assert.match(buyAgain,/repriceCartItems/);assert.doesNotMatch(buyAgain,/coupon|previous.*price/i);assert.match(client,/Previous coupons are not restored/);
 });
 

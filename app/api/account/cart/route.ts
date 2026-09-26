@@ -12,7 +12,7 @@ async function viewer(){const client=await createSupabaseServerClient();if(!clie
 const stored=(row:{line_key:string;kind:"product"|"tester-pack";variant_id:string|null;quantity:number;tester_pack_size:number|null;tester_variant_ids:string[]}):StoredCartItem=>({lineKey:row.line_key,kind:row.kind,variantId:row.variant_id,quantity:row.quantity,testerPackSize:row.tester_pack_size,testerVariantIds:row.tester_variant_ids??[]});
 
 export async function GET(){
-  const auth=await viewer();if(!auth)return NextResponse.json({message:"Sign in to load your saved cart."},{status:401});
+  const auth=await viewer();if(!auth)return NextResponse.json({authenticated:false,lines:null});
   const {data:cart}=await auth.client.from("customer_carts").select("id").eq("user_id",auth.user.id).maybeSingle();
   if(!cart)return NextResponse.json({lines:[]});
   const {data,error}=await auth.client.from("customer_cart_items").select("line_key,kind,variant_id,quantity,tester_pack_size,tester_variant_ids").eq("cart_id",cart.id);

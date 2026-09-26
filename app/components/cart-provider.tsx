@@ -38,6 +38,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const response=await fetch("/api/account/cart",{headers:{accept:"application/json"}});
         if(response.status===401){if(!cancelled)setHydrated(true);return;}
         const remote=await response.json();
+        if(remote.authenticated===false){if(!cancelled){lastSynced.current=JSON.stringify(storedLines);setHydrated(true);}return;}
         if(!response.ok||!Array.isArray(remote.lines))throw new Error("Saved cart unavailable");
         const merged=mergeCartLines(parseStoredCart(JSON.stringify(remote.lines)),storedLines);
         const saved=await fetch("/api/account/cart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({lines:merged})});
