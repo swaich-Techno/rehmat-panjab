@@ -8,37 +8,33 @@ export type ApprovedTester = {
   name: string;
   sku: string;
   pricePaise: number;
+  inspirationLine?: string;
 };
 
 export const APPROVED_TESTERS: ApprovedTester[] = [
-  { slug: "musk-rizali", name: "Musk Rizali", sku: "RP-MR-03", pricePaise: 29900 },
-  { slug: "vanilla-musk", name: "Vanilla Musk", sku: "RP-VM-03", pricePaise: 34900 },
-  { slug: "white-oud", name: "White Oud", sku: "RP-WO-03", pricePaise: 34900 },
-  { slug: "oud-rose", name: "Oud Rose", sku: "RP-OR-03", pricePaise: 39900 },
-  { slug: "junoon", name: "JUNOON", sku: "RP-JN-03", pricePaise: 39900 },
-  { slug: "red-musk", name: "Red Musk", sku: "RP-RM-03", pricePaise: 34900 },
-  { slug: "nazakat", name: "NAZAKAT", sku: "RP-NZ-03", pricePaise: 34900 },
-  { slug: "gulnaar", name: "GULNAAR", sku: "RP-GL-03", pricePaise: 34900 },
-  { slug: "deer-musk", name: "Deer Musk", sku: "RP-DM-03", pricePaise: 37900 },
-  { slug: "afsoon", name: "AFSOON", sku: "RP-AF-03", pricePaise: 29900 },
-  { slug: "amber-veil", name: "Amber Veil", sku: "RP-AV-03", pricePaise: 29900 },
-  { slug: "velvet-oud", name: "Velvet Oud", sku: "RP-VO-03", pricePaise: 37900 },
-  { slug: "purple-oud", name: "Purple Oud", sku: "RP-PO-03", pricePaise: 32900 },
-  { slug: "golden-dream", name: "Golden Dream", sku: "RP-GD-03", pricePaise: 29900 },
-  { slug: "dubai-chocolate", name: "Dubai Chocolate", sku: "RP-DC-03", pricePaise: 24900 },
-  { slug: "mahnoor", name: "MAHNOOR", sku: "RP-MN-03", pricePaise: 24900 },
-  { slug: "milaap", name: "MILAAP", sku: "RP-ML-03", pricePaise: 24900 },
-  { slug: "sukoon-oud", name: "SUKOON OUD", sku: "RP-SO-03", pricePaise: 29900 },
-  { slug: "shaan-oud", name: "SHAAN OUD", sku: "RP-SH-03", pricePaise: 34900 },
-  { slug: "samandar", name: "SAMANDAR", sku: "RP-SD-03", pricePaise: 24900 },
-  { slug: "neel", name: "NEEL", sku: "RP-NL-03", pricePaise: 24900 },
-  { slug: "ishq", name: "ISHQ", sku: "RP-IQ-03", pricePaise: 24900 },
-  { slug: "siyah-oud", name: "SIYAH OUD", sku: "RP-SY-03", pricePaise: 24900 },
-  { slug: "safaa-musk", name: "SAFAA MUSK", sku: "RP-SF-03", pricePaise: 24900 },
-  { slug: "adaa", name: "ADAA", sku: "RP-AD-03", pricePaise: 24900 },
+  { slug: "musk-rizali", name: "Musk Rizali", sku: "RP-MR-03", pricePaise: 24900 },
+  { slug: "vanilla-musk", name: "Vanilla Musk", sku: "RP-VM-03", pricePaise: 29900 },
+  { slug: "white-oud", name: "White Oud", sku: "RP-WO-03", pricePaise: 29900 },
+  { slug: "oud-rose", name: "Oud Rose", sku: "RP-OR-03", pricePaise: 34900 },
+  { slug: "junoon", name: "Junoon", sku: "RP-JN-03", pricePaise: 34900, inspirationLine: "Inspired by Oud Maracujá" },
+  { slug: "red-musk", name: "Red Musk", sku: "RP-RM-03", pricePaise: 29900 },
+  { slug: "nazakat", name: "Nazakat", sku: "RP-NZ-03", pricePaise: 29900, inspirationLine: "Inspired by Delina" },
+  { slug: "gulnaar", name: "Gulnaar", sku: "RP-GL-03", pricePaise: 29900, inspirationLine: "Inspired by Zara Candy" },
+  { slug: "deer-musk", name: "Deer Musk", sku: "RP-DM-03", pricePaise: 34900 },
+  { slug: "afsoon", name: "Afsoon", sku: "RP-AF-03", pricePaise: 29900, inspirationLine: "Inspired by Vampire Blood" },
+  { slug: "mahnoor", name: "Mon Paris–Inspired Perfume Oil", sku: "RP-MN-03", pricePaise: 24900, inspirationLine: "Inspired by Mon Paris by YSL" },
+  { slug: "milaap", name: "Wisal–Inspired Perfume Oil", sku: "RP-ML-03", pricePaise: 24900, inspirationLine: "Inspired by Ajmal Wisal" },
+  { slug: "sukoon-oud", name: "Oud Mood–Inspired Perfume Oil", sku: "RP-SO-03", pricePaise: 29900, inspirationLine: "Inspired by Oud Mood" },
+  { slug: "shaan-oud", name: "Oud for Glory–Inspired Perfume Oil", sku: "RP-SH-03", pricePaise: 34900, inspirationLine: "Inspired by Oud for Glory" },
+  { slug: "samandar", name: "Acqua di Giò–Inspired Perfume Oil", sku: "RP-SD-03", pricePaise: 24900, inspirationLine: "Inspired by Acqua di Giò" },
+  { slug: "neel", name: "Light Blue–Inspired Perfume Oil", sku: "RP-NL-03", pricePaise: 24900, inspirationLine: "Inspired by Light Blue" },
+  { slug: "ishq", name: "Love Spell–Inspired Perfume Oil", sku: "RP-IQ-03", pricePaise: 24900, inspirationLine: "Inspired by Love Spell" },
+  { slug: "siyah-oud", name: "Black Oud", sku: "RP-SY-03", pricePaise: 24900 },
+  { slug: "safaa-musk", name: "Musk Al Tahara", sku: "RP-SF-03", pricePaise: 24900 },
+  { slug: "adaa", name: "Bombshell–Inspired Perfume Oil", sku: "RP-AD-03", pricePaise: 24900, inspirationLine: "Inspired by Bombshell" },
 ];
 
-export const LAUNCH_TESTER_SLUGS = ["mahnoor", "milaap", "sukoon-oud", "shaan-oud", "samandar", "neel", "ishq", "siyah-oud", "safaa-musk", "adaa"] as const;
+export const LAUNCH_TESTER_SLUGS = APPROVED_TESTERS.map(({ slug }) => slug);
 
 export const TESTER_PACK_RULES: Record<TesterPackSize, { discountPercent: number; packagingCostPaise: number }> = {
   2: { discountPercent: 5, packagingCostPaise: 3520 },

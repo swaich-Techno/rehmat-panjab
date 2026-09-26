@@ -71,7 +71,7 @@ export function ProductPurchase({ product, whatsappSettings, policiesPublished=f
         >{canAdd ? "Add to cart" : "Unavailable"}</button>
       </div>}
       {!COMMERCE_ENABLED && <p className="purchase-unavailable">Prefer a personal order? Send your selection to the house on WhatsApp for confirmation.</p>}
-      {!COMMERCE_ENABLED && <WhatsAppOrder compact products={[{name:product.name,slug:product.slug,variants:product.variants.filter((variant) => variant.availableQuantity > 0).map(({id,sizeMl,pricePaise,currency})=>({id,sizeMl,pricePaise,currency}))}]} settings={whatsappSettings} />}
+      <WhatsAppOrder compact products={[{name:product.name,slug:product.slug,variants:product.variants.filter((variant) => variant.availableQuantity > 0).map(({id,sizeMl,pricePaise,currency})=>({id,sizeMl,pricePaise,currency}))}]} settings={whatsappSettings} />
       {policiesPublished&&<p className="purchase-policy-links"><Link href="/policies/shipping">Shipping</Link> · <Link href="/policies/returns">Cancellation &amp; refunds</Link> · <Link href="/policies/terms">Terms</Link> · <Link href="/policies/privacy">Privacy</Link></p>}
     </div>
   );

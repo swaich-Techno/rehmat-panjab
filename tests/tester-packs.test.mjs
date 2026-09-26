@@ -33,6 +33,23 @@ test("pack prices use distinct lowest approved testers, whole-rupee rounding and
   assert.match(source,/roundPaiseToWholeRupee/);
 });
 
+test("approved launch migration activates exactly twenty 3 ml variants at owner-approved prices",async()=>{
+  const [migration,source]=await Promise.all([read("supabase/migrations/202609260001_launch_complete_three_ml.sql"),read("lib/tester-packs.ts")]);
+  const approved=[
+    ["RP-MR-03",24900],["RP-VM-03",29900],["RP-WO-03",29900],["RP-OR-03",34900],["RP-JN-03",34900],
+    ["RP-RM-03",29900],["RP-NZ-03",29900],["RP-GL-03",29900],["RP-DM-03",34900],["RP-AF-03",29900],
+    ["RP-MN-03",24900],["RP-ML-03",24900],["RP-SO-03",29900],["RP-SH-03",34900],["RP-SD-03",24900],
+    ["RP-NL-03",24900],["RP-IQ-03",24900],["RP-SY-03",24900],["RP-SF-03",24900],["RP-AD-03",24900],
+  ];
+  for(const [sku,price] of approved){assert.match(migration,new RegExp(`\\('${sku}',${price}\\)`));assert.match(source,new RegExp(`sku: "${sku}", pricePaise: ${price}`));}
+  assert.match(migration,/quantity=10,low_stock_threshold=2/);
+  assert.match(migration,/enabled=true,[\s\S]*status='active',[\s\S]*tester_pack_eligible=true/);
+  assert.match(migration,/Expected exactly 20 live 3 ml variants/);
+  assert.match(migration,/RP-AV-03','RP-VO-03','RP-PO-03','RP-GD-03','RP-DC-03/);
+  assert.doesNotMatch(migration,/size_ml\s+in\s*\(6,\s*12\)/i);
+  assert.match(source,/Inspired by Zara Candy/);
+});
+
 test("server quote rejects duplicates and revalidates price, eligibility, stock and margin",async()=>{
   const [route,quote,createOrder]=await Promise.all([read("app/api/tester-packs/quote/route.ts"),read("lib/quote.ts"),read("app/api/create-order/route.ts")]);
   for(const pattern of [/new Set\(parsed\.data\.variantIds\)/,/price_paise/,/tester_pack_eligible/,/quantity-inventory\.reserved/,/margin_approved/,/packaging_approved/])assert.match(route,pattern);
@@ -80,10 +97,10 @@ test("new names stay primary while scent-direction references remain secondary",
   assert.match(migration,/select variant\.id,0,0,2/);
 });
 
-test("tester UI is responsive, persistent-cart ready and honest about draft packaging",async()=>{
+test("tester UI is responsive, persistent-cart ready and shows live launch state",async()=>{
   const [builder,home,cart,provider,css,commerce]=await Promise.all([read("app/testers/tester-builder.tsx"),read("app/components/tester-preview.tsx"),read("lib/cart.ts"),read("app/components/cart-provider.tsx"),read("app/globals.css"),read("lib/commerce.ts")]);
-  assert.match(builder,/aria-pressed/);assert.match(builder,/Awaiting packaging approval/);assert.match(builder,/testerPack:/);assert.match(builder,/selectedLive\.map/);
-  assert.match(home,/Discover the 3 ml Tester Collection/);assert.match(home,/Explore Individual Testers/);assert.match(home,/Temporarily unavailable/);assert.match(home,/Copy code/);assert.match(home,/policies\/terms/);
+  assert.match(builder,/aria-pressed/);assert.match(builder,/Checking availability/);assert.match(builder,/testerPack:/);assert.match(builder,/selectedLive\.map/);
+  assert.match(home,/Discover the 3 ml Tester Collection/);assert.match(home,/Explore Individual Testers/);assert.match(home,/Available now/);assert.match(home,/Copy code/);assert.match(home,/policies\/terms/);
   assert.match(cart,/testerPack\?/);assert.match(provider,/localStorage/);assert.match(css,/@media\(max-width:600px\)[^{]*\{[^}]*\.tester-preview/s);
   assert.match(css,/perspective:900px/);assert.match(css,/rotateY\(-4deg\)/);assert.match(css,/scroll-snap-type:x mandatory/);assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(commerce,/NEXT_PUBLIC_COMMERCE_ENABLED === "true"/);

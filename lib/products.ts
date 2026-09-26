@@ -33,7 +33,7 @@ export type Product = {
 };
 
 const commonUses = ["Everyday wear", "Evening gatherings", "Special occasions", "Gifting"];
-export const INSPIRATION_DISCLAIMER="References to inspiration fragrances describe scent direction only. Rehmat Panjab is independent and is not affiliated with, endorsed by or licensed by the owners of those fragrances.";
+export const INSPIRATION_DISCLAIMER="Fragrance references describe scent inspiration only. Rehmat Panjab is independent and is not affiliated with, endorsed by, sponsored by or licensed by the owners of the referenced fragrances or trademarks.";
 
 export const products: Product[] = [
   { id:"musk",number:"01",name:"Musk Rizali",slug:"musk-rizali",subtitle:"Bergamot / saffron / white musk",atmosphere:"Pure tradition. Modern soul.",description:"Top notes: bergamot, saffron and white musk.",character:["Pure","Traditional","Modern","Musky"],suitableFor:commonUses,suitability:"unisex",color:"#b7c6b1",image:"/images/products/musk-rizali.webp",status:"active",enabledSizes:[6,12],prices:{6:49900,12:79900} },

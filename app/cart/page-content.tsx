@@ -9,7 +9,7 @@ import { RazorpayCheckout } from "../components/razorpay-checkout";
 import { addressPreview, deliveryAddressSchema, emptyDeliveryAddress, type DeliveryAddress } from "../../lib/address";
 import { DeliveryAddressFields } from "../components/delivery-address-fields";
 
-export function CartPageContent({ policyVersion }: { policyVersion: string }) {
+export function CartPageContent({ policyVersion, checkoutEnabled }: { policyVersion: string; checkoutEnabled: boolean }) {
   const { lines, subtotal, update, remove } = useCart();
   const [delivery, setDelivery] = useState<DeliveryAddress>(emptyDeliveryAddress);
   const [billing, setBilling] = useState<DeliveryAddress>(emptyDeliveryAddress);
@@ -73,7 +73,7 @@ export function CartPageContent({ policyVersion }: { policyVersion: string }) {
             {reviewed && <section className="address-preview"><h3>Address preview</h3><pre>{addressPreview(delivery)}</pre><button type="button" className="text-link" onClick={() => setReviewed(false)}>Correct address</button></section>}
             <p role="status">{addressMessage}</p>
             <p className="purchase-policy-links"><Link href="/policies/shipping">Shipping</Link> · <Link href="/policies/returns">Cancellation &amp; refunds</Link> · <Link href="/policies/terms">Terms</Link> · <Link href="/policies/privacy">Privacy</Link></p>
-            <RazorpayCheckout policyVersion={policyVersion} lines={checkoutLines} testerPacks={testerPacks} address={reviewed ? { delivery, billingSameAsDelivery: billingSame, billing: billingSame ? undefined : billing } : null} />
+            {checkoutEnabled ? <RazorpayCheckout policyVersion={policyVersion} lines={checkoutLines} testerPacks={testerPacks} address={reviewed ? { delivery, billingSameAsDelivery: billingSame, billing: billingSame ? undefined : billing } : null} /> : <p className="purchase-unavailable">Online payment remains unavailable. Send an order request on WhatsApp for manual confirmation.</p>}
             <small>Checkout remains unavailable until payment verification is complete. A WhatsApp message is an order request, not a confirmed order, until availability, shipping and payment are verified.</small>
           </aside>
         </div>
