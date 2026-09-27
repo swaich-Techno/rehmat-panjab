@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type {Metadata} from "next";
-import { HomepageCampaign } from "./components/homepage-campaign";
 import { InteractiveProductMedia } from "./components/interactive-product-media";
 import { getStorefrontProducts } from "../lib/storefront";
 import { getStoreSettings, supportedTrustItems } from "../lib/store-settings";
@@ -27,8 +26,6 @@ export default async function Home() {
   return (
     <main id="main-content" className="home-v41">
       <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]}/>
-      <HomepageCampaign />
-
       <TodaysRehmat products={products}/>
 
       <TesterPreview />

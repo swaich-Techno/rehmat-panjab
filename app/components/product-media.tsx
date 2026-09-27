@@ -3,16 +3,16 @@ import Image from "next/image";
 type ProductMediaItem = { id: string; name: string; number: string; image: string; heroImage?: string; imageAlt?: string; imageKind?: "product" | "campaign" | "placeholder"; notes?:{top:string[];heart:string[];base:string[]}|null; notesVerified?:boolean };
 
 export function ProductMedia({ product, priority = false, className = "" }: { product: ProductMediaItem; priority?: boolean; className?: string; role?: "card" | "hero" }) {
-  const notesConfirmed=Boolean(product.notesVerified&&product.notes?.top[0]&&product.notes?.heart[0]&&product.notes?.base[0]);
-  const source=notesConfirmed?"/images/bottles/rose-gold-bottle-oil.webp":"/images/bottles/rose-gold-bottle-reference.jpeg";
+  const notesConfirmed=Boolean(product.notes?.top[0]&&product.notes?.heart[0]&&product.notes?.base[0]);
+  const source=notesConfirmed?"/images/bottles/rose-gold-bottle-oil-cutout.webp":"/images/bottles/rose-gold-bottle-cutout.webp";
   return (
     <div className={`product-media scent-${product.id} ${className}`} data-scent={product.id} data-image-pending={source.includes("product-image-pending") || undefined} data-media-kind={product.imageKind}>
       <div className="media-haze" />
       <Image
         src={source}
         alt={`${product.name} perfume oil by Rehmat Panjab`}
-        width={notesConfirmed?960:1122}
-        height={notesConfirmed?1200:1402}
+        width={1254}
+        height={1254}
         unoptimized
         priority={priority}
         sizes="(max-width: 767px) 92vw, (max-width: 1200px) 48vw, 42vw"

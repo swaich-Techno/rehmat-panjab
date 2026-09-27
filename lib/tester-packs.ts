@@ -22,7 +22,7 @@ export const APPROVED_TESTERS: ApprovedTester[] = [
   { slug: "gulnaar", name: "Gulnaar", sku: "RP-GL-03", pricePaise: 29900, inspirationLine: "Inspired by Zara Candy" },
   { slug: "deer-musk", name: "Deer Musk", sku: "RP-DM-03", pricePaise: 34900 },
   { slug: "afsoon", name: "Afsoon", sku: "RP-AF-03", pricePaise: 29900, inspirationLine: "Inspired by Vampire Blood" },
-  { slug: "mahnoor", name: "Mon Paris–Inspired Perfume Oil", sku: "RP-MN-03", pricePaise: 24900, inspirationLine: "Inspired by Mon Paris by YSL" },
+  { slug: "mahnoor", name: "Moon Paris–Inspired Perfume Oil", sku: "RP-MN-03", pricePaise: 24900, inspirationLine: "Inspired by Moon Paris by YSL" },
   { slug: "milaap", name: "Wisal–Inspired Perfume Oil", sku: "RP-ML-03", pricePaise: 24900, inspirationLine: "Inspired by Ajmal Wisal" },
   { slug: "sukoon-oud", name: "Oud Mood–Inspired Perfume Oil", sku: "RP-SO-03", pricePaise: 29900, inspirationLine: "Inspired by Oud Mood" },
   { slug: "shaan-oud", name: "Oud for Glory–Inspired Perfume Oil", sku: "RP-SH-03", pricePaise: 34900, inspirationLine: "Inspired by Oud for Glory" },

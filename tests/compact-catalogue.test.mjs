@@ -12,9 +12,9 @@ test("collection uses a compact responsive commerce grid",async()=>{
 
 test("card interaction exposes one accessible ingredient visual from each structured layer",async()=>{
   const [catalogue,media,reveal]=await Promise.all([read("app/collection/collection-catalogue.tsx"),read("app/components/product-media.tsx"),read("app/components/fragrance-note-reveal.tsx")]);
-  assert.match(catalogue,/FragranceNoteReveal/);assert.match(reveal,/primaryFragranceNotes\(product\.notes\)/);assert.match(reveal,/ingredientVisualsFor\(product\.slug, product\.notes\)/);assert.match(reveal,/fragrance ingredients: \{noteSummary\}/);
+  assert.match(catalogue,/FragranceNoteReveal/);assert.match(reveal,/hasCompleteIngredientVisuals\(product\.notes, visuals\)/);assert.match(reveal,/ingredientVisualsFor\(product\.slug, product\.notes\)/);assert.match(reveal,/fragrance ingredients: \{noteSummary\}/);
   assert.doesNotMatch(reveal,/fragrance-note-label|>TOP<|>HEART<|>BASE</);
-  assert.match(media,/product\.notesVerified/);assert.match(media,/rose-gold-bottle-oil\.webp/);assert.match(media,/rose-gold-bottle-reference\.jpeg/);
+  assert.match(media,/product\.notes\?\.top\[0\]/);assert.match(media,/rose-gold-bottle-oil-cutout\.webp/);assert.match(media,/rose-gold-bottle-cutout\.webp/);
 });
 
 test("public product presentation removes internal artwork labels",async()=>{

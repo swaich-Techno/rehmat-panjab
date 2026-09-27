@@ -1,3 +1,4 @@
 .env
 .env.*
 !.env.example
+public/images/bottles/rose-gold-bottle-reference.jpeg

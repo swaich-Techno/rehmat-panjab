@@ -1,7 +1,6 @@
 export type FragranceNotePalette = { light: string; middle: string; deep: string };
 export type CatalogueNoteGroups = { top: string[]; heart: string[]; base: string[] } | null | undefined;
-export type PrimaryFragranceNotes = { top: string; heart: string; base: string };
-export type FragranceIngredientVisual = { note: string; key: string; asset: string };
+export type FragranceIngredientVisual = { note: string; key: string; asset: string; tier: "top" | "heart" | "base"; index: number; count: number };
 
 // Visual direction only. Note copy always comes from the catalogue product.
 export const FRAGRANCE_NOTE_PALETTES = {
@@ -34,6 +33,20 @@ export const FRAGRANCE_NOTE_PALETTES = {
 
 const ingredientAsset = (key: string) => `/images/fragrance-notes/${key}.webp`;
 
+const NOTE_ASSET_KEYS: Record<string, string> = {
+  almond: "almonds", almonds: "almonds", amber: "amber-resin", "sweet amber": "amber-resin", "warm amber": "amber-resin",
+  bergamot: "bergamot-slice", "cedar": "wood-chips", cedarwood: "wood-chips", "soft woods": "wood-chips", "smoky woods": "wood-chips", woods: "wood-chips",
+  caramel: "caramel", cardamom: "cardamom-pods", chocolate: "dark-chocolate", "dark cherry": "dark-cherries",
+  "dark oud": "wood-chips", oud: "wood-chips", hazelnut: "hazelnuts", hazelnuts: "hazelnuts", jasmine: "jasmine-sambac",
+  lychee: "lychee", passionfruit: "passionfruit", "pink pepper": "pink-peppercorns", raspberry: "raspberries",
+  "red berries": "red-berries", rhubarb: "rhubarb", rose: "rose-petals", "rose petals": "rose-petals", "soft rose": "rose-petals", "turkish rose": "rose-petals",
+  saffron: "saffron-threads", strawberry: "strawberries", vanilla: "vanilla-pod", "vanilla bean": "vanilla-pod",
+  "white musk": "white-musk-orb", musk: "white-musk-orb", "creamy musk": "white-musk-orb", "velvet musk": "velvet-musk-dark",
+  "white pepper": "white-peppercorns", "warm spice": "cardamom-pods",
+};
+
+const normalizedNote = (note: string) => note.trim().toLocaleLowerCase("en-IN");
+
 // The note strings are verification gates. Visible and accessible copy still comes from product.notes.
 export const FRAGRANCE_INGREDIENT_VISUALS = {
   "musk-rizali": [["Bergamot", "bergamot-slice"], ["Saffron", "saffron-threads"], ["White Musk", "white-musk-orb"]],
@@ -57,28 +70,22 @@ export function fragranceNotePaletteFor(slug: string): FragranceNotePalette | nu
   return FRAGRANCE_NOTE_PALETTES[slug as keyof typeof FRAGRANCE_NOTE_PALETTES] ?? null;
 }
 
-export function primaryFragranceNotes(groups: CatalogueNoteGroups): PrimaryFragranceNotes | null {
-  const top = groups?.top.find((note) => note.trim())?.trim();
-  const heart = groups?.heart.find((note) => note.trim())?.trim();
-  const base = groups?.base.find((note) => note.trim())?.trim();
-  return top && heart && base ? { top, heart, base } : null;
-}
-
 export function ingredientVisualsFor(slug: string, groups: CatalogueNoteGroups): FragranceIngredientVisual[] {
-  const notes = primaryFragranceNotes(groups);
+  const notes = groups && groups.top.some(note => note.trim()) && groups.heart.some(note => note.trim()) && groups.base.some(note => note.trim()) ? groups : null;
   const configured = FRAGRANCE_INGREDIENT_VISUALS[slug as keyof typeof FRAGRANCE_INGREDIENT_VISUALS];
   if (!notes) return [];
-  if (!configured) {
-    const aliases: Array<[RegExp,string]> = [
-      [/bergamot|citrus|lemon/i,"bergamot-slice"],[/rose/i,"rose-petals"],[/oud|wood|cedar|sandal/i,"wood-chips"],
-      [/musk/i,"white-musk-orb"],[/amber/i,"amber-resin"],[/vanilla/i,"vanilla-pod"],[/saffron/i,"saffron-threads"],
-      [/berry|berries/i,"red-berries"],[/pepper|spice/i,"pink-peppercorns"],[/jasmine|floral|flower/i,"jasmine-sambac"],
-      [/caramel|sweet/i,"caramel"],[/chocolate|cocoa/i,"dark-chocolate"],[/nut|almond|hazelnut/i,"hazelnuts"],
-    ];
-    return [notes.top, notes.heart, notes.base].map((note) => ({ note, key: aliases.find(([pattern]) => pattern.test(note))?.[1] ?? "amber-resin", asset: ingredientAsset(aliases.find(([pattern]) => pattern.test(note))?.[1] ?? "amber-resin") }));
-  }
-  const actual = [notes.top, notes.heart, notes.base];
-  return configured.flatMap(([note, key], index) => actual[index]?.localeCompare(note, undefined, { sensitivity: "accent" }) === 0
-    ? [{ note: actual[index], key, asset: ingredientAsset(key) }]
-    : []);
+  const configuredByNote = new Map((configured ?? []).map(([note, key]) => [normalizedNote(note), key]));
+  return (["base", "heart", "top"] as const).flatMap(tier => {
+    const tierNotes = notes[tier].map(note => note.trim()).filter(Boolean);
+    return tierNotes.flatMap((note, index) => {
+      const key = configuredByNote.get(normalizedNote(note)) ?? NOTE_ASSET_KEYS[normalizedNote(note)];
+      return key ? [{ note, key, asset: ingredientAsset(key), tier, index, count: tierNotes.length }] : [];
+    });
+  });
+}
+
+export function hasCompleteIngredientVisuals(groups: CatalogueNoteGroups, visuals: FragranceIngredientVisual[]) {
+  if (!groups) return false;
+  const expected = [...groups.top, ...groups.heart, ...groups.base].filter(note => note.trim()).length;
+  return expected >= 3 && visuals.length === expected;
 }

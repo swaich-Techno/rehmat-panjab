@@ -2,24 +2,59 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("cinematic campaign uses owned assets and an accessible escape path", async () => {
-  const campaign = await read("app/components/homepage-campaign.tsx");
-  assert.match(campaign, /rehmat-panjab-homepage-hero\.webp/);
-  assert.match(campaign, /rose-gold-bottle-oil\.webp/);
-  assert.match(campaign, /href="#featured-fragrances"/);
-  assert.match(campaign, /requestAnimationFrame/);
-  assert.match(campaign, /cancelAnimationFrame/);
-  assert.match(campaign, /prefers-reduced-motion/);
+test("homepage opens with the animated Today’s Rehmat first viewport", async () => {
+  const [page, hero, today] = await Promise.all([read("app/page.tsx"), read("app/components/cinematic-today.tsx"), read("app/components/todays-rehmat.tsx")]);
+  assert.match(page, /<TodaysRehmat products=\{products\}\/>/);
+  assert.doesNotMatch(page, /HomepageCampaign/);
+  assert.match(today, /todaysRehmat\(products\)/);
+  assert.match(hero, /useState\(true\)/);
+  assert.match(hero, /requestAnimationFrame/);
+  assert.match(hero, /cancelAnimationFrame/);
+  assert.match(hero, /IntersectionObserver/);
+  assert.match(hero, /Replay fragrance notes/);
+  assert.match(hero, /persistent/);
+  assert.match(hero, /ProductAddButton/);
 });
 
-test("storefront motion has mobile and reduced-motion fallbacks", async () => {
+test("cinematic stage has responsive, paused and reduced-motion states", async () => {
   const css = await read("app/globals.css");
-  const productMotion = await read("app/components/product-story-motion.tsx");
-  assert.match(css, /\.campaign-cinema\s*\{[^}]*height:\s*360svh/s);
-  assert.match(css, /@media \(max-width: 700px\)[\s\S]*\.campaign-cinema\s*\{\s*height:250svh/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.campaign-cinema\s*\{\s*height:100svh/);
-  assert.match(productMotion, /observer\.disconnect\(\)/);
-  assert.match(productMotion, /removeEventListener\("scroll"/);
+  assert.match(css, /\.today-cinematic\{/);
+  assert.match(css, /\.today-cinematic-stage\{/);
+  assert.match(css, /data-visible="false"/);
+  assert.match(css, /@media \(max-width:700px\)[\s\S]*\.today-cinematic\{/);
+  assert.match(css, /@media \(prefers-reduced-motion:reduce\)[\s\S]*\.today-cinematic/);
+  assert.match(css, /rehmat-panjab-homepage-hero\.webp/);
+  assert.match(css, /today-stage-poster/);
+});
+
+test("daily selection uses IST, weekday profiles, stock and exact ten-day festival windows", async () => {
+  const [daily, calendar] = await Promise.all([read("lib/daily-rehmat.ts"), read("lib/festival-calendar.ts")]);
+  assert.match(daily, /weekdayProfiles/);
+  assert.match(daily, /hasAvailableStock\(product\)/);
+  assert.match(daily, /firstPrice\(product\)!==null/);
+  assert.match(daily, /hasCompleteIngredientVisuals\(product\.notes,ingredientVisualsFor\(product\.slug,product\.notes\)\)/);
+  assert.match(daily, /profile\.terms\.reduce/);
+  assert.match(calendar, /timeZone:"Asia\/Kolkata"/);
+  assert.match(calendar, /festivalWindowStart\(item\.date\)/);
+  assert.match(calendar, /leadDays = 10/);
+  assert.doesNotMatch(calendar, /predict|calculate.*lunar/i);
+});
+
+test("Guide variety and Moon Paris correction are release scoped", async () => {
+  const [guide, route, tester, migration] = await Promise.all([
+    read("lib/rehmat-guide.ts"), read("app/api/rehmat-guide/route.ts"), read("lib/tester-packs.ts"),
+    read("supabase/migrations/202609260003_cinematic_homepage_moon_paris.sql"),
+  ]);
+  assert.match(guide, /recentContext/);
+  assert.match(guide, /hasExplicitPreference/);
+  assert.doesNotMatch(guide, /product\.summary,product\.description/);
+  assert.match(guide, /materials_craft/);
+  assert.match(guide, /application_storage/);
+  assert.match(route, /recentContext/);
+  assert.match(tester, /Moon Paris–Inspired Perfume Oil/);
+  assert.doesNotMatch(tester, /Mon Paris/);
+  assert.match(migration, /where slug = 'mahnoor'/);
+  assert.match(migration, /array_replace\(search_aliases, 'Mon Paris', 'Moon Paris'\)/);
 });

@@ -1156,3 +1156,62 @@ a:hover .product-media img { transform: scale(1.018); }
 .tester-showcase-card small{color:rgba(244,240,228,.68);font-size:.62rem;line-height:1.4}.tester-product-copy em{margin-top:5px;color:var(--muted-ink);font-size:.68rem;font-style:normal}
 @media(max-width:700px){.todays-rehmat{padding:54px 12px}.todays-rehmat-heading{grid-template-columns:1fr;margin-bottom:24px}.todays-rehmat-grid{grid-template-columns:1fr}.todays-rehmat-grid article:not(:first-child){display:grid;grid-template-columns:42% 58%}.todays-rehmat-guide{align-items:flex-start;flex-direction:column}.fragrance-note-map{width:46%}.fragrance-ingredient{width:min(var(--ingredient-size),16vw)}}
 @media(prefers-reduced-motion:reduce){.fragrance-bottle-cap{display:none!important}.fragrance-ingredient{opacity:1!important;transform:translate3d(-50%,0,0)!important}}
+
+/* Cinematic first-view recommendation */
+.today-cinematic{--today-light-x:50%;--today-light-y:42%;display:grid;min-height:calc(100svh - 68px);grid-template-columns:minmax(0,1.9fr) minmax(330px,.9fr);overflow:hidden;background:#07150f;color:var(--ivory)}
+.today-cinematic-stage{position:relative;isolation:isolate;min-height:720px;overflow:hidden;background:radial-gradient(circle at 48% 58%,#54411f 0,#17392c 26%,#081711 66%,#040b08 100%)}
+.today-stage-poster{position:absolute;z-index:0;inset:0;background:linear-gradient(180deg,rgba(4,16,11,.24),rgba(4,13,10,.72)),url('/images/hero/rehmat-panjab-homepage-hero.webp') center/cover no-repeat;opacity:1;transition:opacity 520ms ease;pointer-events:none}
+.today-cinematic-stage[data-ready] .today-stage-poster{opacity:0}
+.today-cinematic-stage::before{position:absolute;z-index:1;inset:0;background:radial-gradient(circle at var(--today-light-x) var(--today-light-y),rgba(241,191,105,.22),transparent 21%),linear-gradient(90deg,rgba(4,16,11,.32),transparent 42%,rgba(4,16,11,.22));content:"";pointer-events:none;mix-blend-mode:screen}
+.today-cinematic-stage::after{position:absolute;z-index:1;right:5%;bottom:-5%;left:5%;height:32%;border-radius:50%;background:radial-gradient(ellipse,rgba(198,133,45,.28),transparent 64%);content:"";filter:blur(16px);pointer-events:none}
+.today-stage-heading{position:absolute;z-index:8;top:clamp(24px,5vw,64px);left:clamp(20px,5vw,72px);max-width:min(760px,76%)}
+.today-stage-heading h1{max-width:760px;margin:8px 0 0;color:var(--ivory);font-size:clamp(3.8rem,7.4vw,8.6rem);line-height:.82;text-wrap:balance}
+.today-reveal-wrap{position:absolute;z-index:4;inset:0;display:grid;place-items:end center;padding:11% 7% 0}
+.today-reveal-wrap>.catalogue-card-media{width:min(780px,78%);height:88%;overflow:visible;background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--note-middle,#b9823f),transparent 72%),transparent 38%)}
+.today-reveal-wrap .fragrance-note-trigger{height:100%;overflow:visible}
+.today-reveal-wrap .product-media{height:100%;min-height:0;aspect-ratio:auto;background:transparent}
+.today-reveal-wrap .product-media img{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 30px 32px rgba(0,0,0,.42));transform:scale(.7);transform-origin:50% 100%;animation:today-bottle-arrive 1250ms cubic-bezier(.16,.82,.22,1) both}
+.today-reveal-wrap .product-bottle-label{right:27%;bottom:9%;left:27%;background:rgba(244,240,228,.86)}
+.today-reveal-wrap .fragrance-note-hint{display:none}
+.today-reveal-wrap .fragrance-note-stage{overflow:visible}
+.today-reveal-wrap .fragrance-bottle-cap{bottom:31%;width:12%;height:6%}
+.today-reveal-wrap .fragrance-note-map{top:auto;right:-4%;bottom:18%;width:min(30%,210px)}
+.today-reveal-wrap .fragrance-ingredient{--ingredient-size:86px!important}
+.today-reveal-wrap .fragrance-ingredient[data-note-tier="heart"]{--ingredient-size:78px!important}
+.today-reveal-wrap .fragrance-ingredient[data-note-tier="top"]{--ingredient-size:72px!important}
+.today-replay{position:absolute;z-index:10;right:clamp(18px,3vw,44px);bottom:30px;min-height:44px;border:1px solid rgba(244,240,228,.38);border-radius:999px;padding:0 16px;background:rgba(5,19,13,.62);color:var(--ivory);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(12px);cursor:pointer}
+.today-replay span{margin-left:7px;font-size:1rem}
+.today-stage-caption{position:absolute;z-index:9;bottom:34px;left:clamp(18px,4vw,58px);margin:0;color:rgba(244,240,228,.64);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase}
+.today-mobile-offer{display:none}
+.today-atmosphere,.today-atmosphere::before,.today-atmosphere::after,.today-atmosphere i{position:absolute;inset:0;pointer-events:none}
+.today-atmosphere{z-index:2;overflow:hidden}
+.today-atmosphere::before{background:radial-gradient(ellipse at 18% 75%,rgba(46,91,60,.32),transparent 32%),radial-gradient(ellipse at 84% 72%,rgba(105,44,37,.28),transparent 31%);content:"";filter:blur(12px);animation:today-mist 12s ease-in-out infinite alternate}
+.today-atmosphere::after{background:linear-gradient(110deg,transparent 28%,rgba(255,224,151,.08) 49%,transparent 64%);content:"";transform:translateX(-34%);animation:today-light-sweep 9s ease-in-out infinite}
+.today-atmosphere i{width:5px;height:5px;margin:auto;border-radius:50%;background:rgba(249,221,153,.6);box-shadow:-190px -40px 0 rgba(249,221,153,.22),160px -125px 0 rgba(249,221,153,.3),240px 70px 0 rgba(249,221,153,.18),-250px 150px 0 rgba(249,221,153,.2);animation:today-particles 8s ease-in-out infinite alternate}
+.today-atmosphere i:nth-child(2){transform:rotate(70deg) scale(.72);animation-delay:-3s}.today-atmosphere i:nth-child(3){transform:rotate(145deg) scale(.5);animation-delay:-6s}
+.today-cinematic[data-visible="false"] .today-atmosphere::before,.today-cinematic[data-visible="false"] .today-atmosphere::after,.today-cinematic[data-visible="false"] .today-atmosphere i{animation-play-state:paused}
+.today-cinematic-panel{display:flex;min-width:0;flex-direction:column;justify-content:center;gap:clamp(20px,3vh,34px);border-left:1px solid rgba(244,240,228,.14);padding:clamp(32px,5vw,72px);background:radial-gradient(circle at 90% 12%,rgba(183,121,49,.16),transparent 30%),linear-gradient(160deg,#102d24,#071710 66%,#1f1511);color:var(--ivory)}
+.today-cinematic-panel .eyebrow{color:var(--brass)}
+.today-panel-kicker{max-width:45ch;margin:14px 0 0;color:rgba(244,240,228,.72);font-size:.84rem;line-height:1.6}
+.today-cinematic-panel h2{margin:16px 0 10px;font-size:clamp(3.4rem,5.2vw,6.5rem);line-height:.84}
+.today-panel-description{max-width:48ch;margin:0;color:rgba(244,240,228,.7);line-height:1.65}
+.today-note-list{display:grid;margin:0;border-top:1px solid rgba(244,240,228,.18)}
+.today-note-list>div{display:grid;grid-template-columns:62px 1fr;gap:14px;border-bottom:1px solid rgba(244,240,228,.14);padding:11px 0}
+.today-note-list dt{color:var(--brass);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase}.today-note-list dd{margin:0;color:rgba(244,240,228,.82);font-size:.75rem;line-height:1.45}
+.today-buying{display:grid;gap:7px}.today-buying strong{font-family:var(--font-display);font-size:clamp(2rem,3vw,3.2rem);font-weight:400}.today-buying span{color:rgba(244,240,228,.64);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase}
+.today-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.today-actions .button{min-height:48px;text-align:center}.today-actions .button-outline{border-color:rgba(244,240,228,.44);color:var(--ivory);background:transparent}
+.today-alternatives{display:flex;flex-wrap:wrap;gap:8px 14px;border-top:1px solid rgba(244,240,228,.16);padding-top:17px}.today-alternatives span{width:100%;color:rgba(244,240,228,.48);font-size:.52rem;letter-spacing:.12em;text-transform:uppercase}.today-alternatives a{border-bottom:1px solid rgba(244,240,228,.32);font-size:.68rem}
+.today-guide-link{width:max-content;border:0;border-bottom:1px solid currentColor;padding:0 0 5px;background:transparent;color:var(--brass);font:inherit;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+@keyframes today-bottle-arrive{from{opacity:0;transform:translate3d(0,45px,0) scale(.64);filter:blur(7px) drop-shadow(0 30px 32px rgba(0,0,0,.42))}to{opacity:1;transform:translate3d(0,0,0) scale(.7);filter:blur(0) drop-shadow(0 30px 32px rgba(0,0,0,.42))}}
+@keyframes today-mist{from{opacity:.55;transform:translate3d(-1.5%,1%,0) scale(1)}to{opacity:.84;transform:translate3d(1.5%,-1%,0) scale(1.05)}}
+@keyframes today-light-sweep{0%,18%{opacity:0;transform:translateX(-42%)}46%{opacity:1}72%,100%{opacity:0;transform:translateX(42%)}}
+@keyframes today-particles{from{opacity:.3;transform:translate3d(-8px,10px,0)}to{opacity:.75;transform:translate3d(10px,-16px,0)}}
+
+/* Ingredient pyramids use every exact visual available for a verified note. */
+.fragrance-ingredient{left:var(--ingredient-x,50%)}
+.fragrance-ingredient-name{left:50%;top:calc(100% + 2px);border:0;border-top:1px solid rgba(255,230,177,.62);padding:4px 6px;text-align:center;transform:translate3d(-50%,0,0)}
+.fragrance-ingredient:hover .fragrance-ingredient-name,.fragrance-ingredient:focus-visible .fragrance-ingredient-name{transform:translate3d(-50%,-2px,0)}
+
+@media(max-width:980px){.today-cinematic{grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr)}.today-cinematic-stage{min-height:680px}.today-stage-heading h1{font-size:clamp(3.5rem,8vw,6.6rem)}.today-reveal-wrap>.catalogue-card-media{width:90%}.today-cinematic-panel{padding:34px 28px}.today-cinematic-panel h2{font-size:clamp(3rem,6vw,5rem)}.today-actions{grid-template-columns:1fr}}
+@media(max-width:700px){.today-cinematic{min-height:calc(100svh - 62px);grid-template-columns:1fr;grid-template-rows:minmax(66svh,520px) auto}.today-cinematic-stage{min-height:0;background-position:58% center}.today-stage-heading{top:20px;left:18px;max-width:80%}.today-stage-heading h1{font-size:clamp(2.8rem,13vw,4.8rem)}.today-reveal-wrap{padding:18% 0 8%}.today-reveal-wrap>.catalogue-card-media{width:100%;height:100%}.today-reveal-wrap .product-media img{transform:scale(.58)}.today-reveal-wrap .product-bottle-label{right:25%;bottom:15%;left:25%;font-size:.58rem}.today-reveal-wrap .fragrance-note-map{right:8px;bottom:22%;width:38%}.today-reveal-wrap .fragrance-ingredient{--ingredient-size:54px!important}.today-reveal-wrap .fragrance-ingredient[data-note-tier="heart"],.today-reveal-wrap .fragrance-ingredient[data-note-tier="top"]{--ingredient-size:49px!important}.today-replay{right:12px;bottom:12px}.today-stage-caption{display:none}.today-mobile-offer{position:absolute;z-index:11;right:126px;bottom:12px;left:12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:end;padding:10px 12px;border:1px solid rgba(244,240,228,.24);border-radius:12px;background:rgba(5,19,13,.72);backdrop-filter:blur(14px)}.today-mobile-offer span{grid-column:1/-1;overflow:hidden;font-family:var(--font-display);font-size:1.25rem;line-height:1;white-space:nowrap;text-overflow:ellipsis}.today-mobile-offer strong{font-size:.72rem}.today-mobile-offer a{border-bottom:1px solid currentColor;color:var(--brass);font-size:.56rem;letter-spacing:.08em;text-transform:uppercase}.today-cinematic-panel{gap:20px;border-top:1px solid rgba(244,240,228,.14);border-left:0;padding:30px 18px 38px}.today-cinematic-panel h2{font-size:clamp(3.2rem,16vw,5.4rem)}.today-panel-kicker{font-size:.76rem}.today-note-list>div{grid-template-columns:54px 1fr;padding:9px 0}.today-alternatives{display:none}.today-actions{grid-template-columns:1fr}.fragrance-ingredient-name{max-width:84px;font-size:.4rem}}
+@media(prefers-reduced-motion:reduce){.today-atmosphere::before,.today-atmosphere::after,.today-atmosphere i,.today-reveal-wrap .product-media img{animation:none!important}.today-reveal-wrap .product-media img{opacity:1;transform:scale(.7);filter:drop-shadow(0 30px 32px rgba(0,0,0,.42))}.today-replay{display:none}}

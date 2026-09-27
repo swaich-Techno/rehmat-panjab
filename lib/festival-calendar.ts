@@ -18,5 +18,12 @@ export function indiaDateKey(date = new Date()) {
 }
 
 export function activeFestivalRecommendation(dateKey: string) {
-  return FESTIVAL_RECOMMENDATIONS.find(item => item.status === "published" && dateKey >= item.startDate && dateKey <= item.endDate) ?? null;
+  return FESTIVAL_RECOMMENDATIONS.find(item => item.status === "published" && dateKey >= festivalWindowStart(item.date) && dateKey <= item.date) ?? null;
+}
+
+export function festivalWindowStart(dateKey: string, leadDays = 10) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() - leadDays);
+  return date.toISOString().slice(0, 10);
 }

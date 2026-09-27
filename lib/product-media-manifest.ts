@@ -11,9 +11,9 @@ type ProductMediaSet = {
 };
 
 const bottle = (slug: string, name: string): ProductMediaSet => ({
-  product: "/images/bottles/rose-gold-bottle-oil.webp",
-  card: "/images/bottles/rose-gold-bottle-oil.webp",
-  hero: "/images/bottles/rose-gold-bottle-oil.webp",
+  product: "/images/bottles/rose-gold-bottle-oil-cutout.webp",
+  card: "/images/bottles/rose-gold-bottle-oil-cutout.webp",
+  hero: "/images/bottles/rose-gold-bottle-oil-cutout.webp",
   mood: `/images/products/campaign/${slug}-mood.webp`,
   social: "/images/bottles/rose-gold-bottle-social.webp",
   alt: `${name} perfume oil by Rehmat Panjab`,
@@ -29,7 +29,7 @@ export const PRODUCT_MEDIA_MANIFEST = {
   junoon: bottle("junoon", "JUNOON"),
   "red-musk": bottle("red-musk", "Red Musk"),
   nazakat: bottle("nazakat", "NAZAKAT"),
-  gulnaar: {...bottle("gulnaar", "GULNAAR"),mood:"/images/bottles/rose-gold-bottle-oil.webp"},
+  gulnaar: {...bottle("gulnaar", "GULNAAR"),mood:"/images/bottles/rose-gold-bottle-oil-cutout.webp"},
   "deer-musk": bottle("deer-musk", "Deer Musk"),
   afsoon: bottle("afsoon", "AFSOON"),
 } as const;

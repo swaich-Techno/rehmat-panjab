@@ -54,5 +54,5 @@ test("public metadata is unique and images retain stable geometry",async()=>{
   assert.match(hero,/width="1200"/);assert.match(hero,/height="1500"/);
   assert.match(hero,/width="960"/);assert.match(hero,/height="1200"/);
   assert.equal((hero.match(/unoptimized/g)??[]).length,4);
-  assert.match(media,/width=\{notesConfirmed\?960:1122\}/);assert.match(media,/height=\{notesConfirmed\?1200:1402\}/);assert.match(media,/unoptimized/);assert.match(media,/sizes=/);assert.match(css,/\.product-media[^}]*aspect-ratio: 4 \/ 5/s);
+  assert.match(media,/width=\{1254\}/);assert.match(media,/height=\{1254\}/);assert.match(media,/unoptimized/);assert.match(media,/sizes=/);assert.match(css,/\.product-media[^}]*aspect-ratio: 4 \/ 5/s);
 });
