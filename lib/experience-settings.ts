@@ -59,7 +59,7 @@ export const defaultExperienceSettings: ExperienceSettings = {
   whatsappDefaultMessage: "Please confirm availability, delivery charges and payment instructions.",
   whatsappNotice: "This opens a manually confirmed order request. It does not place, reserve or pay for an order.",
   guideEnabled: true,
-  guideGreeting: "Sat Sri Akal. Tell me what you want your fragrance to feel like, and I’ll help you choose.",
+  guideGreeting: "Sat Sri Akal. I’m Rehmat AI. Describe a scent, note, occasion or layering idea and I’ll guide you using verified fragrance knowledge and the live collection.",
   guidePrompts: ["Help me choose my first oil","Find something for everyday wear","Suggest an evening fragrance","Compare two fragrances","Build a layering combination","Show fragrances within my budget"],
   guideAllowedProducts: [],
   guideExcludedProducts: ["saffron-amber-oud"],

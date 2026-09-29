@@ -7,6 +7,10 @@ import { createGuideReply,type GuideKnowledge } from "../../../lib/rehmat-guide"
 import {providerReady,rewriteGuideReply} from "../../../lib/fragrance-ai";
 import { getStorefrontProducts } from "../../../lib/storefront";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import { todaysRehmat } from "../../../lib/daily-rehmat";
+import { nextFestivalRecommendation } from "../../../lib/festival-calendar";
+import { firstPrice, availabilityLabel } from "../../../lib/catalog";
+import { getCurrentPublicOffer } from "../../../lib/public-offer";
 
 const schema=z.object({message:z.string().trim().min(1).max(360),productId:z.string().uuid().optional(),sessionId:z.string().regex(/^[a-zA-Z0-9_-]{8,80}$/).optional(),excludedProductSlugs:z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(5).optional(),context:z.array(z.string().trim().min(1).max(360)).max(6).optional()}).strict();
 const localAttempts=new Map<string,{count:number;reset:number}>();
@@ -20,18 +24,20 @@ async function allowed(request:Request,limit:number){
 }
 
 export async function GET(){
-  const settings=await getExperienceSettings();
-  return NextResponse.json({enabled:settings.guideEnabled,greeting:settings.guideGreeting,prompts:settings.guidePrompts,whatsapp:{enabled:settings.whatsappEnabled,number:settings.whatsappNumber,notice:settings.whatsappNotice},source:!settings.guideEmergencyDisable&&providerReady()?"provider-with-deterministic-fallback":"deterministic"});
+  const [settings,catalogue,coupon]=await Promise.all([getExperienceSettings(),getStorefrontProducts(),getCurrentPublicOffer()]);
+  const edit=todaysRehmat(catalogue),product=edit.products[0],nextFestival=nextFestivalRecommendation(edit.dateKey);
+  const calendar={dateKey:edit.dateKey,weekday:edit.weekday,festival:edit.festival?{name:edit.festival.name,date:edit.festival.date,headline:edit.festival.headline,description:edit.festival.description}:null,nextFestival:nextFestival?{name:nextFestival.name,date:nextFestival.date}:null,recommendation:product?{slug:product.slug,name:product.name,reason:edit.description,image:product.image,imageAlt:product.imageAlt,pricePaise:firstPrice(product),sizes:product.enabledSizes,availability:availabilityLabel(product),notes:product.notes}:null,coupon};
+  return NextResponse.json({enabled:settings.guideEnabled,greeting:settings.guideGreeting.replace(/Rehmat Guide/g,"Rehmat AI"),prompts:settings.guidePrompts,calendar,whatsapp:{enabled:settings.whatsappEnabled,number:settings.whatsappNumber,notice:settings.whatsappNotice},source:!settings.guideEmergencyDisable&&providerReady()?"provider-with-deterministic-fallback":"deterministic"});
 }
 
 export async function POST(request:Request){
   const settings=await getExperienceSettings();
-  if(!settings.guideEnabled)return NextResponse.json({message:"The Rehmat Guide is resting right now."},{status:503});
+  if(!settings.guideEnabled)return NextResponse.json({message:"Rehmat AI is resting right now."},{status:503});
   if(!(await allowed(request,settings.guideRateLimit)))return NextResponse.json({message:"Too many requests. Please return in a few minutes."},{status:429});
   const parsed=schema.safeParse(await request.json().catch(()=>null)); if(!parsed.success)return NextResponse.json({message:"Please keep your fragrance question brief."},{status:400});
   const catalogue=await getStorefrontProducts();const raw=await createSupabaseServerClient();let knowledge:GuideKnowledge[]=[];if(raw&&settings.guideGeneralKnowledge){const {data}=await (raw as unknown as SupabaseClient).from("fragrance_knowledge").select("topic,aliases,explanation,source_title,source_url,source_license").eq("approval_status","approved").eq("active",true);knowledge=(data??[]).map(item=>({topic:String(item.topic),aliases:Array.isArray(item.aliases)?item.aliases:[],explanation:String(item.explanation),sourceTitle:String(item.source_title),sourceUrl:String(item.source_url),sourceLicense:String(item.source_license)}));}
   const contextProduct=parsed.data.productId?catalogue.find(product=>product.databaseId===parsed.data.productId):null;
   const fallback=createGuideReply(parsed.data.message,catalogue,{excluded:[...settings.productExclusions,...settings.guideExcludedProducts,...(parsed.data.excludedProductSlugs??[])],allowed:contextProduct?[contextProduct.slug]:settings.guideAllowedProducts,max:settings.guideMaxRecommendations,knowledge,recentContext:parsed.data.context});
-  const mayRewrite=["general_education","materials_craft","application_storage","fragrance_family","product_discovery","product_comparison","occasion_mood","gift_climate","layering"].includes(fallback.intent);
+  const mayRewrite=["general_education","materials_craft","application_storage","fragrance_family","note_identification","seasonal_calendar","product_discovery","product_comparison","occasion_mood","gift_climate","layering"].includes(fallback.intent);
   return NextResponse.json(mayRewrite&&!settings.guideEmergencyDisable?await rewriteGuideReply(parsed.data.message,fallback,parsed.data.sessionId??"anonymous",parsed.data.context??[],knowledge):fallback);
 }

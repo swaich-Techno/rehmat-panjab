@@ -62,7 +62,7 @@ export default async function Home() {
           <p className="eyebrow">Personal guidance</p>
           <h2 id="personal-heading">Not sure where<br/>to begin?</h2>
         </div>
-        <div className="guide-intro-copy"><p>Tell Rehmat Guide the mood, occasion or notes you are drawn to. It can help you choose one fragrance, compare several or build a layering ritual.</p><div className="button-row"><OpenGuideButton/><Link className="text-link" href="/collection">Browse all fragrances <span aria-hidden="true">↗</span></Link></div></div>
+        <div className="guide-intro-copy"><p>Tell Rehmat AI the mood, occasion or notes you are drawn to. It can identify likely fragrance families, compare the live collection or build a restrained layering ritual.</p><div className="button-row"><OpenGuideButton/><Link className="text-link" href="/collection">Browse all fragrances <span aria-hidden="true">↗</span></Link></div></div>
       </section>
       <section className="house-preview"><p className="eyebrow">The house</p><h2>Perfume oil,<br/>worn close.</h2><p>Atmosphere, memory and personal ritual shape each Rehmat.</p><Link className="text-link" href="/discover">Read our story <span aria-hidden="true">↗</span></Link></section>
       <TrustStrip items={supportedTrustItems(storeSettings)}/>

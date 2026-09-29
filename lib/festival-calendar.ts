@@ -21,6 +21,10 @@ export function activeFestivalRecommendation(dateKey: string) {
   return FESTIVAL_RECOMMENDATIONS.find(item => item.status === "published" && dateKey >= festivalWindowStart(item.date) && dateKey <= item.date) ?? null;
 }
 
+export function nextFestivalRecommendation(dateKey: string) {
+  return FESTIVAL_RECOMMENDATIONS.filter(item => item.status === "published" && item.date > dateKey).sort((a,b) => a.date.localeCompare(b.date))[0] ?? null;
+}
+
 export function festivalWindowStart(dateKey: string, leadDays = 10) {
   const [year, month, day] = dateKey.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));

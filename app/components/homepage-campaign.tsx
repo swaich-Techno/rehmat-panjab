@@ -105,7 +105,7 @@ export function HomepageCampaign() {
             <p>Find the atmosphere<br />that feels like yours.</p>
             <div className="button-row">
               <Link className="button button-cream" href="/collection" data-cursor="VIEW">Enter the collection</Link>
-              <button className="campaign-guide-link" type="button" onClick={() => window.dispatchEvent(new Event("open-rehmat-guide"))}>Ask Rehmat Guide</button>
+              <button className="campaign-guide-link" type="button" onClick={() => window.dispatchEvent(new Event("open-rehmat-guide"))}>Ask Rehmat AI</button>
             </div>
           </div>
 

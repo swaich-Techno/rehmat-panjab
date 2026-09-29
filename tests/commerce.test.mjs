@@ -129,7 +129,7 @@ test("reviews are pending, private by default, rate limited, and moderated serve
   assert.match(reviewUi, /No reviews yet\. Be the first to share your experience with this fragrance\./);
   assert.match(productPage, /aggregateRating/);
   assert.match(productPage, /isPurchasable\(product, variant\)/);
-  assert.match(header, /\["Ask Rehmat Guide", "#rehmat-guide"\]/);
+  assert.match(header, /\["Ask Rehmat AI", "#rehmat-guide"\]/);
   assert.match(layer, /Guide Me/);
   assert.match(layer, /Build My Own/);
   assert.doesNotMatch(layer, /lightly above/);

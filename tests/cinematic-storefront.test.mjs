@@ -16,6 +16,7 @@ test("homepage opens with the animated Today’s Rehmat first viewport", async (
   assert.match(hero, /Replay fragrance notes/);
   assert.match(hero, /persistent/);
   assert.match(hero, /ProductAddButton/);
+  assert.match(hero, /data-scene=\{scene\.id\}/);
 });
 
 test("cinematic stage has responsive, paused and reduced-motion states", async () => {
@@ -27,6 +28,8 @@ test("cinematic stage has responsive, paused and reduced-motion states", async (
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)[\s\S]*\.today-cinematic/);
   assert.match(css, /rehmat-panjab-homepage-hero\.webp/);
   assert.match(css, /today-stage-poster/);
+  assert.match(css, /@keyframes today-scene-orbit/);
+  assert.match(css, /data-visible="false"[\s\S]*today-atmosphere b/);
 });
 
 test("daily selection uses IST, weekday profiles, stock and exact ten-day festival windows", async () => {
@@ -40,6 +43,19 @@ test("daily selection uses IST, weekday profiles, stock and exact ten-day festiv
   assert.match(calendar, /festivalWindowStart\(item\.date\)/);
   assert.match(calendar, /leadDays = 10/);
   assert.doesNotMatch(calendar, /predict|calculate.*lunar/i);
+  for (const id of ["sunday-stillness","monday-light","tuesday-spice","wednesday-bloom","thursday-amber","friday-velvet","saturday-radiance"]) assert.match(daily, new RegExp(id));
+  assert.match(daily, /festival-radiance/);
+});
+
+test("Rehmat AI exposes calendar and grounded assistant modes", async () => {
+  const [ui, api, expert, offer] = await Promise.all([read("app/components/rehmat-guide.tsx"), read("app/api/rehmat-guide/route.ts"), read("lib/fragrance-ai.ts"), read("lib/public-offer.ts")]);
+  assert.match(ui, /AI Assistant/);
+  assert.match(ui, /verified live offers/);
+  assert.match(api, /getCurrentPublicOffer/);
+  assert.match(expert, /senior perfumery and fragrance adviser/);
+  assert.match(expert, /never claim to authenticate/);
+  assert.match(offer, /coupon_redemptions/);
+  assert.match(offer, /total_usage_limit/);
 });
 
 test("Guide variety and Moon Paris correction are release scoped", async () => {

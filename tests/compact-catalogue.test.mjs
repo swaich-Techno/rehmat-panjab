@@ -25,7 +25,7 @@ test("public product presentation removes internal artwork labels",async()=>{
 
 test("guide exposes availability and receives stable product context",async()=>{
   const [guide,api,settings]=await Promise.all([read("app/components/rehmat-guide.tsx"),read("app/api/rehmat-guide/route.ts"),read("lib/experience-settings.ts")]);
-  assert.match(guide,/Rehmat Guide is available/);assert.match(guide,/Scent guidance available/);assert.match(guide,/productId:contextProductId\.current/);assert.match(api,/product\.databaseId===parsed\.data\.productId/);assert.match(settings,/Build a layering combination/);
+  assert.match(guide,/Rehmat AI is available/);assert.match(guide,/Calendar and fragrance intelligence/);assert.match(guide,/productId:contextProductId\.current/);assert.match(api,/product\.databaseId===parsed\.data\.productId/);assert.match(settings,/Build a layering combination/);
 });
 
 test("catalogue migration preserves inventory while assigning exact product media",async()=>{

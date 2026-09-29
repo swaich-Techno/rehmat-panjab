@@ -11,5 +11,6 @@ export function TodaysRehmat({ products }: { products: StorefrontProduct[] }) {
     eyebrow={edit.festival ? `${edit.festival.name} edit · ${edit.weekday}` : `${edit.weekday} edit`}
     headline={edit.headline}
     description={edit.description}
+    scene={edit.scene}
   />;
 }
