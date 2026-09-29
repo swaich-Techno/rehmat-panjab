@@ -48,12 +48,13 @@ test("daily selection uses IST, weekday profiles, stock and exact ten-day festiv
 });
 
 test("Rehmat AI exposes calendar and grounded assistant modes", async () => {
-  const [ui, api, expert, offer] = await Promise.all([read("app/components/rehmat-guide.tsx"), read("app/api/rehmat-guide/route.ts"), read("lib/fragrance-ai.ts"), read("lib/public-offer.ts")]);
+  const [ui, api, expert, offer, guideSource] = await Promise.all([read("app/components/rehmat-guide.tsx"), read("app/api/rehmat-guide/route.ts"), read("lib/fragrance-ai.ts"), read("lib/public-offer.ts"), read("lib/rehmat-guide.ts")]);
   assert.match(ui, /AI Assistant/);
   assert.match(ui, /verified live offers/);
   assert.match(api, /getCurrentPublicOffer/);
   assert.match(expert, /senior perfumery and fragrance adviser/);
   assert.match(expert, /never claim to authenticate/);
+  assert.match(guideSource, /chypre\|fougere\|fougère/);
   assert.match(offer, /coupon_redemptions/);
   assert.match(offer, /total_usage_limit/);
 });
