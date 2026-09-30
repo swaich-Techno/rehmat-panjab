@@ -2,6 +2,14 @@ import type {StorefrontProduct} from "./catalog";
 
 export type SearchCollection={slug:string;name:string;title:string;description:string;intro:string;keywords:string[]};
 
+export const audienceEditBySlug:Record<string,"men"|"women"|"unisex">={
+  "musk-rizali":"unisex","vanilla-musk":"unisex","white-oud":"men","oud-rose":"women","junoon":"unisex",
+  "red-musk":"unisex","nazakat":"women","gulnaar":"women","deer-musk":"men","afsoon":"unisex",
+  "amber-veil":"unisex","velvet-oud":"women","purple-oud":"men","golden-dream":"unisex","dubai-chocolate":"unisex",
+  "mahnoor":"women","milaap":"women","sukoon-oud":"unisex","shaan-oud":"men","samandar":"men",
+  "neel":"men","ishq":"women","siyah-oud":"men","safaa-musk":"unisex","adaa":"women",
+};
+
 export const searchCollections:SearchCollection[]=[
   {slug:"attar-perfume-oils",name:"Attar & Perfume Oils",title:"Attar & Perfume Oils Online in India",description:"Explore Rehmat Panjab concentrated attar and perfume oils in available 6 ml and 12 ml sizes, with delivery across India.",intro:"Discover concentrated perfume oils for close-to-skin wear, gifting and personal fragrance rituals.",keywords:[]},
   {slug:"oud-perfume-oils",name:"Oud Perfume Oils",title:"Oud Perfume Oils & Oud Attar",description:"Explore woody oud perfume oils and oud attar styles from Rehmat Panjab, with verified notes, sizes and current INR prices.",intro:"Deep woods, rose, amber and spice shape these oud-led perfume oils.",keywords:["oud","wood"]},

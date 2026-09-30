@@ -16,7 +16,9 @@ test("catalogue exposes prominent Men, Women and Unisex edits",async()=>{
   assert.match(catalogue,/aria-pressed=\{filters\.suitability===value\}/);
   assert.match(catalogue,/updateFilter\("suitability",value\)/);
   assert.match(storefront,/hasAudienceEdits/);
-  assert.match(storefront,/editorial\.suitability/);
+  assert.match(storefront,/audienceEditBySlug\[row\.slug\]/);
+  assert.match(collections,/"white-oud":"men"/);
+  assert.match(collections,/"oud-rose":"women"/);
   assert.match(styles,/\.audience-collection-grid/);
   assert.match(styles,/\.catalogue-audience-options button/);
   assert.match(styles,/min-height:48px/);

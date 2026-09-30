@@ -4,6 +4,7 @@ import { products as editorialProducts } from "./products";
 import type { CatalogStatus, StorefrontProduct } from "./catalog";
 import { createSupabaseAdminClient } from "./supabase/admin";
 import { mediaForSlug } from "./product-media-manifest";
+import {audienceEditBySlug} from "./search-collections";
 import {cache} from "react";
 
 type CatalogRow = {
@@ -187,8 +188,9 @@ async function loadStorefrontProducts(): Promise<StorefrontProduct[]> {
   const catalogue=rows.map(row=>{
     const product=mapRow(row);
     if(hasAudienceEdits)return product;
+    const audience=audienceEditBySlug[row.slug];
     const editorial=editorialProducts.find(item=>item.slug===row.slug);
-    return editorial?{...product,suitability:editorial.suitability,suitabilityNote:editorial.suitabilityNote??product.suitabilityNote}:product;
+    return audience?{...product,suitability:audience,suitabilityNote:editorial?.suitabilityNote??product.suitabilityNote}:product;
   });
   const admin=createSupabaseAdminClient(); if(!admin)return catalogue;
   const now=new Date().toISOString(); const {data:discounts}=await admin.from("automatic_discounts").select("*,discount_products(product_id),discount_variants(variant_id)").eq("active",true).is("archived_at",null).or(`starts_at.is.null,starts_at.lte.${now}`).or(`ends_at.is.null,ends_at.gt.${now}`).order("priority",{ascending:false});
