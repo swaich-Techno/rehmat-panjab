@@ -5,7 +5,7 @@ import {readFile} from "node:fs/promises";
 const read=(path)=>readFile(new URL(`../${path}`,import.meta.url),"utf8");
 
 test("catalogue exposes prominent Men, Women and Unisex edits",async()=>{
-  const [page,catalogue,collections,styles]=await Promise.all([read("app/collection/page.tsx"),read("app/collection/collection-catalogue.tsx"),read("lib/search-collections.ts"),read("app/globals.css")]);
+  const [page,catalogue,collections,styles,storefront]=await Promise.all([read("app/collection/page.tsx"),read("app/collection/collection-catalogue.tsx"),read("lib/search-collections.ts"),read("app/globals.css"),read("lib/storefront.ts")]);
   for(const slug of ["mens-perfume-oils","womens-perfume-oils","unisex-perfume-oils"]){
     assert.match(page,new RegExp(slug));
     assert.match(collections,new RegExp(slug));
@@ -15,6 +15,8 @@ test("catalogue exposes prominent Men, Women and Unisex edits",async()=>{
   assert.match(catalogue,/All fragrances/);
   assert.match(catalogue,/aria-pressed=\{filters\.suitability===value\}/);
   assert.match(catalogue,/updateFilter\("suitability",value\)/);
+  assert.match(storefront,/hasAudienceEdits/);
+  assert.match(storefront,/editorial\.suitability/);
   assert.match(styles,/\.audience-collection-grid/);
   assert.match(styles,/\.catalogue-audience-options button/);
   assert.match(styles,/min-height:48px/);

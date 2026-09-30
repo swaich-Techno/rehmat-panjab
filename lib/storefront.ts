@@ -182,7 +182,14 @@ async function loadStorefrontProducts(): Promise<StorefrontProduct[]> {
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");
-  const catalogue=((data ?? []) as unknown as CatalogRow[]).map(mapRow);
+  const rows=(data ?? []) as unknown as CatalogRow[];
+  const hasAudienceEdits=rows.some(row=>row.suitability==="men"||row.suitability==="women");
+  const catalogue=rows.map(row=>{
+    const product=mapRow(row);
+    if(hasAudienceEdits)return product;
+    const editorial=editorialProducts.find(item=>item.slug===row.slug);
+    return editorial?{...product,suitability:editorial.suitability,suitabilityNote:editorial.suitabilityNote??product.suitabilityNote}:product;
+  });
   const admin=createSupabaseAdminClient(); if(!admin)return catalogue;
   const now=new Date().toISOString(); const {data:discounts}=await admin.from("automatic_discounts").select("*,discount_products(product_id),discount_variants(variant_id)").eq("active",true).is("archived_at",null).or(`starts_at.is.null,starts_at.lte.${now}`).or(`ends_at.is.null,ends_at.gt.${now}`).order("priority",{ascending:false});
   return catalogue.map(product=>({...product,variants:product.variants.map(variant=>{
