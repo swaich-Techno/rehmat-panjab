@@ -17,6 +17,6 @@ test("daily edit is India-time deterministic and festival windows are exactly te
   assert.match(daily, /firstPrice/);
   assert.match(daily, /profile\.terms\.reduce/);
   assert.match(daily, /hash\(`\$\{dateKey\}:\$\{product\.slug\}`\)/);
-  assert.match(page, /<TodaysRehmat products=\{products\}\/>/);
+  assert.match(page, /<TodaysRehmat products=\{products\}\s*\/>/);
   assert.match(form, /Festival campaigns JSON/);
 });

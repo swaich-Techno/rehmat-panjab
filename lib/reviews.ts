@@ -22,6 +22,27 @@ export type ReviewSummary = {
   submissionsEnabled: boolean;
 };
 
+export type HomepageReview = PublicReview & { productId: string };
+
+export async function getHomepageReviews(productIds: string[], limit = 3): Promise<HomepageReview[]> {
+  if (!productIds.length) return [];
+  const client = await createSupabaseServerClient();
+  if (!client) return [];
+  const supabase = client as unknown as SupabaseClient;
+  const { data, error } = await supabase
+    .from("public_product_reviews")
+    .select("id,product_id,display_name,rating,title,body,image_path,verified_purchase,helpful_count,admin_response,created_at")
+    .in("product_id", productIds)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) return [];
+  return (data ?? []).map((review) => ({
+    id: String(review.id), productId: String(review.product_id), displayName: String(review.display_name), rating: Number(review.rating), title: String(review.title), body: String(review.body),
+    imageUrl: review.image_path ? `/api/review-images/${review.id}` : null,
+    verifiedPurchase: Boolean(review.verified_purchase), helpfulCount: Number(review.helpful_count ?? 0), adminResponse: review.admin_response ? String(review.admin_response) : null, createdAt: String(review.created_at),
+  }));
+}
+
 export async function getProductReviewSummary(productId: string, productReviewsEnabled: boolean): Promise<ReviewSummary> {
   const empty: ReviewSummary = { average: 0, total: 0, breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, reviews: [], submissionsEnabled: false };
   const client = await createSupabaseServerClient();

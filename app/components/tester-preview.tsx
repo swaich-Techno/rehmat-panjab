@@ -10,14 +10,15 @@ import { INSPIRATION_DISCLAIMER } from "../../lib/products";
 
 const launchTesters = LAUNCH_TESTER_SLUGS.map((slug) => APPROVED_TESTERS.find((tester) => tester.slug === slug)!).filter(Boolean);
 
-export function TesterPreview(){
+export function TesterPreview({compact=false}:{compact?:boolean}){
   const [copied,setCopied]=useState(false);
   const prices=APPROVED_TESTERS.map(item=>item.pricePaise);
+  const visibleTesters=compact?launchTesters.slice(0,3):launchTesters;
   async function copy(){try{await navigator.clipboard.writeText("NEW");setCopied(true);window.setTimeout(()=>setCopied(false),2000);}catch{setCopied(false);}}
   return <section className="tester-preview" aria-labelledby="tester-preview-heading">
     <div className="tester-preview-copy"><p className="eyebrow light">3 ml discovery</p><h2 id="tester-preview-heading">Discover the 3 ml Tester Collection</h2><p>Explore individual fragrances or build your own set of 2, 3 or 5. Find the scent that feels like you before choosing a larger bottle.</p><div className="tester-preview-actions"><Link className="button button-cream" href="/testers">Build Your Tester Pack</Link><Link className="button tester-secondary-action" href="/testers#individual-testers">Explore Individual Testers</Link></div></div>
     <div className="tester-showcase" aria-label="3 ml tester fragrances">
-      {launchTesters.map((tester)=>{const palette=fragranceNotePaletteFor(tester.slug);return <article className="tester-showcase-card" key={tester.slug} style={{"--tester-light":palette?.light,"--tester-middle":palette?.middle,"--tester-deep":palette?.deep} as CSSProperties}>
+      {visibleTesters.map((tester)=>{const palette=fragranceNotePaletteFor(tester.slug);return <article className="tester-showcase-card" key={tester.slug} style={{"--tester-light":palette?.light,"--tester-middle":palette?.middle,"--tester-deep":palette?.deep} as CSSProperties}>
         <div className="tester-showcase-visual"><span className="tester-showcase-highlight" aria-hidden="true"/><Image src="/images/bottles/rose-gold-bottle-oil-cutout.webp" alt={`${tester.name} 3 ml concentrated perfume oil presentation`} width={1254} height={1254} sizes="(max-width: 600px) 68vw, 220px"/></div>
         <div><h3>{tester.name}</h3>{tester.inspirationLine&&<small>{tester.inspirationLine}</small>}<p>{formatMoney(tester.pricePaise)} · 3 ml</p><span>Available now</span><Link href={`/product/${tester.slug}`}>View tester</Link></div>
       </article>;})}
