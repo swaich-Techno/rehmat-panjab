@@ -39,12 +39,14 @@ export async function POST(request:Request){
       await admin.from("orders").update({status:"payment_failed",updated_at:new Date().toISOString()}).eq("razorpay_order_id",payment.order_id).in("status",["pending","payment_pending"]);
     }else if((event.event==="refund.processed"||event.event==="refund.failed")&&refund?.id&&refund.payment_id){
       const failed=event.event==="refund.failed";
-      const {data:order}=await admin.from("orders").select("id,total_paise,shipping_paise,refunded_paise").eq("razorpay_payment_id",refund.payment_id).maybeSingle();
+      const {data:order}=await admin.from("orders").select("id,user_id,total_paise,shipping_paise,refunded_paise").eq("razorpay_payment_id",refund.payment_id).maybeSingle();
       if(!order)throw new Error("refund_order_not_found");
       await admin.from("razorpay_refunds").update({status:failed?"failed":"processed",provider_refund_id:refund.id,processed_at:new Date().toISOString()}).eq("order_id",order.id).eq("provider_refund_id",refund.id);
       const refunded=Number(order.refunded_paise??0)+(failed?0:Number(refund.amount??0));
       const refundable=Math.max(0,Number(order.total_paise)-Number(order.shipping_paise??0));
-      await admin.from("orders").update({status:failed?"refund_failed":refunded>=refundable?"refunded":"paid",refunded_paise:refunded,razorpay_refund_id:refund.id,updated_at:new Date().toISOString()}).eq("id",order.id);
+      const full=!failed&&refunded>=refundable;
+      await admin.from("orders").update({status:failed?"refund_failed":full?"refunded":"paid",refunded_paise:refunded,razorpay_refund_id:refund.id,updated_at:new Date().toISOString()}).eq("id",order.id);
+      if(!failed&&!full&&order.user_id)await admin.from("reward_adjustment_reviews").upsert({order_id:order.id,user_id:order.user_id,reason:"Partial refund requires reward review",refund_amount_paise:refunded,status:"pending"},{onConflict:"order_id,refund_amount_paise"});
     }
     await admin.from("razorpay_webhook_events").update({status:"completed",processed_at:new Date().toISOString()}).eq("event_id",eventId);
     return NextResponse.json({received:true});

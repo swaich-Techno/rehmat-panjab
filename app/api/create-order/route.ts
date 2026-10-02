@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from "node:crypto";
+import { createHash, randomInt, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { z } from "zod";
@@ -18,6 +18,7 @@ const requestSchema = z.object({
   }).strict()).max(20),
   testerPacks:z.array(z.object({packSize:z.union([z.literal(2),z.literal(3),z.literal(5)]),variantIds:z.array(z.string().uuid()).min(2).max(5),quantity:z.number().int().min(1).max(10)}).strict()).max(10).default([]),
   couponCode: z.string().trim().max(40).optional(),
+  rewardVariantId:z.string().uuid().optional(),
   customerIdentifier:z.string().trim().max(120).optional(),
   deliveryPin:z.string().trim().regex(/^\d{6}$/).optional(),
   deliveryAddress:checkoutAddressSchema,
@@ -47,6 +48,10 @@ export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = createSupabaseAdminClient();
   if (!supabase || !supabaseAdmin) return NextResponse.json({ message: "The catalogue is temporarily unavailable." }, { status: 503 });
+  const forwarded=request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown";
+  const rateKey=`checkout:${createHash("sha256").update(forwarded).digest("hex")}`;
+  const {data:allowed}=await supabaseAdmin.rpc("register_checkout_attempt",{p_bucket_key:rateKey,p_limit:8,p_window_seconds:600});
+  if(allowed===false)return NextResponse.json({message:"Too many checkout attempts. Please wait before trying again."},{status:429});
 
   const quantities = new Map<string, number>();
   for (const line of parsed.data.lines) quantities.set(line.variantId, (quantities.get(line.variantId) ?? 0) + line.quantity);
@@ -92,10 +97,10 @@ export async function POST(request: Request) {
     amount += variant.price_paise * quantity;
   }
 
-  const quote=await calculateOrderQuote(parsed.data.lines,parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin,parsed.data.testerPacks).catch(()=>null);
+  const quote=await calculateOrderQuote(parsed.data.lines,parsed.data.couponCode,parsed.data.customerIdentifier,parsed.data.deliveryPin,parsed.data.testerPacks,{rewardVariantId:parsed.data.rewardVariantId}).catch(()=>null);
   if(!quote) return NextResponse.json({message:"The final total could not be calculated."},{status:409});
   if(quote.shipping.shippingPaise===null||quote.grandTotalPaise===null)return NextResponse.json({message:"Shipping charges apply below ₹1,000 and will be disclosed before payment. Share your order request on WhatsApp for confirmation."},{status:409});
-  const subtotal=amount; amount=quote.grandTotalPaise;
+  const subtotal=quote.subtotalPaise; amount=quote.grandTotalPaise;
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return NextResponse.json({ message: "The payment total must be at least ₹1." }, { status: 400 });
   }
@@ -117,6 +122,10 @@ export async function POST(request: Request) {
       razorpay_order_id: order.id,
       coupon_id: quote.couponId,
       coupon_code: quote.couponCode,
+      promotion_kind:quote.appliedPromotion?.kind??null,
+      promotion_label:quote.appliedPromotion?.label??null,
+      reward_variant_id:quote.reward?.variantId??null,
+      reward_quantity:quote.reward?.quantity??null,
       policy_version:controlled?parsed.data.policyAcceptance.version:publishedPolicy!.version,
       policies_accepted_at:new Date().toISOString(),
       marketing_consent:parsed.data.policyAcceptance.marketingConsent,
@@ -126,12 +135,15 @@ export async function POST(request: Request) {
     }).select("id").single();
     if (orderError || !savedOrder) return NextResponse.json({ message: "The payment order could not be saved." }, { status: 500 });
 
-    const orderItems = parsed.data.lines.map(({variantId, quantity}) => ({
+    const orderItems:Record<string,unknown>[] = [...parsed.data.lines.map(({variantId, quantity}) => ({
       order_id: savedOrder.id,
       variant_id: variantId,
       quantity,
       unit_price_paise: variantById.get(variantId)!.price_paise!,
-    })).concat(parsed.data.testerPacks.flatMap(pack=>{const testerPackGroupId=randomUUID();return pack.variantIds.map(variantId=>({order_id:savedOrder.id,variant_id:variantId,quantity:pack.quantity,unit_price_paise:variantById.get(variantId)!.price_paise!,tester_pack_group_id:testerPackGroupId,tester_pack_size:pack.packSize}));}));
+      list_price_paise:variantById.get(variantId)!.price_paise!,
+      promotion_kind:null,
+    })),...parsed.data.testerPacks.flatMap(pack=>{const testerPackGroupId=randomUUID();return pack.variantIds.map(variantId=>({order_id:savedOrder.id,variant_id:variantId,quantity:pack.quantity,unit_price_paise:variantById.get(variantId)!.price_paise!,list_price_paise:variantById.get(variantId)!.price_paise!,promotion_kind:"tester-pack",tester_pack_group_id:testerPackGroupId,tester_pack_size:pack.packSize}));})];
+    if(quote.reward)orderItems.push({order_id:savedOrder.id,variant_id:quote.reward.variantId,quantity:quote.reward.quantity,unit_price_paise:0,list_price_paise:quote.reward.listPricePaise,promotion_kind:"buy-two-gift"});
     const { error: itemError } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemError) {
       await supabaseAdmin.from("orders").delete().eq("id", savedOrder.id);
@@ -143,6 +155,7 @@ export async function POST(request: Request) {
       amount: Number(order.amount),
       currency: order.currency,
       order_token: createRazorpayOrderToken(order.id, keySecret),
+      quote:{subtotalPaise:quote.subtotalPaise,discountPaise:quote.discountPaise,totalPaise:quote.totalPaise,shippingPaise:quote.shipping.shippingPaise,grandTotalPaise:quote.grandTotalPaise,appliedPromotion:quote.appliedPromotion,reward:quote.reward},
       ...(controlled?{public_key_id:keyId,internal_order_id:savedOrder.id}:{}),
     });
   } catch (error) {

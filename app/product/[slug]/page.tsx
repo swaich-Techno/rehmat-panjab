@@ -7,6 +7,7 @@ import { InteractiveProductMedia } from "../../components/interactive-product-me
 import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
 import { ProductStoryMotion } from "../../components/product-story-motion";
+import { PromotionNotices } from "../../components/promotion-notices";
 import { INSPIRATION_DISCLAIMER, productRedirects, products as editorialProducts } from "../../../lib/products";
 import { availabilityLabel, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
@@ -104,6 +105,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel format-panel">
           <p className="eyebrow">02 · Bottle and order</p>
           <h2>Choose your<br />bottle.</h2>
+          <PromotionNotices compact />
           <ProductPurchase product={product} policiesPublished={Boolean(publishedPolicies)} whatsappSettings={{enabled:experience.whatsappEnabled,number:experience.whatsappNumber,defaultMessage:experience.whatsappDefaultMessage,notice:experience.whatsappNotice}} />
           <TrustStrip items={supportedTrustItems(storeSettings)}/>
         </section>

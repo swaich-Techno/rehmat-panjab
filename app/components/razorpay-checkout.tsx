@@ -41,7 +41,7 @@ async function readResponse(response: Response) {
   return response.json().catch(() => ({ message: "The payment service returned an unreadable response." })) as Promise<Record<string, unknown>>;
 }
 
-export function RazorpayCheckout({ lines, testerPacks=[], policyVersion,address }: { lines: CheckoutLine[]; testerPacks?:TesterPackLine[]; policyVersion: string;address:CheckoutAddress|null }) {
+export function RazorpayCheckout({ lines, testerPacks=[], rewardVariantId, policyVersion,address }: { lines: CheckoutLine[]; testerPacks?:TesterPackLine[]; rewardVariantId?:string; policyVersion: string;address:CheckoutAddress|null }) {
   const { clear } = useCart();
   const [state, setState] = useState<CheckoutState>("idle");
   const [message, setMessage] = useState("Your total will be rechecked securely before the payment window opens.");
@@ -64,7 +64,7 @@ export function RazorpayCheckout({ lines, testerPacks=[], policyVersion,address 
       const orderResponse = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines,testerPacks,deliveryAddress:address,deliveryPin:address?.delivery.pinCode,customerIdentifier:address?.delivery.email,policyAcceptance:{version:policyVersion,acceptedAt:new Date().toISOString(),marketingConsent} }),
+        body: JSON.stringify({ lines,testerPacks,rewardVariantId,deliveryAddress:address,deliveryPin:address?.delivery.pinCode,customerIdentifier:address?.delivery.email,policyAcceptance:{version:policyVersion,acceptedAt:new Date().toISOString(),marketingConsent} }),
       });
       const order = await readResponse(orderResponse);
       if (!orderResponse.ok) throw new Error(typeof order.message === "string" ? order.message : "Checkout could not start.");

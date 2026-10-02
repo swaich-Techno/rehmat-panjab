@@ -1,0 +1,10 @@
+"use client";
+import {useState} from "react";
+
+type Campaign={active:boolean;starts_at:string;ends_at:string;tiers:Array<{minimumPaise:number;maximumPaise:number|null;percent:number}>;max_discount_paise:number};
+export function FestivalOfferForm({initial}:{initial:Campaign}){
+  const [message,setMessage]=useState("");
+  async function save(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const form=new FormData(event.currentTarget);setMessage("Saving…");const response=await fetch("/api/admin/festival-offer",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({active:form.get("active")==="on",startsAt:new Date(String(form.get("startsAt"))).toISOString(),endsAt:new Date(String(form.get("endsAt"))).toISOString(),tierOne:Number(form.get("tierOne"))*100,tierTwo:Number(form.get("tierTwo"))*100,tierThree:Number(form.get("tierThree"))*100,maxDiscountPaise:Number(form.get("cap"))*100})});const data=await response.json();setMessage(data.message);}
+  const local=(value:string)=>new Date(value).toISOString().slice(0,16);
+  return <form className="admin-form" onSubmit={save}><label><input name="active" type="checkbox" defaultChecked={initial.active}/> Campaign enabled</label><label>Starts (IST schedule)<input name="startsAt" type="datetime-local" defaultValue={local(initial.starts_at)} required/></label><label>Ends (IST schedule)<input name="endsAt" type="datetime-local" defaultValue={local(initial.ends_at)} required/></label><label>10% minimum (₹)<input name="tierOne" type="number" min="1" defaultValue={initial.tiers[0].minimumPaise/100} required/></label><label>20% minimum (₹)<input name="tierTwo" type="number" min="1" defaultValue={initial.tiers[1].minimumPaise/100} required/></label><label>30% minimum (₹)<input name="tierThree" type="number" min="1" defaultValue={initial.tiers[2].minimumPaise/100} required/></label><label>Maximum saving (₹)<input name="cap" type="number" min="1" defaultValue={initial.max_discount_paise/100} required/></label><button className="button button-dark">Save festival campaign</button><p className="form-message" aria-live="polite">{message}</p></form>;
+}

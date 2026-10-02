@@ -13,5 +13,7 @@ const cards=[
   ["09","Policies","/admin/policies","Owner-approved merchant, shipping, returns, privacy and terms settings."],
   ["10","Local delivery","/admin/delivery","Approved PIN codes and manual confirmation safeguards."],
   ["11","3 ml testers","/admin/testers","Private tester costs, margin review and launch gates."],
+  ["12","Festival offer","/admin/festival-offer","Navratri and Dussehra dates, tiers and cap."],
+  ["13","Rewards","/admin/rewards","Stamp ledger, hamper configuration and fulfilment."],
 ];
 export default async function AdminPage(){const {role}=await requireAdmin();return <main id="main-content" className="admin-page"><p className="eyebrow">House administration · {role.replace("_"," ")}</p><h1>Rehmat house<br/>operations.</h1><div className="admin-grid">{cards.filter((_,i)=>role==="super_admin"||i<3).map(([n,title,href,copy])=><Link href={href} key={href}><span>{n}</span><h2>{title}</h2><p>{copy}</p></Link>)}</div></main>}

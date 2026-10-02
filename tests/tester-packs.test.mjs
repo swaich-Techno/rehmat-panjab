@@ -53,7 +53,7 @@ test("approved launch migration activates exactly twenty 3 ml variants at owner-
 test("server quote rejects duplicates and revalidates price, eligibility, stock and margin",async()=>{
   const [route,quote,createOrder]=await Promise.all([read("app/api/tester-packs/quote/route.ts"),read("lib/quote.ts"),read("app/api/create-order/route.ts")]);
   for(const pattern of [/new Set\(parsed\.data\.variantIds\)/,/price_paise/,/tester_pack_eligible/,/quantity-inventory\.reserved/,/margin_approved/,/packaging_approved/])assert.match(route,pattern);
-  assert.match(quote,/new Set\(pack\.variantIds\)/);assert.match(quote,/calculateTesterPackPrice/);assert.match(quote,/couponDiscount>discountPaise/);assert.match(quote,/couponId=null;couponCode=null/);
+  assert.match(quote,/new Set\(pack\.variantIds\)/);assert.match(quote,/calculateTesterPackPrice/);assert.match(quote,/chooseBestPromotion\(candidates\)/);assert.match(quote,/couponCode=null;couponId=null/);
   assert.match(createOrder,/testerPacks/);assert.match(createOrder,/tester_pack_group_id/);assert.match(createOrder,/calculateOrderQuote\(parsed\.data\.lines/);
 });
 

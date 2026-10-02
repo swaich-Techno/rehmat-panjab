@@ -13,6 +13,7 @@ import { JsonLd } from "./components/json-ld";
 import { OpenGuideButton } from "./components/open-guide-button";
 import { ProductAddButton } from "./components/product-add-button";
 import { ProductMedia } from "./components/product-media";
+import { PromotionNotices } from "./components/promotion-notices";
 import { TesterPreview } from "./components/tester-preview";
 import { TodaysRehmat } from "./components/todays-rehmat";
 import { TrustStrip } from "./components/trust-strip";
@@ -38,6 +39,7 @@ export default async function Home() {
     <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]} />
 
     <TodaysRehmat products={products} />
+    <PromotionNotices />
 
     <section className="home-paths" aria-labelledby="home-paths-heading">
       <header className="home-paths-heading">
