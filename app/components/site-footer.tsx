@@ -15,6 +15,7 @@ export async function SiteFooter() {
       <div className="footer-links">
         <p className="eyebrow">Explore</p>
         <Link href="/collection">The collection</Link>
+        <Link href="/offers">Current offers</Link>
         <Link href="/find-your-scent">Find your scent</Link>
         <Link href="/create-your-fragrance">Create your Rehmat</Link>
         <Link href="/layer">Layering lab</Link>

@@ -8,6 +8,7 @@ import { useCart } from "./cart-provider";
 
 const nav = [
   ["Fragrances", "/collection"],
+  ["Offers", "/offers"],
   ["Ask Rehmat Guide", "#rehmat-guide"],
   ["Our Story", "/discover"],
 ];

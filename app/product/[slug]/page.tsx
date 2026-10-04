@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -9,7 +10,8 @@ import { ProductReviews } from "../../components/product-reviews";
 import { ProductStoryMotion } from "../../components/product-story-motion";
 import { PromotionNotices } from "../../components/promotion-notices";
 import { INSPIRATION_DISCLAIMER, productRedirects, products as editorialProducts } from "../../../lib/products";
-import { availabilityLabel, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
+import { availabilityLabel, firstPrice, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
+import { formatMoney } from "../../../lib/cart";
 import { COMMERCE_ENABLED } from "../../../lib/commerce";
 import { getProductReviewSummary } from "../../../lib/reviews";
 import { getStorefrontProduct, getStorefrontProducts } from "../../../lib/storefront";
@@ -71,14 +73,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   };
   const breadcrumbSchema={"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Home",item:origin},{"@type":"ListItem",position:2,name:"Collection",item:`${origin}/collection`},{"@type":"ListItem",position:3,name:product.name,item:canonicalUrl}]};
   const categoryLinks=searchCollectionsForProduct(product).slice(0,4);
+  const startingPrice=firstPrice(product);
 
   return (
-    <main id="main-content" className={`product-page scent-page-${product.id}`}>
+    <main id="main-content" className={`product-page product-editorial scent-page-${product.id}`} style={{"--product-accent":product.color} as CSSProperties}>
       <JsonLd data={[breadcrumbSchema,productSchema]}/>
       <ProductStoryMotion />
       <aside className="product-sticky">
+        <div className="product-sticky-kicker"><span>Concentrated perfume oil</span><span>Rehmat {product.number}</span></div>
         <InteractiveProductMedia product={product} priority />
-        <p className="product-sticky-caption"><span>{product.number}</span> Rehmat Panjab · Bottle formats</p>
+        <p className="product-sticky-caption"><span>Pure · Authentic · Timeless</span><Link href="/offers">View house offers ↗</Link></p>
       </aside>
       <div className="product-story">
         <section className="story-panel story-opening">
@@ -89,6 +93,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="product-lede">{product.atmosphere}</p>
           {product.microDescription && <p className="product-micro-description">{product.microDescription}</p>}
           <p className="product-micro-description">Concentrated perfume oil designed for a lasting, close-to-skin fragrance experience. Performance varies by skin, climate and application.</p>
+          <div className="product-opening-commerce"><p><span>Starting at</span><strong>{startingPrice === null ? "Price on request" : formatMoney(startingPrice)}</strong></p><a className="button button-dark" href="#choose-bottle">Choose your bottle</a></div>
           <p className="product-suitability"><span>{suitabilityLabels[product.suitability]}</span>{product.suitabilityNote && <> · {product.suitabilityNote}</>}</p>
           <div className="character-chips">{product.character.map((word) => <span key={word}>{word}</span>)}</div>
         </section>
@@ -102,7 +107,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <details className="product-details"><summary>How to wear it</summary><p>Apply sparingly to pulse points and allow the concentrated perfume oil to settle naturally. Experience varies by skin, climate and application.</p></details>
           {product.campaignImage && <figure className="product-campaign-inline"><div className="editorial-campaign-image"><Image src={product.campaignImage} alt={product.campaignImageAlt ?? `${product.name} scent atmosphere`} fill sizes="(max-width: 700px) 88vw, 32vw" /></div><figcaption>Scent atmosphere</figcaption></figure>}
         </section>
-        <section className="story-panel format-panel">
+        <section id="choose-bottle" className="story-panel format-panel">
           <p className="eyebrow">02 · Bottle and order</p>
           <h2>Choose your<br />bottle.</h2>
           <PromotionNotices compact />
