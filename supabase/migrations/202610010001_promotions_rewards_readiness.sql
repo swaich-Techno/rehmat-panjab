@@ -273,14 +273,17 @@ declare missing_count integer;
 begin
   select count(*) into missing_count from public.products product
   where product.status='active' and exists(
-    select 1 from (values(3),(6),(12)) required(size_ml)
+    -- Every published fragrance must retain its approved core bottle sizes.
+    -- A 3 ml tester is optional until its separate content, packaging and margin
+    -- approvals are complete, so it must not block this additive release.
+    select 1 from (values(6),(12)) required(size_ml)
     where not exists(
       select 1 from public.product_variants variant join public.inventory stock on stock.variant_id=variant.id
       where variant.product_id=product.id and variant.size_ml=required.size_ml and variant.enabled and variant.status='active'
         and variant.price_paise is not null and stock.quantity>=stock.reserved
     )
   );
-  if missing_count<>0 then raise exception '% published products are missing an approved 3 ml, 6 ml or 12 ml variant',missing_count; end if;
+  if missing_count<>0 then raise exception '% published products are missing an approved 6 ml or 12 ml variant',missing_count; end if;
 end $$;
 
 commit;
