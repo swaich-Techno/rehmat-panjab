@@ -138,12 +138,13 @@ function mapRow(row: CatalogRow): StorefrontProduct {
   const journey = journeyValue && typeof journeyValue === "object" && !Array.isArray(journeyValue)
     ? journeyValue as { opening: string; heart: string; drydown: string }
     : editorial?.journey ?? null;
+  const displayName = publicProductName(row.slug, row.name);
 
   return {
     id: editorial?.id ?? row.slug,
     databaseId: row.id,
     number: row.product_number,
-    name: publicProductName(row.slug, row.name),
+    name: displayName,
     slug: row.slug,
     subtitle: row.subtitle,
     atmosphere: row.card_line || row.short_description || row.description || editorial?.atmosphere || "",
@@ -164,14 +165,14 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     character,
     color: editorial?.color ?? "#c7b58f",
     image: primary ? publicImage(primary.storage_path, "/images/products/product-image-pending.svg") : media?.card ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
-    imageAlt: `${row.name} perfume oil by Rehmat Panjab`,
+    imageAlt: `${displayName} perfume oil by Rehmat Panjab`,
     imageKind: genuine ? "product" : primary?.is_generated || media ? "campaign" : row.image_path?.includes("product-image-pending") ? "placeholder" : "product",
     heroImage: genuine ? publicImage(genuine.storage_path, "/images/products/product-image-pending.svg") : hero ? publicImage(hero.storage_path, "/images/products/product-image-pending.svg") : media?.hero ?? publicImage(row.image_path, editorial?.image ?? "/images/products/product-image-pending.svg"),
     moodImage: mood ? publicImage(mood.storage_path, "/images/products/product-image-pending.svg") : media?.mood ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/images/products/product-image-pending.svg"),
     socialImage: social ? publicImage(social.storage_path, "/og.png") : media?.social ?? publicImage(row.campaign_image_path, editorial?.campaignImage ?? "/og.png"),
     imagePending: !media && row.image_path === "/images/products/product-image-pending.svg",
     campaignImage: mood ? publicImage(mood.storage_path, "") : media?.mood ?? (row.campaign_image_path && row.campaign_image_path !== row.image_path ? publicImage(row.campaign_image_path, "") : editorial?.campaignImage ?? null),
-    campaignImageAlt: `${row.name} scent atmosphere`,
+    campaignImageAlt: `${displayName} scent atmosphere`,
     status: row.status,
     featured: row.featured,
     createdAt: row.created_at,

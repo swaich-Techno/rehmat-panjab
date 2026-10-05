@@ -19,6 +19,7 @@ test("public catalogue restores reference names without changing stable slugs", 
     assert.match(migration, new RegExp(`'${slug}','${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}'`));
   }
   assert.match(storefront, /publicProductName\(row\.slug, row\.name\)/);
+  assert.match(storefront, /imageAlt: `\$\{displayName\} perfume oil by Rehmat Panjab`/);
   assert.match(storefront, /inspirationLine: undefined/);
   assert.doesNotMatch(migration, /update public\.product_variants|update public\.inventory/);
 });
