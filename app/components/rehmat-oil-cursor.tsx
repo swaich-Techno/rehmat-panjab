@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 const IGNORED_TARGETS = "input, textarea, select, option, form, p, li, dd, dt, [contenteditable='true'], [data-selectable], .razorpay-checkout, [data-native-cursor]";
-const INTERACTIVE_TARGETS = "a, button, [role='button'], .v41-product-card, .product-card";
+const INTERACTIVE_TARGETS = "a, button, [role='button'], [data-cursor-lens], .v41-product-card, .product-card, .catalogue-card";
 
 function createOilRipple(x: number, y: number, onControl: boolean, onDone: (effect: HTMLElement, timer: number) => void) {
   const effect = document.createElement("span");
@@ -48,7 +48,7 @@ export function RehmatOilCursor() {
       const targetAngle = distance > 0.35 ? Math.atan2(dy, dx) * (180 / Math.PI) + 90 : 0;
       cursorPoint.angle += (targetAngle - cursorPoint.angle) * 0.24;
 
-      el.style.transform = "translate3d(" + (cursorPoint.px - 11) + "px," + (cursorPoint.py - 15) + "px,0)";
+      el.style.transform = "translate3d(" + (cursorPoint.px - 7) + "px," + (cursorPoint.py - 7) + "px,0)";
       el.style.setProperty("--oil-rotate", cursorPoint.angle + "deg");
       el.style.setProperty("--oil-stretch", String(stretch));
       el.style.setProperty("--oil-width", String(2 - stretch));
@@ -166,18 +166,9 @@ export function RehmatOilCursor() {
   return (
     <div ref={cursorRef} className="rehmat-oil-cursor" data-state="DEFAULT" aria-hidden="true">
       <span className="oil-cursor-body">
-        <svg viewBox="0 0 22 30" focusable="false">
-          <defs>
-            <linearGradient id="rehmat-oil-gradient" x1="4" y1="3" x2="18" y2="28" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="#ffe39a" />
-              <stop offset="0.38" stopColor="#d99528" />
-              <stop offset="1" stopColor="#794014" />
-            </linearGradient>
-          </defs>
-          <path className="oil-cursor-drop" d="M11.7 1C10.8 5.7 7.1 9.2 4.7 13.5C1.8 18.8 4.2 26.5 11 28.2C17.4 29.8 21.1 24.8 20.6 19.4C20.1 13.9 14.3 9.7 11.7 1Z" />
-          <ellipse className="oil-cursor-highlight" cx="8.2" cy="16" rx="1.4" ry="4.2" />
-        </svg>
+        <i className="oil-cursor-highlight" />
       </span>
+      <span className="oil-cursor-orbit" />
     </div>
   );
 }

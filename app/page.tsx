@@ -9,6 +9,7 @@ import { getHomepageReviews } from "../lib/reviews";
 import { pageMetadata } from "../lib/seo";
 import { getSiteUrl } from "../lib/site-url";
 import { merchant } from "../lib/merchant";
+import { homepageAnswers } from "../lib/answer-engine";
 import { JsonLd } from "./components/json-ld";
 import { OpenGuideButton } from "./components/open-guide-button";
 import { ProductAddButton } from "./components/product-add-button";
@@ -36,7 +37,12 @@ export default async function Home() {
   const origin = getSiteUrl();
 
   return <main id="main-content" className="home-v41">
-    <JsonLd data={[{"@context":"https://schema.org","@type":"Organization",name:merchant.name,url:origin,logo:`${origin}/icon.png`,image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},{"@context":"https://schema.org","@type":"WebSite",name:"Rehmat Panjab",url:origin,inLanguage:"en-IN"}]} />
+    <JsonLd data={[
+      {"@context":"https://schema.org","@type":"Organization","@id":`${origin}/#organization`,name:merchant.name,url:origin,logo:`${origin}/images/brand/rehmat-panjab-crest.webp`},
+      {"@context":"https://schema.org","@type":"OnlineStore","@id":`${origin}/#organization`,name:merchant.name,alternateName:"Rehmat",description:"A Punjab-based perfume-oil house offering concentrated fragrances, testers and guided scent discovery.",url:origin,logo:{"@type":"ImageObject",url:`${origin}/images/brand/rehmat-panjab-crest.webp`,contentUrl:`${origin}/images/brand/rehmat-panjab-crest.webp`,width:640,height:640},image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},
+      {"@context":"https://schema.org","@type":"WebSite","@id":`${origin}/#website`,name:"Rehmat Panjab",alternateName:"Rehmat",url:origin,inLanguage:"en-IN",publisher:{"@id":`${origin}/#organization`}},
+      {"@context":"https://schema.org","@type":"FAQPage",mainEntity:homepageAnswers.map(item=>({"@type":"Question",name:item.question,acceptedAnswer:{"@type":"Answer",text:item.answer}}))},
+    ]} />
 
     <TodaysRehmat products={products} />
     <PromotionNotices />
@@ -76,6 +82,11 @@ export default async function Home() {
         <li><span>02</span><h3>Made personal</h3><p>Notes unfold differently across people, climate and occasion—part of the pleasure of perfume oil.</p></li>
         <li><span>03</span><h3>Easy to discover</h3><p>Begin with 3 ml, learn what you return to, then choose a larger bottle with confidence.</p></li>
       </ol>
+    </section>
+
+    <section className="home-answer-led" aria-labelledby="home-answer-led-heading">
+      <header><p className="eyebrow">Clear fragrance guidance</p><h2 id="home-answer-led-heading">Answers before<br/><em>the first drop.</em></h2><p>Concise guidance grounded in the Rehmat collection, product facts and published policies.</p></header>
+      <div>{homepageAnswers.map((item,index)=><article key={item.question}><span>0{index+1}</span><h3>{item.question}</h3><p>{item.answer}</p><Link className="text-link" href={item.href}>{item.label} <i aria-hidden="true">↗</i></Link></article>)}</div>
     </section>
 
     <section className="guide-intro home-ai" aria-labelledby="personal-heading">

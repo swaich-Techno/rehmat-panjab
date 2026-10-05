@@ -680,16 +680,17 @@ a:hover .product-media img { transform: scale(1.018); }
 .v41-path-grid b { position: absolute; right: 28px; bottom: 30px; font-weight: 400; transition: transform 220ms var(--ease-liquid); }
 .v41-path-grid > a:hover b { transform: translate(4px,-4px); }
 
-.rehmat-oil-cursor { --oil-rotate: 0deg; --oil-stretch: 1; --oil-width: 1; --oil-compress: 1; --oil-scale: 1; --oil-highlight-x: 0px; --oil-highlight-y: 0px; position: fixed; z-index: 9999; top: 0; left: 0; display: none; width: 22px; height: 30px; pointer-events: none; opacity: 0; contain: layout style paint; will-change: transform; transition: opacity 100ms ease; }
+.rehmat-oil-cursor { --oil-rotate: 0deg; --oil-stretch: 1; --oil-width: 1; --oil-compress: 1; --oil-scale: 1; --oil-highlight-x: 0px; --oil-highlight-y: 0px; position: fixed; z-index: 9999; top: 0; left: 0; display: none; width: 14px; height: 14px; pointer-events: none; opacity: 0; contain: layout style paint; will-change: transform; transition: opacity 100ms ease; }
 .rehmat-oil-cursor.is-active { opacity: 1; }
 .rehmat-oil-cursor.is-hidden { opacity: 0; }
-.oil-cursor-body { display: block; width: 22px; height: 30px; opacity: 1; transform: rotate(var(--oil-rotate)) scaleX(var(--oil-width)) scaleY(calc(var(--oil-stretch) * var(--oil-compress))) scale(var(--oil-scale)); transform-origin: 50% 66%; transition: transform 70ms ease-out, opacity 180ms ease; }
-.oil-cursor-body svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 2px rgba(14,24,17,.52)) drop-shadow(0 0 5px rgba(217,149,40,.46)) drop-shadow(0 0 1px rgba(255,244,211,.9)); }
-.oil-cursor-drop { fill: url(#rehmat-oil-gradient); fill-opacity: .88; stroke: rgba(48,28,12,.72); stroke-width: .72; transition: opacity 140ms ease; }
-.oil-cursor-highlight { fill: rgba(255,250,220,.82); transform: translate(var(--oil-highlight-x),var(--oil-highlight-y)); transition: transform 80ms ease-out, opacity 140ms ease; }
-.rehmat-oil-cursor[data-state="INTERACTIVE"] { --oil-scale: 1.08; }
-.rehmat-oil-cursor.is-pressed { --oil-compress: .76; --oil-width: 1.13; }
-.rehmat-oil-cursor.is-rebounding { --oil-stretch: 1.08; }
+.oil-cursor-body { position: absolute; z-index: 2; inset: 0; display: block; border: 1px solid rgba(255,232,173,.72); border-radius: 50%; background: radial-gradient(circle at 31% 27%,#fff6d5 0 8%,#e4aa43 25%,#a45b1f 66%,#3f2110 100%); box-shadow: inset -2px -2px 4px rgba(43,20,8,.38), inset 2px 2px 4px rgba(255,245,211,.3), 0 2px 5px rgba(13,26,20,.38), 0 0 7px rgba(203,133,41,.24); transform: rotate(var(--oil-rotate)) scaleX(var(--oil-width)) scaleY(calc(var(--oil-stretch) * var(--oil-compress))) scale(var(--oil-scale)); transform-origin: 50% 50%; transition: transform 70ms ease-out, box-shadow 180ms ease; }
+.oil-cursor-highlight { position: absolute; top: 2px; left: 3px; width: 4px; height: 3px; border-radius: 50%; background: rgba(255,251,228,.86); filter: blur(.2px); transform: translate(var(--oil-highlight-x),var(--oil-highlight-y)); transition: transform 80ms ease-out; }
+.oil-cursor-orbit { position: absolute; z-index: 1; top: 50%; left: 50%; width: 34px; height: 34px; border: 1px solid rgba(180,112,35,.66); border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,228,166,.08), inset 0 0 8px rgba(216,147,53,.12); opacity: .26; transform: translate(-50%,-50%) scale(.52); transition: opacity 190ms ease, transform 260ms var(--ease-liquid), border-color 190ms ease; }
+.rehmat-oil-cursor[data-state="INTERACTIVE"] { --oil-scale: .84; }
+.rehmat-oil-cursor[data-state="INTERACTIVE"] .oil-cursor-orbit { border-color: rgba(226,175,92,.84); opacity: .9; transform: translate(-50%,-50%) scale(1); }
+.rehmat-oil-cursor.is-pressed { --oil-compress: .68; --oil-width: 1.18; }
+.rehmat-oil-cursor.is-pressed .oil-cursor-orbit { opacity: .48; transform: translate(-50%,-50%) scale(.78); }
+.rehmat-oil-cursor.is-rebounding { --oil-stretch: 1.06; }
 @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .rehmat-oil-cursor { display: block; }
   .has-rehmat-cursor body, .has-rehmat-cursor a, .has-rehmat-cursor button { cursor: none; }
@@ -928,35 +929,21 @@ a:hover .product-media img { transform: scale(1.018); }
 .fragrance-note-hint { position:absolute; z-index:4; top:12px; right:12px; display:inline-flex; min-height:28px; align-items:center; border:1px solid rgba(255,255,255,.44); border-radius:999px; padding:5px 9px; background:rgba(11,26,20,.67); box-shadow:0 5px 20px rgba(8,22,17,.16); color:#fff8e8; font-size:.5rem; font-weight:650; letter-spacing:.12em; text-transform:uppercase; backdrop-filter:blur(8px); transition:opacity 180ms ease; }
 .fragrance-note-reveal.is-active .fragrance-note-hint { opacity:0; }
 .fragrance-note-stage { position:absolute; z-index:5; inset:0; overflow:hidden; pointer-events:none; }
-.fragrance-bottle-cap { position:absolute; z-index:6; bottom:33%; left:50%; width:19%; height:8%; border:1px solid color-mix(in srgb,var(--note-light),transparent 30%); border-radius:50%; background:linear-gradient(90deg,var(--note-deep),var(--note-light),var(--note-middle),var(--note-deep)); box-shadow:0 8px 20px rgba(0,0,0,.36); opacity:0; transform:translate3d(-50%,0,0); animation:fragrance-cap-lift 2.9s var(--ease-liquid) both; }
-.fragrance-liquid-bloom { position:absolute; z-index:0; inset:7%; border-radius:50%; background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--note-light),transparent 58%) 0 11%,transparent 25%),repeating-conic-gradient(from 8deg at 50% 49%,transparent 0 5deg,color-mix(in srgb,var(--note-middle),transparent 38%) 6deg 7deg,transparent 8deg 16deg),radial-gradient(circle at 50% 49%,color-mix(in srgb,var(--note-light),transparent 18%) 0 16%,color-mix(in srgb,var(--note-middle),transparent 36%) 30%,color-mix(in srgb,var(--note-deep),transparent 48%) 48%,transparent 69%); filter:drop-shadow(0 0 16px color-mix(in srgb,var(--note-middle),transparent 22%)); opacity:0; transform:scale(.42) rotate(-8deg); animation:fragrance-liquid-bloom 720ms cubic-bezier(.18,.76,.2,1) 150ms both; -webkit-mask-image:radial-gradient(circle at 50% 48%,transparent 0 17%,#000 31% 100%); mask-image:radial-gradient(circle at 50% 48%,transparent 0 17%,#000 31% 100%); }
-.fragrance-liquid-bloom::before,.fragrance-liquid-bloom::after { position:absolute; border-radius:50%; content:""; }
-.fragrance-liquid-bloom::before { inset:2%; border:2px solid color-mix(in srgb,var(--note-light),transparent 38%); box-shadow:0 -66px 0 -60px var(--note-light),62px -31px 0 -59px var(--note-middle),70px 37px 0 -60px var(--note-light),-69px 39px 0 -58px var(--note-middle),-62px -33px 0 -60px var(--note-light); }
-.fragrance-liquid-bloom::after { inset:20%; border:1px solid color-mix(in srgb,var(--note-light),transparent 52%); box-shadow:0 0 34px var(--note-middle); }
-.fragrance-particles,.fragrance-particles i { position:absolute; inset:0; }
-.fragrance-particles { z-index:1; }
-.fragrance-particles i { width:4px; height:4px; margin:auto; border-radius:50%; background:var(--note-light); box-shadow:0 0 7px var(--note-middle); opacity:0; animation:fragrance-particle-settle 1.35s var(--ease-liquid) 360ms both; }
-.fragrance-particles i:nth-child(1){--particle-x:-115px;--particle-y:-88px}.fragrance-particles i:nth-child(2){--particle-x:108px;--particle-y:-74px}.fragrance-particles i:nth-child(3){--particle-x:-92px;--particle-y:8px}.fragrance-particles i:nth-child(4){--particle-x:104px;--particle-y:22px}.fragrance-particles i:nth-child(5){--particle-x:-86px;--particle-y:92px}.fragrance-particles i:nth-child(6){--particle-x:93px;--particle-y:103px}.fragrance-particles i:nth-child(7){--particle-x:-42px;--particle-y:-118px}.fragrance-particles i:nth-child(8){--particle-x:46px;--particle-y:-108px}.fragrance-particles i:nth-child(9){--particle-x:18px;--particle-y:112px}
-.fragrance-note-map { position:absolute; z-index:4; top:8px; right:8px; display:grid; width:min(44%,170px); gap:5px; opacity:0; animation:fragrance-note-map-in 360ms ease-out 1400ms both; }
-.fragrance-note-map>span { min-width:0; border:1px solid rgba(255,255,255,.3); padding:6px; background:rgba(7,20,16,.82); box-shadow:0 5px 20px rgba(8,22,17,.14); color:#fff8e8; opacity:0; transform:translate3d(12px,0,0); animation:fragrance-note-tier-in 420ms var(--ease-liquid) 560ms both; backdrop-filter:blur(8px); }
-.fragrance-note-map>span:nth-child(2){animation-delay:940ms}.fragrance-note-map>span:nth-child(3){animation-delay:1320ms}
-.fragrance-note-map b,.fragrance-note-map small { display:block; }
-.fragrance-note-map b { margin-bottom:3px; color:var(--note-light); font-size:.42rem; letter-spacing:.14em; text-transform:uppercase; }
-.fragrance-note-map small { overflow-wrap:anywhere; font-size:.48rem; line-height:1.25; }
-.fragrance-ingredients { position:absolute; z-index:2; inset:0; }
-.fragrance-ingredient { position:absolute; left:50%; bottom:var(--ingredient-bottom); display:block; width:var(--ingredient-size); aspect-ratio:1; opacity:0; outline:0; pointer-events:auto; transform:translate3d(calc(-50% + var(--ingredient-drift)),150%,0) scale(.62); transform-origin:50% 80%; animation:fragrance-ingredient-rise 760ms cubic-bezier(.18,.72,.2,1) var(--ingredient-delay) both; will-change:transform,opacity; }
-.fragrance-ingredient img { display:block; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 5px rgba(24,11,6,.28)); -webkit-user-drag:none; }
-.fragrance-ingredient-name { position:absolute; z-index:5; top:50%; left:calc(100% + 9px); width:max-content; max-width:132px; border-left:1px solid rgba(255,230,177,.62); padding:4px 7px; background:rgba(7,20,16,.82); color:#fff8e8; font-size:.48rem; font-style:normal; letter-spacing:.07em; line-height:1.2; opacity:.78; pointer-events:none; text-transform:uppercase; transform:translate3d(4px,-50%,0); transition:opacity 180ms ease,transform 180ms ease; white-space:normal; }
-.fragrance-ingredient-name b { display:block; margin-bottom:2px; color:var(--note-light); font-size:.4rem; }
-.fragrance-ingredient:hover .fragrance-ingredient-name,.fragrance-ingredient:focus-visible .fragrance-ingredient-name { opacity:1; transform:translate3d(-50%,0,0); }
-.fragrance-ingredient:focus-visible img { filter:drop-shadow(0 0 5px var(--note-light)) drop-shadow(0 6px 5px rgba(24,11,6,.28)); }
+.fragrance-stage-seal { position:absolute; z-index:1; top:7%; left:50%; width:clamp(48px,18%,92px); height:auto; border-radius:50%; opacity:0; mix-blend-mode:screen; transform:translate3d(-50%,-8px,0) scale(.92); animation:fragrance-seal-in 420ms ease-out 180ms both; }
+.fragrance-triptych-rail { position:absolute; z-index:4; right:8px; bottom:8px; left:8px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
+.fragrance-tier-panel { display:grid; min-width:0; align-content:end; border:1px solid rgba(255,238,202,.24); padding:7px; background:linear-gradient(155deg,rgba(18,31,25,.9),rgba(43,19,19,.78)); box-shadow:0 8px 24px rgba(5,13,10,.22); color:#fff8e8; opacity:0; transform:translate3d(0,16px,0); animation:fragrance-triptych-in 520ms var(--ease-liquid) calc(220ms + var(--tier-sequence) * 240ms) both; backdrop-filter:blur(8px); }
+.fragrance-tier-panel[data-note-tier="base"] { border-color:color-mix(in srgb,var(--note-deep),#fff 24%); }
+.fragrance-tier-panel[data-note-tier="heart"] { border-color:color-mix(in srgb,var(--note-middle),#fff 20%); }
+.fragrance-tier-panel[data-note-tier="top"] { border-color:color-mix(in srgb,var(--note-light),transparent 36%); }
+.fragrance-tier-visuals { display:flex; min-height:34px; align-items:flex-end; justify-content:center; margin-bottom:4px; }
+.fragrance-tier-visuals img { width:clamp(24px,32%,42px); height:auto; margin:0 -3px; object-fit:contain; filter:drop-shadow(0 5px 5px rgba(10,5,3,.3)); }
+.fragrance-tier-panel b,.fragrance-tier-panel small { display:block; min-width:0; }
+.fragrance-tier-panel b { color:var(--note-light); font-size:.43rem; font-style:normal; letter-spacing:.14em; text-transform:uppercase; }
+.fragrance-tier-panel b i { display:block; margin-top:2px; color:rgba(255,248,232,.64); font-size:.36rem; font-weight:400; letter-spacing:.08em; }
+.fragrance-tier-panel small { margin-top:4px; overflow-wrap:anywhere; font-size:.47rem; line-height:1.3; }
 @keyframes fragrance-bottle-glow { 0%{opacity:0;transform:scale(.82)} 38%{opacity:.75;transform:scale(1.08)} 100%{opacity:.08;transform:scale(1)} }
-@keyframes fragrance-cap-lift { 0%,8%{opacity:0;transform:translate3d(-50%,0,0) rotate(0)} 18%{opacity:.9;transform:translate3d(-50%,-56px,0) rotate(-7deg)} 76%{opacity:.9;transform:translate3d(-50%,-56px,0) rotate(5deg)} 100%{opacity:0;transform:translate3d(-50%,0,0) rotate(0)} }
-@keyframes fragrance-liquid-bloom { 0%{opacity:0;transform:scale(.42) rotate(-8deg)} 62%{opacity:.86;transform:scale(1.08) rotate(2deg)} 100%{opacity:.44;transform:scale(1) rotate(0)} }
-@keyframes fragrance-ingredient-rise { 0%{opacity:0;transform:translate3d(calc(-50% + var(--ingredient-drift)),150%,0) scale(.62)} 24%{opacity:1} 72%{opacity:1;transform:translate3d(calc(-50% - var(--ingredient-drift)),-8%,0) scale(1.04)} 100%{opacity:1;transform:translate3d(-50%,0,0) scale(1)} }
-@keyframes fragrance-particle-settle { 0%{opacity:0;transform:translate3d(0,0,0) scale(.4)} 24%{opacity:.78} 72%{opacity:.45;transform:translate3d(var(--particle-x),var(--particle-y),0) scale(1)} 100%{opacity:0;transform:translate3d(var(--particle-x),var(--particle-y),0) scale(.5)} }
-@keyframes fragrance-note-map-in { from{opacity:0;transform:translate3d(0,-5px,0)} to{opacity:1;transform:translate3d(0,0,0)} }
-@keyframes fragrance-note-tier-in { from{opacity:0;transform:translate3d(12px,0,0)} to{opacity:1;transform:translate3d(0,0,0)} }
+@keyframes fragrance-seal-in { to{opacity:.13;transform:translate3d(-50%,0,0) scale(1)} }
+@keyframes fragrance-triptych-in { to{opacity:1;transform:translate3d(0,0,0)} }
 .catalogue-card-copy { display:flex; flex:1; flex-direction:column; gap:14px; padding:18px; }
 .todays-rehmat { padding:clamp(58px,8vw,110px) clamp(18px,5vw,76px); background:#efe9dc; color:var(--forest-deep); }
 .todays-rehmat-heading { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(250px,.7fr); gap:clamp(24px,7vw,110px); align-items:end; max-width:1460px; margin:0 auto 36px; }
@@ -1529,3 +1516,77 @@ a:hover .product-media img { transform: scale(1.018); }
   .offers-fine-print>div:not(.button-row) { grid-template-columns:1fr;gap:8px; }
 }
 @media(prefers-reduced-motion:reduce){.offers-bottle,.offers-ingredient,.offers-orbit{animation:none!important}}
+
+/* Answer-led discovery: visible answers and matching structured data. */
+.home-answer-led { display:grid; grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr); gap:clamp(42px,8vw,130px); padding:clamp(76px,10vw,150px) clamp(20px,7vw,110px); color:#f7eddd; background:radial-gradient(circle at 14% 14%,rgba(126,44,55,.55),transparent 31%),linear-gradient(145deg,#241316,#0f241c 70%,#13271f); }
+.home-answer-led>header { position:sticky; top:90px; align-self:start; }
+.home-answer-led>header h2 { margin:8px 0 24px; font-size:clamp(3.6rem,6.5vw,7.2rem); }
+.home-answer-led>header>p:last-child { max-width:48ch; color:rgba(247,237,221,.68); }
+.home-answer-led>div { border-top:1px solid rgba(247,237,221,.22); }
+.home-answer-led article { display:grid; grid-template-columns:42px minmax(180px,.72fr) minmax(240px,1fr); gap:20px; align-items:start; border-bottom:1px solid rgba(247,237,221,.22); padding:26px 0; }
+.home-answer-led article>span { color:var(--brass); font-size:.58rem; letter-spacing:.16em; }
+.home-answer-led article h3 { margin:0; font-size:clamp(1.5rem,2.3vw,2.5rem); line-height:1; }
+.home-answer-led article p { margin:0; color:rgba(247,237,221,.72); line-height:1.65; }
+.home-answer-led article .text-link { grid-column:3; width:max-content; border-color:rgba(247,237,221,.45); color:#f7eddd; }
+
+/* Olfactory Triptych: one legible layer at a time; base, heart, then top. */
+.olfactory-triptych { --triptych-light:#fff5d8; --triptych-middle:#d2a45d; --triptych-deep:#6f2f24; margin-top:36px; border:1px solid rgba(55,35,27,.16); padding:clamp(18px,3vw,32px); color:#fff8ec; background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--triptych-middle),transparent 78%),transparent 32%),linear-gradient(145deg,#1d1515,#13241d 66%,#2b1619); box-shadow:0 25px 60px rgba(52,31,23,.12); }
+.olfactory-triptych-heading { position:relative; z-index:2; display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:24px; }
+.olfactory-triptych-heading .eyebrow { color:var(--triptych-light); }
+.olfactory-triptych-heading h3 { margin:6px 0 0; font-size:clamp(2.2rem,4vw,4.1rem); line-height:.9; }
+.olfactory-triptych-heading button { min-height:42px; border:1px solid rgba(255,248,236,.38); padding:0 15px; background:rgba(255,255,255,.04); color:#fff8ec; font-size:.55rem; letter-spacing:.13em; text-transform:uppercase; cursor:pointer; }
+.olfactory-triptych-heading button[aria-pressed="true"] { border-color:var(--triptych-light); color:#1c1613; background:var(--triptych-light); }
+.olfactory-triptych-stage { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid rgba(255,248,236,.2); }
+.olfactory-triptych-seal { position:absolute; z-index:0; top:50%; left:50%; width:min(38%,220px); height:auto; border-radius:50%; opacity:.08; transform:translate(-50%,-50%); }
+.olfactory-tier { position:relative; z-index:1; display:grid; min-height:310px; align-content:end; border:0; border-right:1px solid rgba(255,248,236,.2); padding:22px 18px; overflow:hidden; background:transparent; color:inherit; text-align:left; cursor:pointer; opacity:.42; transform:translate3d(0,12px,0); animation:olfactory-tier-in 520ms var(--ease-liquid) calc(90ms + var(--triptych-sequence) * 150ms) both; transition:opacity 240ms ease,background 240ms ease,transform 240ms var(--ease-liquid); }
+.olfactory-tier:last-child { border-right:0; }
+.olfactory-tier:hover,.olfactory-tier:focus-visible,.olfactory-tier[aria-pressed="true"] { z-index:2; background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--triptych-deep),transparent 62%)); opacity:1; transform:translate3d(0,-4px,0); }
+.olfactory-tier:focus-visible { outline:2px solid var(--triptych-light); outline-offset:-3px; }
+.olfactory-tier-number,.olfactory-tier-chapter { font-size:.5rem; letter-spacing:.14em; text-transform:uppercase; }
+.olfactory-tier-number { position:absolute; top:18px; left:18px; color:var(--triptych-light); }
+.olfactory-tier-chapter { margin-bottom:6px; color:rgba(255,248,236,.62); }
+.olfactory-tier>strong { font-family:var(--font-display); font-size:clamp(1.55rem,2.4vw,2.5rem); font-weight:400; }
+.olfactory-tier-visuals { display:flex; min-height:98px; align-items:flex-end; justify-content:center; margin:20px 0 12px; }
+.olfactory-tier-visuals img { width:min(48%,108px); height:auto; margin:0 -10px; object-fit:contain; filter:drop-shadow(0 10px 12px rgba(0,0,0,.34)); }
+.olfactory-tier-notes { color:var(--triptych-light); font-size:.62rem; font-weight:650; letter-spacing:.09em; line-height:1.5; text-transform:uppercase; }
+.olfactory-tier small { margin-top:9px; color:rgba(255,248,236,.68); font-size:.67rem; line-height:1.55; }
+@keyframes olfactory-tier-in { to{opacity:.42;transform:translate3d(0,0,0)} }
+
+.today-reveal-wrap .fragrance-triptych-rail { right:-2%; bottom:4%; left:-2%; gap:8px; }
+.today-reveal-wrap .fragrance-tier-panel { min-height:108px; padding:10px; }
+.today-reveal-wrap .fragrance-tier-visuals { min-height:50px; }
+.today-reveal-wrap .fragrance-tier-visuals img { width:clamp(34px,30%,58px); }
+
+@media(max-width:980px){
+  .home-answer-led { grid-template-columns:1fr; }
+  .home-answer-led>header { position:relative; top:auto; }
+  .olfactory-tier { min-height:280px; }
+}
+@media(max-width:700px){
+  .fragrance-triptych-rail { right:6px; bottom:6px; left:6px; gap:3px; }
+  .fragrance-tier-panel { padding:5px; }
+  .fragrance-tier-visuals { min-height:28px; }
+  .fragrance-tier-visuals img { width:34%; }
+  .fragrance-tier-panel b i { display:none; }
+  .fragrance-tier-panel small { font-size:.4rem; }
+  .home-answer-led { gap:34px; padding:70px 18px; }
+  .home-answer-led article { grid-template-columns:30px 1fr; gap:10px 12px; padding:22px 0; }
+  .home-answer-led article p,.home-answer-led article .text-link { grid-column:2; }
+  .olfactory-triptych { margin-top:28px; padding:16px; }
+  .olfactory-triptych-heading { align-items:flex-start; flex-direction:column; }
+  .olfactory-triptych-stage { grid-template-columns:1fr; }
+  .olfactory-triptych-seal { width:180px; }
+  .olfactory-tier { min-height:188px; border-right:0; border-bottom:1px solid rgba(255,248,236,.2); padding:20px 16px; }
+  .olfactory-tier:last-child { border-bottom:0; }
+  .olfactory-tier-visuals { position:absolute; top:24px; right:10px; width:42%; min-height:80px; margin:0; opacity:.8; }
+  .olfactory-tier>strong,.olfactory-tier-notes,.olfactory-tier small { max-width:58%; }
+  .today-reveal-wrap .fragrance-triptych-rail { right:2%; bottom:8%; left:2%; gap:3px; }
+  .today-reveal-wrap .fragrance-tier-panel { min-height:76px; padding:5px; }
+  .today-reveal-wrap .fragrance-tier-visuals { min-height:30px; }
+}
+@media(prefers-reduced-motion:reduce){
+  .fragrance-stage-seal,.fragrance-tier-panel,.olfactory-tier { animation:none!important; transition:none!important; }
+  .fragrance-stage-seal { opacity:.13; transform:translate3d(-50%,0,0) scale(1); }
+  .fragrance-tier-panel { opacity:1; transform:none; }
+  .olfactory-tier { transform:none; }
+}

@@ -5,6 +5,7 @@ import type { CatalogStatus, StorefrontProduct } from "./catalog";
 import { createSupabaseAdminClient } from "./supabase/admin";
 import { mediaForSlug } from "./product-media-manifest";
 import {audienceEditBySlug} from "./search-collections";
+import { approvedNotesForSlug } from "./approved-fragrance-notes";
 import {cache} from "react";
 
 type CatalogRow = {
@@ -61,8 +62,8 @@ function fallbackCatalogue(): StorefrontProduct[] {
     suitability: product.suitability,
     suitabilityNote: product.suitabilityNote ?? null,
     positioning: product.positioning ?? null,
-    notes: product.notes ?? null,
-    notesVerified: true,
+    notes: approvedNotesForSlug(product.slug) ?? product.notes ?? null,
+    notesVerified: Boolean(approvedNotesForSlug(product.slug) ?? product.notes),
     journey: product.journey ?? null,
     reviewsEnabled: true,
     scentFamily: null,
@@ -127,7 +128,10 @@ function mapRow(row: CatalogRow): StorefrontProduct {
   }).filter((variant) => variant.enabled && variant.bottle).sort((a, b) => a.sizeMl - b.sizeMl);
   const noteGroups = row.notes;
   const asStrings = (value: unknown) => Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
-  const notes = noteGroups ? { top: asStrings(noteGroups.top), heart: asStrings(noteGroups.heart), base: asStrings(noteGroups.base) } : editorial?.notes ?? null;
+  const databaseNotes = noteGroups ? { top: asStrings(noteGroups.top), heart: asStrings(noteGroups.heart), base: asStrings(noteGroups.base) } : null;
+  const databaseNotesComplete = Boolean(databaseNotes?.top.length && databaseNotes.heart.length && databaseNotes.base.length);
+  const approvedFallbackNotes = approvedNotesForSlug(row.slug);
+  const notes = row.notes_verified === true && databaseNotesComplete ? databaseNotes : approvedFallbackNotes ?? editorial?.notes ?? null;
   const journeyValue = row.scent_profile?.journey;
   const journey = journeyValue && typeof journeyValue === "object" && !Array.isArray(journeyValue)
     ? journeyValue as { opening: string; heart: string; drydown: string }
@@ -151,7 +155,7 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     suitabilityNote: row.suitability_note ?? editorial?.suitabilityNote ?? null,
     positioning: row.positioning ?? editorial?.positioning ?? null,
     notes,
-    notesVerified: row.notes_verified === true,
+    notesVerified: row.notes_verified === true || Boolean(approvedFallbackNotes),
     journey,
     reviewsEnabled: row.reviews_enabled,
     scentFamily: row.scent_family,
@@ -179,7 +183,7 @@ async function loadStorefrontProducts(): Promise<StorefrontProduct[]> {
   if (!supabase) return fallbackCatalogue();
   const { data, error } = await supabase
     .from("products")
-    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_media(role,storage_path,alt_text,is_generated,sort_order),product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold),bottles(id,name,public_label,short_description,photo_path,thumbnail_path,alt_text,applicator_type,status,display_order))")
+    .select("id,product_number,name,slug,subtitle,description,short_description,micro_description,card_line,inspiration_line,search_aliases,scent_family,status,scent_profile,notes,notes_verified,occasions,suitability,suitability_note,positioning,reviews_enabled,image_path,campaign_image_path,image_alt_text,featured,created_at,product_media(role,storage_path,alt_text,is_generated,sort_order),product_variants(id,size_ml,sku,price_paise,enabled,inventory(quantity,reserved,low_stock_threshold),bottles(id,name,public_label,short_description,photo_path,thumbnail_path,alt_text,applicator_type,status,display_order))")
     .in("status", ["coming_soon", "active", "sold_out"])
     .order("product_number");
   if (error) throw new Error("The public catalogue could not be loaded.");

@@ -107,38 +107,18 @@ export function FragranceNoteReveal({ product, priority = false, active, replay,
     </button>
     {active && palette && canReveal && <div key={`${product.slug}-${replay}`} id={stageId} className="fragrance-note-stage" role="status" aria-live="polite" aria-atomic="true">
       <span className="sr-only">{product.name} fragrance ingredients: {noteSummary}</span>
-      <span className="fragrance-liquid-bloom" aria-hidden="true" />
-      <span className="fragrance-bottle-cap" aria-hidden="true" />
-      <span className="fragrance-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</span>
-      <span className="fragrance-note-map" aria-hidden="true">
-        {[...noteGroups].reverse().map((group) => <span key={group.label}>
-          <b>{group.label}</b>
-          <small>{group.notes.join(" · ")}</small>
-        </span>)}
-      </span>
-      {visuals.length > 0 && <span className="fragrance-ingredients" aria-hidden="true">
-        {visuals.map((visual, visualIndex) => {
-          const tierOffset = visual.tier === "base" ? 0 : visual.tier === "heart" ? 560 : 1120;
-          const x = visual.count === 1 ? 50 : 28 + (44 * visual.index / (visual.count - 1));
-          const dropStyle = {
-            "--ingredient-bottom": visual.tier === "base" ? "36%" : visual.tier === "heart" ? "55%" : "74%",
-            "--ingredient-size": visual.tier === "base" ? "68px" : visual.tier === "heart" ? "62px" : "58px",
-            "--ingredient-delay": `${480 + tierOffset + visual.index * 105}ms`,
-            "--ingredient-x": `${x}%`,
-            "--ingredient-drift": `${visualIndex % 2 ? 12 : -12}px`,
-          } as CSSProperties;
-          return <i
-            className="fragrance-ingredient"
-            data-ingredient-key={visual.key}
-            data-note-tier={visual.tier}
-            key={`${visual.tier}-${visual.note}`}
-            style={dropStyle}
-          >
-            <Image src={visual.asset} alt="" width={512} height={512} draggable={false} />
-            <span className="fragrance-ingredient-name"><b>{visual.tier}</b>{visual.note}</span>
-          </i>;
+      <Image className="fragrance-stage-seal" src="/images/brand/rehmat-panjab-crest.webp" alt="" width={640} height={640} aria-hidden="true" />
+      <span className="fragrance-triptych-rail" aria-hidden="true">
+        {[...noteGroups].reverse().map((group, groupIndex) => {
+          const tier = group.label.toLowerCase() as "top" | "heart" | "base";
+          const groupVisuals = visuals.filter((visual) => visual.tier === tier);
+          return <span className="fragrance-tier-panel" data-note-tier={tier} key={group.label} style={{ "--tier-sequence": groupIndex } as CSSProperties}>
+            <span className="fragrance-tier-visuals">{groupVisuals.slice(0, 3).map((visual) => <Image key={`${tier}-${visual.note}`} src={visual.asset} alt="" width={512} height={512} draggable={false} />)}</span>
+            <b>{group.label}<i>{tier === "base" ? "What remains" : tier === "heart" ? "The character" : "First light"}</i></b>
+            <small>{group.notes.join(" · ")}</small>
+          </span>;
         })}
-      </span>}
+      </span>
     </div>}
   </div>;
 }

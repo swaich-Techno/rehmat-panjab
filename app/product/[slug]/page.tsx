@@ -9,6 +9,7 @@ import { ProductPurchase } from "../../components/product-purchase";
 import { ProductReviews } from "../../components/product-reviews";
 import { ProductStoryMotion } from "../../components/product-story-motion";
 import { PromotionNotices } from "../../components/promotion-notices";
+import { OlfactoryTriptych } from "../../components/olfactory-triptych";
 import { INSPIRATION_DISCLAIMER, productRedirects, products as editorialProducts } from "../../../lib/products";
 import { availabilityLabel, firstPrice, isPurchasable, suitabilityLabels } from "../../../lib/catalog";
 import { formatMoney } from "../../../lib/cart";
@@ -67,7 +68,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     variesBy:"https://schema.org/size",
     brand:{"@type":"Brand",name:"Rehmat Panjab"},
     audience: { "@type": "PeopleAudience", suggestedGender: suitabilityLabels[product.suitability] },
+    category: `${product.scentFamily?.trim() || "Concentrated"} perfume oil`,
     image: [product.socialImage.startsWith("http") ? product.socialImage : `${origin}${product.socialImage}`],
+    additionalProperty: product.notes ? [
+      { "@type": "PropertyValue", name: "Top notes", value: product.notes.top.join(", ") },
+      { "@type": "PropertyValue", name: "Heart notes", value: product.notes.heart.join(", ") },
+      { "@type": "PropertyValue", name: "Base notes", value: product.notes.base.join(", ") },
+      { "@type": "PropertyValue", name: "Mood", value: product.character.join(", ") },
+      { "@type": "PropertyValue", name: "Best for", value: product.suitableFor.join(", ") },
+    ] : undefined,
     hasVariant:offerVariants.map(variant=>({"@type":"Product",name:`${product.name} ${variant.sizeMl} ml`,sku:variant.sku,size:`${variant.sizeMl} ml`,image:product.socialImage.startsWith("http")?product.socialImage:`${origin}${product.socialImage}`,isVariantOf:{"@id":`${canonicalUrl}#product-group`},offers:{"@type":"Offer",url:canonicalUrl,priceCurrency:variant.currency,price:((variant.pricePaise??0)/100).toFixed(2),availability:variant.availableQuantity>0?"https://schema.org/InStock":"https://schema.org/OutOfStock",itemCondition:"https://schema.org/NewCondition",seller:{"@type":"Organization",name:"Rehmat Panjab",url:origin}}})),
     ...(reviews.total ? { aggregateRating: { "@type": "AggregateRating", ratingValue: reviews.average.toFixed(1), reviewCount: reviews.total } } : {}),
   };
@@ -100,7 +109,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="story-panel product-description-panel">
           <p className="eyebrow">01 · Notes and journey</p>
           <h2>How it<br />unfolds.</h2>
-          {product.notes && <div className="note-groups" aria-label="Fragrance notes"><div><h3>Top</h3><p>{product.notes.top.join(" · ")}</p></div><div><h3>Heart</h3><p>{product.notes.heart.join(" · ")}</p></div><div><h3>Base</h3><p>{product.notes.base.join(" · ")}</p></div></div>}
+          <OlfactoryTriptych product={product} />
           {product.journey && <div className="scent-journey" aria-label="Scent journey"><p><strong>Opening</strong>{product.journey.opening}</p><p><strong>Heart</strong>{product.journey.heart}</p><p><strong>Drydown</strong>{product.journey.drydown}</p></div>}
           <div className="suitable-for"><h3>Suitable for</h3><ul>{product.suitableFor.map((use) => <li key={use}>{use}</li>)}</ul></div>
           <details className="product-details"><summary>Full fragrance portrait</summary><div className="long-description">{product.description.split(/\n\s*\n/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>{product.positioning && <p className="product-positioning"><strong>Positioning</strong> {product.positioning}</p>}</details>
