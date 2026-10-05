@@ -59,10 +59,10 @@ test("daily selection uses IST, weekday profiles, stock and exact ten-day festiv
   assert.doesNotMatch(calendar, /predict|calculate.*lunar/i);
 });
 
-test("Guide variety and Moon Paris correction are release scoped", async () => {
+test("Guide variety and public reference-name correction are release scoped", async () => {
   const [guide, route, tester, migration] = await Promise.all([
     read("lib/rehmat-guide.ts"), read("app/api/rehmat-guide/route.ts"), read("lib/tester-packs.ts"),
-    read("supabase/migrations/202609260003_cinematic_homepage_moon_paris.sql"),
+    read("supabase/migrations/202610040001_restore_reference_product_names.sql"),
   ]);
   assert.match(guide, /recentContext/);
   assert.match(guide, /hasExplicitPreference/);
@@ -70,8 +70,8 @@ test("Guide variety and Moon Paris correction are release scoped", async () => {
   assert.match(guide, /materials_craft/);
   assert.match(guide, /application_storage/);
   assert.match(route, /recentContext/);
-  assert.match(tester, /Moon Paris–Inspired Perfume Oil/);
-  assert.doesNotMatch(tester, /Mon Paris/);
-  assert.match(migration, /where slug = 'mahnoor'/);
-  assert.match(migration, /array_replace\(search_aliases, 'Mon Paris', 'Moon Paris'\)/);
+  assert.match(tester, /name: "Moon Paris"/);
+  assert.doesNotMatch(tester, /Inspired Perfume Oil/);
+  assert.match(migration, /\('mahnoor','Moon Paris'/);
+  assert.match(migration, /inspiration_line = null/);
 });

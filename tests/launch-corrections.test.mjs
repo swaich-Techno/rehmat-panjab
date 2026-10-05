@@ -25,10 +25,10 @@ test("local delivery requires an exact approved PIN and verified activation",()=
   assert.equal(calculateShipping(10000,"141401",{...config,autoLocalDeliveryEnabled:false}).requiresManualConfirmation,true);
 });
 
-test("GULNAAR preserves internal identity and exposes only secondary inspiration",()=>{
+test("Zara Candy preserves stable internal identity and URL",()=>{
   const gulnaar=products.find(product=>product.slug==="gulnaar");
-  assert.ok(gulnaar);assert.equal(gulnaar.id,"zara-candy");assert.equal(gulnaar.name,"GULNAAR");
-  assert.equal(gulnaar.inspirationLine,"Inspired by Zara Candy");assert.deepEqual(gulnaar.enabledSizes,[6,12]);
+  assert.ok(gulnaar);assert.equal(gulnaar.id,"zara-candy");assert.equal(gulnaar.name,"Zara Candy");
+  assert.equal(gulnaar.inspirationLine,undefined);assert.deepEqual(gulnaar.enabledSizes,[6,12]);
   assert.equal(productRedirects["zara-candy"],"gulnaar");
 });
 

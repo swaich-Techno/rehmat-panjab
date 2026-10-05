@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Afsoon is fully represented without fabricated stock or photography", async () => {
+test("Vampire Blood is fully represented without fabricated stock or photography", async () => {
   const [products, migration, editorialMigration, media, storefront, productPage] = await Promise.all([
     read("lib/products.ts"),
     read("supabase/migrations/202609080001_afsoon_suitability_images.sql"),
@@ -13,12 +13,13 @@ test("Afsoon is fully represented without fabricated stock or photography", asyn
     read("lib/storefront.ts"),
     read("app/product/[slug]/page.tsx"),
   ]);
-  for (const value of ["AFSOON","Inspired by Vampire Blood","49900","89900","Dark Cherry","Velvet Musk","Slightly sensual-sweet leaning"]) assert.match(products, new RegExp(value));
+  for (const value of ["Vampire Blood","49900","89900","Dark Cherry","Velvet Musk","Slightly sensual-sweet leaning"]) assert.match(products, new RegExp(value));
+  assert.doesNotMatch(products, /Inspired by Vampire Blood/);
   assert.match(migration, /where p\.slug='afsoon'[\s\S]*on conflict\(variant_id\) do nothing/);
   assert.match(migration, /select v\.id,0,0,2/);
   assert.doesNotMatch(migration, /on conflict\(variant_id\).*do update/s);
   assert.doesNotMatch(media, /Genuine product image pending/);
-  assert.match(products, /AFSOON fragrance house oil-drop illustration/);
+  assert.match(products, /Vampire Blood fragrance house oil-drop illustration/);
   assert.match(editorialMigration, /afsoon-editorial-campaign\.webp/);
   assert.match(storefront, /image: primary \? publicImage\(primary\.storage_path/);
   assert.match(productPage, /Scent atmosphere/);

@@ -47,7 +47,8 @@ test("approved launch migration activates exactly twenty 3 ml variants at owner-
   assert.match(migration,/Expected exactly 20 live 3 ml variants/);
   assert.match(migration,/RP-AV-03','RP-VO-03','RP-PO-03','RP-GD-03','RP-DC-03/);
   assert.doesNotMatch(migration,/size_ml\s+in\s*\(6,\s*12\)/i);
-  assert.match(source,/Inspired by Zara Candy/);
+  assert.match(source,/name: "Zara Candy"/);
+  assert.doesNotMatch(source,/Inspired Perfume Oil|inspirationLine:/i);
 });
 
 test("server quote rejects duplicates and revalidates price, eligibility, stock and margin",async()=>{

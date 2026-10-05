@@ -6,6 +6,7 @@ import { createSupabaseAdminClient } from "./supabase/admin";
 import { mediaForSlug } from "./product-media-manifest";
 import {audienceEditBySlug} from "./search-collections";
 import { approvedNotesForSlug } from "./approved-fragrance-notes";
+import { publicProductName } from "./public-product-names";
 import {cache} from "react";
 
 type CatalogRow = {
@@ -52,11 +53,12 @@ function fallbackCatalogue(): StorefrontProduct[] {
     const media = mediaForSlug(product.slug);
     return ({
     ...product,
+    name: publicProductName(product.slug, product.name),
     databaseId: null,
     description: product.description,
     microDescription: product.microDescription ?? product.atmosphere,
     summary: product.summary ?? product.atmosphere,
-    inspirationLine: product.inspirationLine,
+    inspirationLine: undefined,
     searchAliases: product.searchAliases ?? [],
     suitableFor: product.suitableFor,
     suitability: product.suitability,
@@ -141,14 +143,14 @@ function mapRow(row: CatalogRow): StorefrontProduct {
     id: editorial?.id ?? row.slug,
     databaseId: row.id,
     number: row.product_number,
-    name: row.name,
+    name: publicProductName(row.slug, row.name),
     slug: row.slug,
     subtitle: row.subtitle,
     atmosphere: row.card_line || row.short_description || row.description || editorial?.atmosphere || "",
     microDescription: row.micro_description || editorial?.microDescription || row.short_description || "",
     summary: row.short_description || editorial?.summary || row.description || "",
     description: row.description || row.short_description || editorial?.atmosphere || "",
-    inspirationLine: row.inspiration_line || editorial?.inspirationLine,
+    inspirationLine: undefined,
     searchAliases: Array.isArray(row.search_aliases) ? row.search_aliases : editorial?.searchAliases ?? [],
     suitableFor: Array.isArray(row.occasions) ? row.occasions : editorial?.suitableFor ?? [],
     suitability: row.suitability ?? editorial?.suitability ?? "unisex",

@@ -26,12 +26,12 @@ export const PRODUCT_MEDIA_MANIFEST = {
   "vanilla-musk": bottle("vanilla-musk", "Vanilla Musk"),
   "white-oud": bottle("white-oud", "White Oud"),
   "oud-rose": bottle("oud-rose", "Oud Rose"),
-  junoon: bottle("junoon", "JUNOON"),
+  junoon: bottle("junoon", "Oud Maracuja"),
   "red-musk": bottle("red-musk", "Red Musk"),
-  nazakat: bottle("nazakat", "NAZAKAT"),
-  gulnaar: {...bottle("gulnaar", "GULNAAR"),mood:"/images/bottles/rose-gold-bottle-oil-cutout.webp"},
+  nazakat: bottle("nazakat", "Delina"),
+  gulnaar: {...bottle("gulnaar", "Zara Candy"),mood:"/images/bottles/rose-gold-bottle-oil-cutout.webp"},
   "deer-musk": bottle("deer-musk", "Deer Musk"),
-  afsoon: bottle("afsoon", "AFSOON"),
+  afsoon: bottle("afsoon", "Vampire Blood"),
 } as const;
 
 export type ProductMediaSlug = keyof typeof PRODUCT_MEDIA_MANIFEST;

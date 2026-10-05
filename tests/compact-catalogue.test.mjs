@@ -20,7 +20,7 @@ test("card interaction exposes one accessible ingredient visual from each struct
 test("public product presentation removes internal artwork labels",async()=>{
   const [media,product,storefront,manifest]=await Promise.all([read("app/components/product-media.tsx"),read("app/product/[slug]/page.tsx"),read("lib/storefront.ts"),read("lib/product-media-manifest.ts")]);
   assert.doesNotMatch(`${media}${product}${storefront}${manifest}`,/Campaign Artwork|Campaign image|Illustration|Artwork 0[1-9]|Artwork 10/i);
-  assert.match(manifest,/JUNOON/);assert.match(manifest,/NAZAKAT/);assert.match(manifest,/perfume oil by Rehmat Panjab/);
+  assert.match(manifest,/Oud Maracuja/);assert.match(manifest,/Delina/);assert.match(manifest,/perfume oil by Rehmat Panjab/);
 });
 
 test("guide exposes availability and receives stable product context",async()=>{
