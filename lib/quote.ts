@@ -1,7 +1,7 @@
 import { createSupabaseAdminClient } from "./supabase/admin";
 import { calculateShipping, type ShippingDecision } from "./shipping";
 import { calculateTesterPackPrice, isTesterPackSize, type TesterPackSize } from "./tester-packs";
-import { buyTwoGiftSaving, chooseBestPromotion, festivalSaving } from "./promotions.mjs";
+import { buyTwoGiftSaving, chooseBestPromotion, festivalSaving, percentageSaving } from "./promotions.mjs";
 
 export type QuoteLine = { variantId: string; quantity: number };
 export type TesterPackQuoteLine = { packSize: TesterPackSize; variantIds: string[]; quantity: number };
@@ -14,7 +14,7 @@ export type OrderQuote = {
 };
 
 export function discountAmount(type:string,value:number,eligible:number,max:number|null){
-  const raw=type==="percentage"?Math.floor(eligible*Math.min(100,value)/100):value;
+  const raw=type==="percentage"?percentageSaving(eligible,value,max):value;
   return Math.max(0,Math.min(eligible,max===null?raw:Math.min(raw,max)));
 }
 

@@ -1,10 +1,20 @@
 import {
   BUY_TWO_GIFT_LABEL,
+  DIWALI_CAMPAIGN_ID,
+  DIWALI_DISCOUNT_PERCENT,
+  DIWALI_END_ISO,
+  DIWALI_PUBLIC_LABEL,
+  DIWALI_START_ISO,
   FESTIVAL_END_ISO,
   FESTIVAL_PUBLIC_LABEL,
   FESTIVAL_START_ISO,
+  SAMPLE_CAMPAIGN_ID,
+  SAMPLE_PRICE_PAISE,
+  SAMPLE_PUBLIC_LABEL,
+  SAMPLE_TOTAL_STOCK,
   WELCOME_CODE,
   WELCOME_PUBLIC_LABEL,
+  campaignPhase,
 } from "./promotions.mjs";
 
 export type PublicOffer = {
@@ -18,6 +28,9 @@ export type PublicOffer = {
   code?: string;
   startsAt?: string;
   endsAt?: string;
+  windowStartLabel?: string;
+  windowEndLabel?: string;
+  shareClaim?: boolean;
   tone: "champagne" | "rose" | "sapphire";
 };
 
@@ -67,17 +80,46 @@ export const publicOffers: PublicOffer[] = [
     endsAt: FESTIVAL_END_ISO,
     tone: "sapphire",
   },
+  {
+    id: DIWALI_CAMPAIGN_ID,
+    eyebrow: "Diwali · 1–10 November",
+    title: `${DIWALI_DISCOUNT_PERCENT}% off for Diwali`,
+    description: DIWALI_PUBLIC_LABEL,
+    terms: [
+      "Eligible live fragrance bottles and tester packs are included; shipping is excluded.",
+      "No coupon is needed and there is no maximum discount cap.",
+      "Offers do not stack; the server applies the single highest-value eligible saving.",
+    ],
+    href: "/collection",
+    action: "Shop 60% off",
+    startsAt: DIWALI_START_ISO,
+    endsAt: DIWALI_END_ISO,
+    windowStartLabel: "1 November 2026, 12:00 AM IST",
+    windowEndLabel: "10 November 2026, 11:59 PM IST",
+    tone: "sapphire",
+  },
+  {
+    id: SAMPLE_CAMPAIGN_ID,
+    eyebrow: "Limited to 99 verified claims",
+    title: "Share Rehmat. Try 3 ml for ₹99.",
+    description: SAMPLE_PUBLIC_LABEL,
+    terms: [
+      `One eligible in-stock 3 ml tester for ₹${SAMPLE_PRICE_PAISE / 100}; shipping is extra.`,
+      "One verified claim per customer. Support confirms the share or WhatsApp enquiry and payment manually.",
+      `Sharing or sending an enquiry does not reserve stock; the campaign closes after ${SAMPLE_TOTAL_STOCK} confirmed claims or 10 November, whichever comes first.`,
+    ],
+    href: "/contact",
+    action: "Share & claim",
+    startsAt: DIWALI_START_ISO,
+    endsAt: DIWALI_END_ISO,
+    windowStartLabel: "1 November 2026, 12:00 AM IST",
+    windowEndLabel: "10 November 2026, 11:59 PM IST",
+    shareClaim: true,
+    tone: "rose",
+  },
 ];
 
 export function offerPhase(offer: PublicOffer, now = new Date()): "live" | "upcoming" | "ended" {
-  if (offer.startsAt && now < new Date(offer.startsAt)) return "upcoming";
-  if (offer.endsAt && now > new Date(offer.endsAt)) return "ended";
-  return "live";
+  if (!offer.startsAt || !offer.endsAt) return "live";
+  return campaignPhase(offer.startsAt, offer.endsAt, now);
 }
-
-export const diwaliCalendarPreview = {
-  title: "Diwali gifting edit",
-  festivalDate: "8 November 2026",
-  revealDate: "29 October 2026",
-  description: "A luminous fragrance and gifting edit will appear ten days before Diwali. No discount or coupon is promised until the house publishes approved terms.",
-};

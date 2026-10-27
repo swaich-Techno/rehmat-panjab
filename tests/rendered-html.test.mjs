@@ -23,7 +23,7 @@ test("server-renders the Rehmat homepage", async () => {
 });
 
 test("server-renders the core public routes", async () => {
-  for (const path of ["/collection", "/find-your-scent", "/create-your-fragrance", "/next-drop", "/layer", "/discover", "/product/musk-rizali"]) {
+  for (const path of ["/collection", "/offers", "/find-your-scent", "/create-your-fragrance", "/next-drop", "/layer", "/discover", "/product/musk-rizali"]) {
     const response = await render(path);
     assert.equal(response.status, 200, `${path} should render`);
   }

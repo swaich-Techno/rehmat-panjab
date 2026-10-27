@@ -18,6 +18,8 @@ import { PromotionNotices } from "./components/promotion-notices";
 import { TesterPreview } from "./components/tester-preview";
 import { TodaysRehmat } from "./components/todays-rehmat";
 import { TrustStrip } from "./components/trust-strip";
+import { DiwaliPopup } from "./components/diwali-campaign";
+import { UpcomingFragrances } from "./components/upcoming-fragrances";
 
 export const revalidate = 3600;
 
@@ -37,6 +39,7 @@ export default async function Home() {
   const origin = getSiteUrl();
 
   return <main id="main-content" className="home-v41">
+    <DiwaliPopup whatsappNumber={merchant.whatsapp} />
     <JsonLd data={[
       {"@context":"https://schema.org","@type":"Organization","@id":`${origin}/#organization`,name:merchant.name,url:origin,logo:`${origin}/images/brand/rehmat-panjab-crest.webp`},
       {"@context":"https://schema.org","@type":"OnlineStore","@id":`${origin}/#organization`,name:merchant.name,alternateName:"Rehmat",description:"A Punjab-based perfume-oil house offering concentrated fragrances, testers and guided scent discovery.",url:origin,logo:{"@type":"ImageObject",url:`${origin}/images/brand/rehmat-panjab-crest.webp`,contentUrl:`${origin}/images/brand/rehmat-panjab-crest.webp`,width:640,height:640},image:`${origin}/og.png`,email:merchant.email,telephone:merchant.phoneE164,address:{"@type":"PostalAddress",streetAddress:"Village Bagli Khurd",addressLocality:"Samrala",addressRegion:"Punjab",postalCode:"141412",addressCountry:"IN"},areaServed:{"@type":"Country",name:"India"},contactPoint:{"@type":"ContactPoint",contactType:"customer support",telephone:merchant.phoneE164,email:merchant.email,availableLanguage:["English","Punjabi","Hindi"]}},
@@ -45,7 +48,8 @@ export default async function Home() {
     ]} />
 
     <TodaysRehmat products={products} />
-    <PromotionNotices />
+    <PromotionNotices whatsappNumber={merchant.whatsapp} />
+    <UpcomingFragrances />
 
     <section className="home-paths" aria-labelledby="home-paths-heading">
       <header className="home-paths-heading">

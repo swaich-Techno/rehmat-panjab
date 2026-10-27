@@ -1517,6 +1517,77 @@ a:hover .product-media img { transform: scale(1.018); }
 }
 @media(prefers-reduced-motion:reduce){.offers-bottle,.offers-ingredient,.offers-orbit{animation:none!important}}
 
+/* Diwali 2026 campaign */
+.promotion-notices.is-diwali{grid-template-columns:repeat(2,minmax(0,1fr))}
+.promotion-notices.is-compact.is-diwali{grid-template-columns:1fr}
+.promotion-notice{display:flex;align-items:center;flex-direction:column;justify-content:center;text-align:center}
+.promotion-notice p{margin-inline:auto}
+.promotion-notice .text-link{width:max-content;margin-top:12px}
+.promotion-notice-diwali{background:radial-gradient(circle at 50% 0,rgba(192,139,80,.18),transparent 45%),#faf1e4}
+.promotion-notice-sample{background:radial-gradient(circle at 50% 0,rgba(130,42,48,.12),transparent 45%),#f8e9e5}
+.promotion-share-claim,.offer-share-claim{border:0;border-bottom:1px solid currentColor;padding:0;background:transparent;color:inherit;font:inherit;font-size:.62rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.share-claim-status{display:block;max-width:42ch;margin-top:8px;font-size:.62rem;line-height:1.45}
+
+.diwali-popup-shell{position:fixed;z-index:120;inset:0;display:grid;place-items:center;padding:20px;background:rgba(17,25,21,.72);backdrop-filter:blur(8px)}
+.diwali-popup{position:relative;display:grid;width:min(680px,100%);max-height:calc(100svh - 40px);place-items:center;padding:clamp(34px,6vw,68px);overflow:auto;color:#fff7e9;text-align:center;background:radial-gradient(circle at 18% 0,rgba(216,158,86,.38),transparent 34%),radial-gradient(circle at 88% 85%,rgba(121,36,47,.44),transparent 36%),linear-gradient(145deg,#172d26,#23171a 70%,#421c25);box-shadow:0 32px 100px rgba(8,12,10,.48);animation:diwali-popup-arrive .52s cubic-bezier(.22,.8,.24,1) both}
+.diwali-popup::before{position:absolute;inset:14px;border:1px solid rgba(255,244,224,.25);content:"";pointer-events:none}
+.diwali-popup .eyebrow{color:#d8ad70}
+.diwali-popup h2{max-width:10ch;margin:8px auto 18px;font-size:clamp(3.5rem,8vw,6.8rem);line-height:.84}
+.diwali-popup>p:not(.eyebrow){max-width:54ch;margin:0;color:rgba(255,247,233,.75)}
+.diwali-popup-close{position:absolute;z-index:2;top:18px;right:18px;display:grid;width:42px;height:42px;place-items:center;border:1px solid rgba(255,247,233,.35);border-radius:50%;background:rgba(255,255,255,.04);color:#fff7e9;font-size:1.5rem;line-height:1;cursor:pointer}
+.diwali-popup-close:focus-visible,.diwali-popup a:focus-visible,.diwali-popup button:focus-visible{outline:2px solid #f2c888;outline-offset:4px}
+.diwali-popup-sample{display:grid;width:100%;gap:7px;margin:28px 0 24px;border-block:1px solid rgba(255,247,233,.22);padding:22px 0}
+.diwali-popup-sample span,.diwali-popup-sample small{font-size:.56rem;font-weight:650;letter-spacing:.12em;line-height:1.5;text-transform:uppercase}
+.diwali-popup-sample span{color:#d8ad70}
+.diwali-popup-sample small{color:rgba(255,247,233,.62)}
+.diwali-popup-sample strong{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,3rem);font-weight:400;line-height:1}
+.diwali-popup-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.diwali-popup-actions .button-outline{border-color:rgba(255,247,233,.54);color:#fff7e9;background:transparent}
+.diwali-popup-actions .share-claim-status{flex-basis:100%}
+.diwali-popup-terms{margin-top:18px;border-bottom:1px solid rgba(255,247,233,.45);color:rgba(255,247,233,.72);font-size:.58rem;letter-spacing:.11em;text-transform:uppercase}
+@keyframes diwali-popup-arrive{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
+
+.upcoming-fragrances{padding:clamp(72px,9vw,132px) clamp(18px,6vw,92px);color:#f8efe2;background:radial-gradient(circle at 12% 6%,rgba(138,47,57,.45),transparent 30%),linear-gradient(145deg,#241617,#10251e 72%,#173428)}
+.upcoming-fragrances>header{max-width:850px;margin:0 auto clamp(38px,6vw,76px);text-align:center}
+.upcoming-fragrances .eyebrow{color:#d7ad76}
+.upcoming-fragrances h2{margin:8px 0 22px;font-size:clamp(3.4rem,7vw,7.8rem);line-height:.86}
+.upcoming-fragrances>header>p:last-child{max-width:62ch;margin-inline:auto;color:rgba(248,239,226,.68)}
+.upcoming-fragrance-grid{display:grid;max-width:1400px;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:auto;background:rgba(248,239,226,.2)}
+.upcoming-fragrance-card{position:relative;display:flex;min-height:250px;align-items:center;flex-direction:column;justify-content:center;padding:28px 18px;text-align:center;background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.015));transition:background-color 180ms ease,transform 180ms ease}
+.upcoming-fragrance-card:hover{z-index:1;background:rgba(255,255,255,.09);transform:translateY(-3px)}
+.upcoming-fragrance-card>span{position:absolute;top:18px;left:18px;color:rgba(248,239,226,.42);font-size:.58rem;letter-spacing:.12em}
+.upcoming-fragrance-card p{margin:0 0 8px;color:#d7ad76;font-size:.55rem;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
+.upcoming-fragrance-card h3{max-width:11ch;margin:0;font-size:clamp(1.8rem,2.8vw,3rem);line-height:.95}
+.upcoming-fragrance-card strong{margin-top:24px;border:1px solid rgba(248,239,226,.3);border-radius:999px;padding:7px 12px;color:rgba(248,239,226,.72);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase}
+
+.offers-hero-copy{align-items:center;margin:auto;text-align:center}
+.offers-hero-copy>p:not(.eyebrow,.offers-live-count){margin-inline:auto}
+.offers-hero-actions{justify-content:center}
+.offers-list>header{display:flex;max-width:900px;align-items:center;flex-direction:column;margin-right:auto;margin-left:auto;text-align:center}
+.offers-list>header>p:last-of-type{max-width:680px;align-self:auto}
+.offers-list>header .offers-live-count{margin-top:10px}
+.offer-card{align-items:center;text-align:center}
+.offer-card ul{width:100%;text-align:left}
+.offer-card h3{margin-right:auto;margin-left:auto}
+.offer-card>.text-link,.offer-card>.share-claim-status{margin-right:auto;margin-left:auto}
+.offer-window{width:100%}
+
+@media(max-width:900px){.upcoming-fragrance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){
+  .promotion-notices.is-diwali{grid-template-columns:1fr}
+  .diwali-popup-shell{padding:10px}
+  .diwali-popup{max-height:calc(100svh - 20px);padding:54px 24px 32px}
+  .diwali-popup::before{inset:8px}
+  .diwali-popup h2{font-size:clamp(3.1rem,17vw,4.9rem)}
+  .diwali-popup-actions{width:100%;flex-direction:column}
+  .diwali-popup-actions .button{width:100%}
+  .upcoming-fragrances{padding:68px 14px}
+  .upcoming-fragrance-grid{grid-template-columns:1fr 1fr}
+  .upcoming-fragrance-card{min-height:190px;padding:34px 12px 22px}
+  .upcoming-fragrance-card h3{font-size:clamp(1.45rem,7vw,2.15rem)}
+}
+@media(prefers-reduced-motion:reduce){.diwali-popup,.upcoming-fragrance-card{animation:none!important;transition:none!important}}
+
 /* Answer-led discovery: visible answers and matching structured data. */
 .home-answer-led { display:grid; grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr); gap:clamp(42px,8vw,130px); padding:clamp(76px,10vw,150px) clamp(20px,7vw,110px); color:#f7eddd; background:radial-gradient(circle at 14% 14%,rgba(126,44,55,.55),transparent 31%),linear-gradient(145deg,#241316,#0f241c 70%,#13271f); }
 .home-answer-led>header { position:sticky; top:90px; align-self:start; }
